@@ -1,5 +1,9 @@
 ## go-decorator
 
+```html
+该项目处于开发初期，不要将它应用于生产环境！
+```
+
 实现 Go 语言装饰器功能的编译链工具。它可以让 Go 语言使用简单的注释注解来装饰函数方法，完成样板代码注入，改变函数行为，就像其他语言的装饰器一样的体验！（比如 Python）
 
 由于是编译时进行的装饰器注入，因此它不会破坏你的项目源文件，也不会生产新的`.go`文件和其他多余文件，和 `go:generate` 完全不同。
@@ -111,7 +115,7 @@ func logging(ctx *decor.Context) {
 
 ## Issue
 
-发现任何问题，都可以在这里反馈. [github issues](issues)  
+发现任何问题，都可以在这里反馈. [github issues](https://github.com/dengsgo/go-decorator/issues)  
 
 ## Contribute
 
