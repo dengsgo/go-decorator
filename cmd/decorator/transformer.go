@@ -137,7 +137,7 @@ func (i *importer) sync() (err error) {
 	}
 	bs = append(bs, insert.Bytes()...)
 	logs.Debug("added file:", string(bs))
-	err = os.WriteFile(i.cfg, bs, 0666)
+	err = os.WriteFile(i.cfg, bs, 0777)
 	appendPackagefileSharedFile(insert.Bytes())
 	i.q = make(map[string]string)
 	return
@@ -145,7 +145,7 @@ func (i *importer) sync() (err error) {
 
 func appendPackagefileSharedFile(bs []byte) {
 	fileName := path.Join(tempDir, "sharedPackagefile.txt")
-	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0666)
+	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0777)
 	if err != nil {
 		logs.Error("appendPackagefileSharedFile OpenFile fail", fileName, err, string(bs))
 	}

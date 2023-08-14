@@ -24,7 +24,7 @@ var (
 
 func init() {
 	initUseFlag()
-	if err := os.MkdirAll(tempDir, 0666); err != nil {
+	if err := os.MkdirAll(tempDir, 0777); err != nil {
 		logs.Error("Init() fail, os.MkdirAll tempDir", err)
 	}
 }

@@ -36,6 +36,10 @@ func link(args []string) {
 		logs.Error("link ReadFile cfg fail", err)
 	}
 	sf := filepath.Join(tempDir, "sharedPackagefile.txt")
+	workspaceCleaner = func() {
+		_ = os.Remove(sf)
+		_ = os.RemoveAll(tempDir)
+	}
 	newBs, err := os.ReadFile(sf)
 	if err != nil {
 		logs.Debug("link ReadFile sharedPackagefile.txt err", err)
@@ -44,9 +48,5 @@ func link(args []string) {
 	}
 	// TODO 去重
 	bs = append(bs, newBs...)
-	os.WriteFile(cfg, bs, 0644)
-	workspaceCleaner = func() {
-		_ = os.Remove(sf)
-		_ = os.RemoveAll(tempDir)
-	}
+	os.WriteFile(cfg, bs, 0777)
 }

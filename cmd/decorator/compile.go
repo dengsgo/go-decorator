@@ -167,10 +167,10 @@ func compile(args []string) error {
 			return errors.New("fprint original code")
 		}
 		tgDir := path.Join(tempDir, os.Getenv("TOOLEXEC_IMPORTPATH"))
-		_ = os.MkdirAll(tgDir, 0666)
+		_ = os.MkdirAll(tgDir, 0777)
 		tmpEntryFile := path.Join(tgDir, filepath.Base(originPath))
 		logs.Debug("originPath", originPath, filepath.Base(originPath))
-		err = os.WriteFile(tmpEntryFile, buffer.Bytes(), 0755)
+		err = os.WriteFile(tmpEntryFile, buffer.Bytes(), 0777)
 		if err != nil {
 			return errors.New("fail write into temporary file" + err.Error())
 		}
