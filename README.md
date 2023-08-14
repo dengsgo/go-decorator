@@ -1,16 +1,20 @@
 ## go-decorator
 
 ```html
-该项目处于开发初期，不要将它应用于生产环境！
+！！！项目仍在迭代开发，仅供测试尝鲜。请勿应用于生产环境！！！
 ```
 
-让 Go 语言实现装饰器特性的编译链工具。它可以让 Go 语言使用简单的注释注解来装饰函数方法，完成样板代码注入，改变函数行为，和其他语言的装饰器一样的体验！（比如 Python）
+让 Go 语言实现装饰器特性的编译链工具。
 
-由于是编译时进行的装饰器注入，因此它不会破坏你的项目源文件，也不会生成新的`.go`文件和其他多余文件，和 `go:generate` 完全不同。
+只需 `//go:decor decoratorFunctionName` 来注释你的函数，即可实现装饰器代码的包装，让你快速完成样板代码注入、改变函数行为、控制逻辑流程等。
+
+装饰器的使用场景，可以类比其他语言，比如 Python、Typescript。
+
+`go-decorator` 是在编译时进行的装饰器注入，因此它不会破坏你项目的源文件，也不会额外在项目中生成新的`.go`文件和其他多余文件。 和 `go:generate` 生成式完全不同。
 
 ## Install
 
-项目仍在积极开发中，最好的安装方式就是源码编译（后续稳定后会提供二进制分发）。
+项目仍在积极开发，当前最好的安装方式是源码编译（后续稳定后会提供二进制分发）。
 
 ```shell
 $ git clone https://github.com/dengsgo/go-decorator.git
@@ -22,12 +26,12 @@ $ go build
 
 也可以直接 `go install`:
 ```shell
-$ go install github.com/dengsgo/go-decorator/cmd/decorator
+$ go install github.com/dengsgo/go-decorator/cmd/decorator@latest
 ```
 
 运行 `decorator --help`，出现`decorator`的帮助信息即为安装成功。
 
-注意：由于项目初期，代码更改频繁，尽量多更新以安装最新版本。获得最佳体验。
+注意：由于代码更改频繁，尽量多更新以安装最新版本。获得最佳体验。
 
 ## Usage
 
@@ -111,8 +115,8 @@ func logging(ctx *decor.Context) {
 
 使用该工具必须满足：
 
-- go版本 1.13 及其以上(开发中要求必须 1.20)  
-- 标准的 go.mod 项目
+- go版本 1.13 及其以上(当前要求必须 1.20)  
+- go.mod 项目
 
 ## Issue
 
