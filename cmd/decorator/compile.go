@@ -59,83 +59,81 @@ func compile(args []string) error {
 		decorImports := []*ast.ImportSpec{}
 		updated := false
 
-		for _, decl := range f.Decls {
-			visitAstDecl(
-				decl,
-				func(fd *ast.FuncDecl) {
-					if fd.Doc == nil || fd.Doc.List == nil || len(fd.Doc.List) == 0 {
-						return
+		visitAstDecl(
+			f,
+			func(fd *ast.FuncDecl) {
+				if fd.Doc == nil || fd.Doc.List == nil || len(fd.Doc.List) == 0 {
+					return
+				}
+				originPath = file
+				//log.Printf("%+v\n", fd)
+				collDecors := []*ast.Comment{}
+				for i := len(fd.Doc.List) - 1; i >= 0; i-- {
+					doc := fd.Doc.List[i]
+					if !strings.HasPrefix(doc.Text, decoratorScanFlag) {
+						break
 					}
-					originPath = file
-					//log.Printf("%+v\n", fd)
-					collDecors := []*ast.Comment{}
-					for i := len(fd.Doc.List) - 1; i >= 0; i-- {
-						doc := fd.Doc.List[i]
-						if !strings.HasPrefix(doc.Text, decoratorScanFlag) {
-							break
-						}
-						logs.Debug("HIT:", doc.Text)
-						decorName, decorArgs, ok := parseGoDecComment(doc.Text)
-						logs.Debug(decorName, decorArgs, ok)
-						collDecors = append(collDecors, doc)
+					logs.Debug("HIT:", doc.Text)
+					decorName, decorArgs, ok := parseGoDecComment(doc.Text)
+					logs.Debug(decorName, decorArgs, ok)
+					collDecors = append(collDecors, doc)
+				}
+				if len(collDecors) == 0 {
+					return
+				}
+				logs.Debug("find comment FuncDecl entry", fset.Position(fd.Pos()))
+				logs.Debug("collDecors", collDecors)
+				gi := newGenIdentId()
+				for _, doc := range collDecors {
+					logs.Debug("handler:", doc.Text)
+					decorName, decorArgs, ok := parseGoDecComment(doc.Text)
+					logs.Debug(decorName, decorArgs, ok)
+					// TODO 检查 decorName 是不是装饰器
+					// method1
+					if fd.Recv != nil {
+						logs.Warn("decor function is have Recv, ignore")
+						continue
 					}
-					if len(collDecors) == 0 {
-						return
+					ra := builderReplaceArgs(fd, decorName, gi)
+					rs, err := replace(ra)
+					if err != nil {
+						logs.Error(err)
 					}
-					logs.Debug("find comment FuncDecl entry", fset.Position(fd.Pos()))
-					logs.Debug("collDecors", collDecors)
-					gi := newGenIdentId()
-					for _, doc := range collDecors {
-						logs.Debug("handler:", doc.Text)
-						decorName, decorArgs, ok := parseGoDecComment(doc.Text)
-						logs.Debug(decorName, decorArgs, ok)
-						// TODO 检查 decorName 是不是装饰器
-						// method1
-						if fd.Recv != nil {
-							logs.Warn("decor function is have Recv, ignore")
-							continue
-						}
-						ra := builderReplaceArgs(fd, decorName, gi)
-						rs, err := replace(ra)
-						if err != nil {
-							logs.Error(err)
-						}
-						genStmts, _, err := getStmtList(rs)
-						if err != nil {
-							logs.Error("getStmtList err", err)
-						}
-						fd.Body.List = genStmts
-						//x.Body.Rbrace = x.Body.Lbrace + token.Pos(ofs)
-						//log.Printf("fd.Body.Pos() %+v\n", fd.Body.Pos())
-						updated = true
+					genStmts, _, err := getStmtList(rs)
+					if err != nil {
+						logs.Error("getStmtList err", err)
 					}
-				},
-				func(gd *ast.GenDecl) {
-					if gd.Doc == nil || gd.Doc.List == nil || len(gd.Doc.List) == 0 {
-						return
+					fd.Body.List = genStmts
+					//x.Body.Rbrace = x.Body.Lbrace + token.Pos(ofs)
+					//log.Printf("fd.Body.Pos() %+v\n", fd.Body.Pos())
+					updated = true
+				}
+			},
+			func(gd *ast.GenDecl) {
+				if gd.Doc == nil || gd.Doc.List == nil || len(gd.Doc.List) == 0 {
+					return
+				}
+				for i := len(gd.Doc.List) - 1; i >= 0; i-- {
+					if !strings.HasPrefix(gd.Doc.List[i].Text, decoratorScanFlag) {
+						break
 					}
-					for i := len(gd.Doc.List) - 1; i >= 0; i-- {
-						if !strings.HasPrefix(gd.Doc.List[i].Text, decoratorScanFlag) {
-							break
-						}
-						arr := strings.Split(gd.Doc.List[i].Text, " ")
-						if len(arr) == 2 {
-							decorImports = append(decorImports, &ast.ImportSpec{
-								Path: &ast.BasicLit{Value: arr[1]},
-							})
-						} else if len(arr) == 3 {
-							decorImports = append(decorImports, &ast.ImportSpec{
-								Name: &ast.Ident{Name: arr[1]},
-								Path: &ast.BasicLit{Value: arr[2]},
-							})
-						} else {
-							logs.Warn("import format fail", gd.Doc.List[i].Text)
-						}
+					arr := strings.Split(gd.Doc.List[i].Text, " ")
+					if len(arr) == 2 {
+						decorImports = append(decorImports, &ast.ImportSpec{
+							Path: &ast.BasicLit{Value: arr[1]},
+						})
+					} else if len(arr) == 3 {
+						decorImports = append(decorImports, &ast.ImportSpec{
+							Name: &ast.Ident{Name: arr[1]},
+							Path: &ast.BasicLit{Value: arr[2]},
+						})
+					} else {
+						logs.Warn("import format fail", gd.Doc.List[i].Text)
+					}
 
-					}
-				},
-			)
-		}
+				}
+			},
+		)
 
 		if !updated {
 			continue
@@ -187,15 +185,20 @@ func compile(args []string) error {
 	return nil
 }
 
-func visitAstDecl(t ast.Decl, funVisitor func(*ast.FuncDecl), genVisitor func(*ast.GenDecl)) {
-	if t == nil {
+func visitAstDecl(f *ast.File, funVisitor func(*ast.FuncDecl), genVisitor func(*ast.GenDecl)) {
+	if f.Decls == nil {
 		return
 	}
-	switch decl := t.(type) {
-	case *ast.FuncDecl:
-		funVisitor(decl)
-	case *ast.GenDecl:
-		genVisitor(decl)
+	for _, t := range f.Decls {
+		if t == nil {
+			continue
+		}
+		switch decl := t.(type) {
+		case *ast.FuncDecl:
+			funVisitor(decl)
+		case *ast.GenDecl:
+			genVisitor(decl)
+		}
 	}
 }
 
