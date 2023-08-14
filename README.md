@@ -84,13 +84,13 @@ func myFunc() {
 // 这是一个普通的函数
 // 但是它实现了 func(*decor.Context) 类型，因此它还是一个装饰器方法，
 // 可以在其他函数上使用这个这个装饰器。
-// 在函数中，ctx 是装饰器上下文，你可以通过 ctx 获取到目标函数的出入参
+// 在函数中，ctx 是装饰器上下文，可以通过 ctx 获取到目标函数的出入参
 // 和目标方法的执行。
 // 如果函数中没有执行 ctx.TargetDo(), 那么意味着目标函数不会执行，
 // 即使你代码里调用了被装饰的目标函数！这时候，目标函数返回的都是零值。
-// 在 ctx.TargetDo() 之前，你可以修改 ctx.TargetIn 来改变入参值。
-// 在 ctx.TargetDo() 之后，你可以修改 ctx.TargetOut 来改变返回值。
-// 你只能改变出入参的值。不要试图改变他们的类型和数量，这将会引发运行时 panic !!!
+// 在 ctx.TargetDo() 之前，可以修改 ctx.TargetIn 来改变入参值。
+// 在 ctx.TargetDo() 之后，可以修改 ctx.TargetOut 来改变返回值。
+// 只能改变出入参的值。不要试图改变他们的类型和数量，这将会引发运行时 panic !!!
 func logging(ctx *decor.Context) {
 	log.Println("decorator function logging in", ctx.TargetIn)
 	ctx.TargetDo()
