@@ -162,7 +162,7 @@ func compile(args []string) error {
 
 		var output []byte
 		buffer := bytes.NewBuffer(output)
-		err = printer.Fprint(buffer, fset, f)
+		err = (&printer.Config{Tabwidth: 8, Mode: printer.SourcePos}).Fprint(buffer, fset, f)
 		if err != nil {
 			return errors.New("fprint original code")
 		}
