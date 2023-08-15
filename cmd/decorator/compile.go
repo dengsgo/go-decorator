@@ -89,7 +89,6 @@ func compile(args []string) error {
 					decorName, decorArgs, ok := parseGoDecComment(doc.Text)
 					logs.Debug(decorName, decorArgs, ok)
 					// TODO 检查 decorName 是不是装饰器
-					// method1
 					if fd.Recv != nil {
 						logs.Warn("decor function is have Recv, ignore")
 						continue
@@ -103,6 +102,17 @@ func compile(args []string) error {
 					if err != nil {
 						logs.Error("getStmtList err", err)
 					}
+
+					if len(ra.OutArgNames) == 0 {
+						// non-return
+						genStmts[1].(*ast.AssignStmt).Rhs[0].(*ast.FuncLit).Body.List[0].(*ast.ExprStmt).X.(*ast.CallExpr).Fun.(*ast.FuncLit).Body.List = fd.Body.List
+					} else {
+						// has return
+						genStmts[1].(*ast.AssignStmt).Rhs[0].(*ast.FuncLit).Body.List[0].(*ast.AssignStmt).Rhs[0].(*ast.CallExpr).Fun.(*ast.FuncLit).Body.List = fd.Body.List
+					}
+					ce := genStmts[2].(*ast.ExprStmt).X.(*ast.CallExpr)
+					assignCorrectPos(doc, ce)
+
 					fd.Body.List = genStmts
 					//x.Body.Rbrace = x.Body.Lbrace + token.Pos(ofs)
 					//log.Printf("fd.Body.Pos() %+v\n", fd.Body.Pos())
@@ -198,6 +208,27 @@ func visitAstDecl(f *ast.File, funVisitor func(*ast.FuncDecl), genVisitor func(*
 			funVisitor(decl)
 		case *ast.GenDecl:
 			genVisitor(decl)
+		}
+	}
+}
+
+func assignCorrectPos(doc *ast.Comment, ce *ast.CallExpr) {
+	ce.Lparen = doc.Pos()
+	offset := token.Pos(0)
+	if t, ok := ce.Fun.(*ast.Ident); ok {
+		t.NamePos = doc.Pos()
+		offset = token.Pos(len(t.Name))
+	} else if t, ok := ce.Fun.(*ast.SelectorExpr); ok {
+		if id, ok := t.X.(*ast.Ident); ok {
+			id.NamePos = doc.Pos()
+			offset = token.Pos(len(id.Name))
+		}
+		t.Sel.NamePos = doc.Pos() + offset + 1
+		offset += token.Pos(len(t.Sel.Name)) + 1
+	}
+	for _, arg := range ce.Args {
+		if id, ok := arg.(*ast.Ident); ok {
+			id.NamePos = doc.Pos() + offset
 		}
 	}
 }
