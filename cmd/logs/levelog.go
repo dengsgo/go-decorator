@@ -37,6 +37,7 @@ func logg(level Level, v ...any) {
 	}
 	if level == LevelError {
 		log.Panicln(append([]any{levelStrMap[level]}, v...)...)
+		return
 	}
 	log.Println(append([]any{levelStrMap[level]}, v...)...)
 }

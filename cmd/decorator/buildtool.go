@@ -22,21 +22,26 @@ var (
 	workspaceCleaner = func() {}
 )
 
-func init() {
+func inits() {
 	initUseFlag()
+	initTempDir()
+}
+
+func initTempDir() {
 	if err := os.MkdirAll(tempDir, 0777); err != nil {
 		logs.Error("Init() fail, os.MkdirAll tempDir", err)
 	}
 }
 
 func main() {
-	if len(os.Args) < 3 {
-		logs.Error("os.Args < 3")
-	}
-	//logs.Log.Level = logs.LevelInfo
+	inits()
 	logs.Debug("os.Args", os.Args)
-	chainName := os.Args[1]
-	chainArgs := os.Args[2:]
+	if cmdFlag.chainName == "" {
+		logs.Error("currently not in a compilation chain environment and cannot be used")
+	}
+	logs.Debug("cmdFlag", cmdFlag)
+	chainName := cmdFlag.chainName
+	chainArgs := cmdFlag.chainArgs
 	toolName := filepath.Base(chainName)
 
 	var err error
