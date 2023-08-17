@@ -22,7 +22,7 @@ jobs:
         go-version: '1.20'
 
     - name: Build
-      run: cd cmd/decorator && go install -a -work && cd ../.. && decorator --help
+      run: go install -a -work ./cmd/decorator/ && decorator --help && cd ./example/packages/ && go build -toolexec decorator -a && ./packages
 
     - name: Test
       run: go test -v ./example/single/ && go test -v ./example/packages/
