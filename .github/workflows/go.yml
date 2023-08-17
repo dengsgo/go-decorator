@@ -12,12 +12,12 @@ on:
 jobs:
 
   build:
-    name: Build ${{ matrix.target }}
+    name: Build and Use on ${{ matrix.target }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        target: ["1.19", "1.20"]
+        target: ["1.16", "1.17", "1.18", "1.19", "1.20"]
     steps:
     - uses: actions/checkout@v3
 
