@@ -2,11 +2,12 @@ package main
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/dengsgo/go-decorator/cmd/logs"
+	"go/ast"
 	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -76,87 +77,50 @@ func pkgInfo(buf *bytes.Buffer) *pkgCompiled {
 }
 
 type importer struct {
-	q   map[string]string
-	cfg string
-
-	qMap map[string]bool
+	nameMap    map[string]string
+	pathMap    map[string]string
+	pathObjMap map[string]*ast.ImportSpec
 }
 
-func newImporter(cfg string) *importer {
+func newImporter(f *ast.File) *importer {
+	nameMap := map[string]string{}
+	pathMap := map[string]string{}
+	pathObjMap := map[string]*ast.ImportSpec{}
+	if f.Imports != nil && len(f.Imports) > 0 {
+		for _, ip := range f.Imports {
+			if ip == nil {
+				continue
+			}
+			name := ""
+			pkg, _ := strconv.Unquote(ip.Path.Value)
+			if ip.Name != nil && ip.Name.Name != "" && ip.Name.Name != "_" {
+				name = ip.Name.Name
+			} else {
+				name = filepath.Base(pkg)
+			}
+			nameMap[name] = pkg
+			pathObjMap[pkg] = ip
+			pathMap[pkg] = func() string {
+				if ip.Name != nil && ip.Name.Name == "_" {
+					return "_"
+				}
+				return name
+			}()
+		}
+	}
 	return &importer{
-		q:    map[string]string{},
-		cfg:  cfg,
-		qMap: map[string]bool{},
+		nameMap:    nameMap,
+		pathMap:    pathMap,
+		pathObjMap: pathObjMap,
 	}
 }
 
-func (i *importer) addImport(pkg string) (err error) {
-	if _, ok := i.qMap[pkg]; ok {
-		return
-	}
-	i.qMap[pkg] = true
-	pg := getPkgCompiledInfo(pkg)
-	i.q[pkg] = fmt.Sprintf("packagefile %s=%s\n", pkg, pg.export)
+func (i *importer) importedName(name string) (pat string, ok bool) {
+	pat, ok = i.nameMap[name]
 	return
 }
 
-func (i *importer) sync() (err error) {
-	if len(i.q) == 0 {
-		return
-	}
-
-	bs, err := os.ReadFile(i.cfg)
-	if err != nil {
-		return
-	}
-	bf := bytes.NewBuffer(bs)
-	for {
-		line, err := bf.ReadString('\n')
-		if err != nil {
-			break
-		}
-		if !strings.HasPrefix(line, "packagefile ") {
-			continue
-		}
-		kv := line[len("packagefile "):]
-		index := strings.Index(kv, "=")
-		if index < 0 {
-			continue
-		}
-		p := strings.TrimSpace(kv[0:index])
-		if _, ok := i.q[p]; ok {
-			delete(i.q, p)
-		}
-	}
-	if len(i.q) == 0 {
-		return
-	}
-	insert := bytes.NewBuffer([]byte{})
-	for _, v := range i.q {
-		insert.WriteString(v)
-	}
-	bs = append(bs, insert.Bytes()...)
-	logs.Debug("added file:", string(bs))
-	err = os.WriteFile(i.cfg, bs, 0777)
-	appendPackagefileSharedFile(insert.Bytes())
-	i.q = make(map[string]string)
+func (i *importer) importedPath(pkg string) (name string, ok bool) {
+	name, ok = i.pathMap[pkg]
 	return
-}
-
-func appendPackagefileSharedFile(bs []byte) {
-	fileName := path.Join(tempDir, "sharedPackagefile.txt")
-	file, err := os.OpenFile(fileName, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0777)
-	if err != nil {
-		logs.Error("appendPackagefileSharedFile OpenFile fail", fileName, err, string(bs))
-	}
-	defer func() {
-		_ = file.Close()
-	}()
-
-	if _, err := file.Write(bs); err != nil {
-		logs.Error("appendPackagefileSharedFile Write fail", fileName, err, string(bs))
-	}
-	if file.Sync() != nil {
-		logs.Error("appendPackagefileSharedFile Sync fail", fileName, err, string(bs))
-	}
 }

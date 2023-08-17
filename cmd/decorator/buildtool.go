@@ -65,7 +65,7 @@ func main() {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if cmd.Run() != nil {
-		logs.Error("run toolchain err", chainName, err)
+		//logs.Error("run toolchain err", chainName, err)
 	}
 }
 

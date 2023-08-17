@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
+	log.SetFlags(0)
 	log.Println("MAIN call myFunc1()")
 	myFunc1()
 	log.Println("MAIN call myFunc2UseMultipleDecor()")

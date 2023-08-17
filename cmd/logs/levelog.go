@@ -2,6 +2,7 @@ package logs
 
 import (
 	"log"
+	"os"
 )
 
 type Level int
@@ -36,7 +37,12 @@ func logg(level Level, v ...any) {
 		return
 	}
 	if level == LevelError {
-		log.Panicln(append([]any{levelStrMap[level]}, v...)...)
+		if os.Getenv("GO_DECORATOR_LOG_LEVEL") == "debug" {
+			log.Panicln(append([]any{levelStrMap[level]}, v...)...)
+			return
+		}
+		log.Println(append([]any{levelStrMap[level]}, v...)...)
+		os.Exit(2)
 		return
 	}
 	log.Println(append([]any{levelStrMap[level]}, v...)...)

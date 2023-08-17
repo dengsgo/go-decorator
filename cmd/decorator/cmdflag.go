@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/dengsgo/go-decorator/cmd/logs"
+	"log"
 	"os"
 	"strings"
 )
@@ -41,13 +42,18 @@ func initUseFlag() {
 	case "close":
 		logs.Log.Level = logs.LevelClose
 	}
+	os.Setenv("GO_DECORATOR_LOG_LEVEL", cmdFlag.Level)
+	log.SetPrefix("decorator: ")
+	if logs.Log.Level < logs.LevelDebug {
+		log.SetFlags(0)
+	}
 	if cmdFlag.TempDir != "" {
 		tempDir = cmdFlag.TempDir // TODO check
 	}
 	cmdFlag.toolPath = os.Args[0]
 	goToolDir := os.Getenv("GOTOOLDIR")
 	if goToolDir == "" {
-		logs.Info("Env key `GOTOOLDIR` not found")
+		logs.Info("env key `GOTOOLDIR` not found")
 	}
 	if len(os.Args) < 2 {
 		logs.Error("at least one parameter input should be present")
