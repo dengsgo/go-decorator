@@ -27,6 +27,9 @@ jobs:
         decorator --help 
         cd ./example/packages/ && go build -toolexec decorator -a && ./packages
         cd ../single && go build -toolexec decorator -a && ./single
+        cd ../..
 
     - name: Test
-      run: go test -v ./example/single/ && go test -v ./example/packages/
+      run: |
+        go test -v ./example/single/ 
+        go test -v ./example/packages/
