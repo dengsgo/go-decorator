@@ -11,6 +11,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -213,6 +214,9 @@ func assignCorrectPos(doc *ast.Comment, ce *ast.CallExpr) {
 }
 
 func friendlyIDEPosition(fset *token.FileSet, p token.Pos) string {
+	if runtime.GOOS == "windows" {
+		return fset.Position(p).String()
+	}
 	return filepath.Join("./", fset.Position(p).String())
 }
 
