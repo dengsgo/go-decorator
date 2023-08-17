@@ -23,7 +23,7 @@ call fun1.decorHandlerFunc out []
 
 func TestExamplePackages(t *testing.T) {
 	args := []string{
-		"go", "run", "-toolexec", "decorator", "main.go",
+		"go", "run", "-toolexec", "decorator", "./main.go",
 	}
 	cmd := exec.Command(args[0], args[1:]...)
 	cmd.Env = os.Environ()
