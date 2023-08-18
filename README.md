@@ -83,7 +83,7 @@ func myFunc() {
 }
 
 // This is a regular function. 
-// But it implements the func (* decor. Context) type, so it is still a decorator method,
+// But it implements the func (*decor.Context) type, so it is still a decorator method,
 // You can use this decorator on other functions.
 // In the function, ctx is the decorator context, and the input and output parameters of the target function 
 // can be obtained through ctx and the execution of the target method.
