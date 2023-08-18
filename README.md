@@ -1,14 +1,12 @@
 ## go-decorator
 
-```html
-！！！项目仍在迭代开发，仅供测试尝鲜。请勿应用于生产环境！！！
-```
+> ！！！项目仍在迭代开发，仅公开测试。请勿应用于生产环境！！！
 
 让 Go 语言实现装饰器特性的编译链工具。
 
-只需 `//go:decor decoratorFunctionName` 来注释你的函数，即可实现装饰器代码的包装，让你快速完成样板代码注入、改变函数行为、控制逻辑流程等。
+只需 `//go:decor your-decorator-function` 来注释你的函数即可。让你快速完成样板代码注入、改变函数行为、控制逻辑流程等。
 
-装饰器的使用场景，可以类比其他语言，比如 Python、Typescript。
+装饰器的使用场景，可以类比其他语言，比如 Python、TypeScript。
 
 `go-decorator` 是在编译时进行的装饰器注入，因此它不会破坏你项目的源文件，也不会额外在项目中生成新的`.go`文件和其他多余文件。 和 `go:generate` 生成式完全不同。
 
@@ -18,8 +16,7 @@
 
 ```shell
 $ git clone https://github.com/dengsgo/go-decorator.git
-$ cd go-decorator
-$ cd cmd/decorator
+$ cd go-decorator/cmd/decorator
 $ go build
 ```
 编译成功会得到 `decorator` 二进制文件。将此文件路径加入你的环境变量 `Path` 中以便后续调用。
@@ -31,7 +28,7 @@ $ go install github.com/dengsgo/go-decorator/cmd/decorator@latest
 
 运行 `decorator --help`，出现`decorator`的帮助信息即为安装成功。
 
-注意：由于代码更改频繁，尽量多更新以安装最新版本。获得最佳体验。
+注意：请经常更新以安装最新版本。获得最佳体验。
 
 ## Usage
 
@@ -83,7 +80,7 @@ func myFunc() {
 
 // 这是一个普通的函数
 // 但是它实现了 func(*decor.Context) 类型，因此它还是一个装饰器方法，
-// 可以在其他函数上使用这个这个装饰器。
+// 可以在其他函数上使用这个装饰器。
 // 在函数中，ctx 是装饰器上下文，可以通过 ctx 获取到目标函数的出入参
 // 和目标方法的执行。
 // 如果函数中没有执行 ctx.TargetDo(), 那么意味着目标函数不会执行，
@@ -106,8 +103,7 @@ func logging(ctx *decor.Context) {
 
 [**single**](example/single): 这个一个单文件示例，装饰器定义和被装饰的函数都位于一个包内。这种情况无需考虑导入依赖包的问题，按示例代码使用即可。
 
-[**packages**](example/packages)：该项目示例为装饰器定义和被装饰的函数不在同一个包内，需要明确表明导入相关包来帮助工具编译时导
-入。
+[**packages**](example/packages)：该项目示例为装饰器定义和被装饰的函数不在同一个包内，需要使用匿名包导入。
 
 更多示例和手册陆续添加中...
 
@@ -115,7 +111,7 @@ func logging(ctx *decor.Context) {
 
 使用该工具必须满足：
 
-- go版本 1.13 及其以上(当前要求必须 1.20)  
+- go 1.18 及其以上  
 - go.mod 项目
 
 ## Issue
