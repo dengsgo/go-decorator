@@ -36,6 +36,7 @@ func initTempDir() {
 func main() {
 	inits()
 	logs.Debug("os.Args", os.Args)
+	logs.Debug("os.Env", os.Environ())
 	if cmdFlag.chainName == "" {
 		logs.Error("currently not in a compilation chain environment and cannot be used")
 	}
@@ -64,6 +65,7 @@ func main() {
 	cmd := exec.Command(chainName, chainArgs...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	cmd.Env = os.Environ()
 	if cmd.Run() != nil {
 		//logs.Error("run toolchain err", chainName, err)
 	}

@@ -49,7 +49,7 @@ func getGoModPath() string {
 	cmd.Stdout = buf
 	cmd.Stderr = buf
 	cmd.Dir = projectDir
-	cmd.Env = cmd.Environ()
+	cmd.Env = os.Environ()
 	err := cmd.Run()
 	if err != nil {
 		logs.Error("getGoModPath()", err)
