@@ -1,52 +1,56 @@
 ## go-decorator
 
-> ！！！项目仍在迭代开发，仅公开测试。请勿应用于生产环境！！！
+[中文](README.zh_cn.md) | English (Translated from Chinese document)
 
-让 Go 语言实现装饰器特性的编译链工具。
+> Don`t apply it in production environment !!!  
+> Project is still under iterative development and is open for testing only. 
 
-只需 `//go:decor your-decorator-function` 来注释你的函数即可。让你快速完成样板代码注入、改变函数行为、控制逻辑流程等。
+A compilation chain tool for implementing decorator features in Go language.
 
-装饰器的使用场景，可以类比其他语言，比如 Python、TypeScript。
+Simply `//go:decor your-decorator-function` to annotate your function. Enable you to quickly complete template code injection, change function behavior, control logical processes, and more.
 
-`go-decorator` 是在编译时进行的装饰器注入，因此它不会破坏你项目的源文件，也不会额外在项目中生成新的`.go`文件和其他多余文件。 和 `go:generate` 生成式完全不同。
+The usage scenarios of decorators can be compared to other languages, such as Python and TypeScript.
+
+`go-decorator` is a decorator injection performed during compilation, so it does not damage the source files of your project, nor does it generate new `.go` files or other unnecessary files in the project. It is completely different from the `go:generate` generative expression.
 
 ## Install
 
-项目仍在积极开发，当前最好的安装方式是源码编译（后续稳定后会提供二进制分发）。
+The project is still actively developing, and the best installation method currently is source code compilation (binary distribution will be provided after stabilization).
 
 ```shell
 $ git clone https://github.com/dengsgo/go-decorator.git
 $ cd go-decorator/cmd/decorator
 $ go build
 ```
-编译成功会得到 `decorator` 二进制文件。将此文件路径加入你的环境变量 `Path` 中以便后续调用。
 
-也可以直接 `go install`:
+Successfully compiled will result in the `decorator` binary file. Add this file path to your environment variable `Path` for future calls.
+
+You can also directly `go install`:
 ```shell
 $ go install github.com/dengsgo/go-decorator/cmd/decorator@latest
 ```
 
-运行 `decorator --help`，出现`decorator`的帮助信息即为安装成功。
+Run `decorator --help` and the help message `decorator` appears to indicate successful installation.
 
-注意：请经常更新以安装最新版本。获得最佳体验。
+Note: Please update frequently to install the latest version. Get the best experience.
 
 ## Usage
 
-在 `go build` 命令中加入 `-toolexec 'decorator'` 参数即可。
+Simply add the `-toolexec decorator` parameter to the `go build` command.
 
-假如你平时就是使用 `go build`,那么现在只需要加上工具链参数变成 `go build -toolexec 'decorator'`。其他一切和以往一样，无需做任何更改！
+If you usually use `go build`, now all you need to do is add the toolchain parameter to become `go build -toolexec decorator`. Everything else is the same as before, no changes need to be made!
 
-go 的其他子命令也是同样的使用方法。
+The other subcommands of go are also used in the same way.
 
 ## Code
 
-首选在你的项目引入装饰器依赖（必须是 go.mod 项目）:
+Introducing decorator dependencies in your project (must be a `go.mod` project):
 
 ```shell
 $ go get -u github.com/dengsgo/go-decorator
 ```
 
-然后编写类似代码：
+Write similar code:
 
 ```go
 package main
@@ -57,37 +61,37 @@ import (
 )
 
 func main() {
-	// 正常调用你的函数。
-	// 由于这是一个声明使用装饰器logging的函数, 
-	// decorator 编译链会在编译代码时注入装饰器方法logging的调用。
-	// 所以使用上面的方式编译后运行，你会得到如下输出：
+	// Call your function normally.
+	// Since this is a function that declares the use of decorator logging,
+	// The decorator compilation chain injects calls to the decorator method logging during code compilation.
+	// So after compiling and running using the above method, you will get the following output:
 	// 
 	// 2023/08/13 20:26:30 decorator function logging in []
 	// 2023/08/13 20:26:30 this is a function: myFunc
 	// 2023/08/13 20:26:30 decorator function logging out []
 	// 
-	// 而不是只有 myFunc 本身的一句输出。
-	// 也就是说通过装饰器改变了这个方法的行为！
+	// Instead of just one sentence output from myFunc itself.
+	// That is to say, the behavior of this method has been changed through the decorator!
 	myFunc() 
 }
 
-// 通过使用 go:decor 注释声明该函数将使用装饰器logging来装饰。
+// Declare that the function will be decorated using the decorator logging by using the go: decor annotation.
 //
 //go:decor logging
 func myFunc() {
 	log.Println("this is a function: myFunc")
 }
 
-// 这是一个普通的函数
-// 但是它实现了 func(*decor.Context) 类型，因此它还是一个装饰器方法，
-// 可以在其他函数上使用这个装饰器。
-// 在函数中，ctx 是装饰器上下文，可以通过 ctx 获取到目标函数的出入参
-// 和目标方法的执行。
-// 如果函数中没有执行 ctx.TargetDo(), 那么意味着目标函数不会执行，
-// 即使你代码里调用了被装饰的目标函数！这时候，目标函数返回的都是零值。
-// 在 ctx.TargetDo() 之前，可以修改 ctx.TargetIn 来改变入参值。
-// 在 ctx.TargetDo() 之后，可以修改 ctx.TargetOut 来改变返回值。
-// 只能改变出入参的值。不要试图改变他们的类型和数量，这将会引发运行时 panic !!!
+// This is a regular function. 
+// But it implements the func (* decor. Context) type, so it is still a decorator method,
+// You can use this decorator on other functions.
+// In the function, ctx is the decorator context, and the input and output parameters of the target function 
+// can be obtained through ctx and the execution of the target method.
+// If ctx.TargetDo() is not executed in the function, it means that the target function will not execute,
+// Even if you call the decorated target function in your code! At this point, the objective function returns zero values.
+// Before ctx.TargetDo(), ctx.TargetIn can be modified to change the input parameter values.
+// After ctx.TargetDo(), you can modify ctx.TargetOut to change the return value.
+// Only the values of the input and output parameters can be changed. Don't try to change their type and quantity, as this will trigger runtime panic!!!
 func logging(ctx *decor.Context) {
 	log.Println("decorator function logging in", ctx.TargetIn)
 	ctx.TargetDo()
@@ -99,25 +103,23 @@ func logging(ctx *decor.Context) {
 ## Example
 
 
-[example](example)这个目录示范了如何正确编写代码来使用 go-decorator 工具。
+[example](example) This directory demonstrates how to write code correctly to use the `decorator` tool.
 
-[**single**](example/single): 这个一个单文件示例，装饰器定义和被装饰的函数都位于一个包内。这种情况无需考虑导入依赖包的问题，按示例代码使用即可。
+[**single**](example/single): This is a single file example where both the decorator definition and the decorated function are located within the same package. In this case, there is no need to consider the issue of importing dependent packages, just use the example code.
 
-[**packages**](example/packages)：该项目示例为装饰器定义和被装饰的函数不在同一个包内，需要使用匿名包导入。
+[**packages**](example/packages)：The example of this project is that the decorator definition and the decorated function are not in the same package, and anonymous package import is required.
 
-更多示例和手册陆续添加中...
+More examples and manuals are gradually being added.
 
 ## Requirement
 
-使用该工具必须满足：
-
-- go 1.18 及其以上  
-- go.mod 项目
+- go1.18+  
+- go.mod project
 
 ## Issue
 
-发现任何问题，都可以在这里反馈. [github issues](https://github.com/dengsgo/go-decorator/issues)  
+If you find any problems, you can provide feedback here. [GitHub Issues](https://github.com/dengsgo/go-decorator/issues)  
 
 ## Contribute
 
-项目仍在开发中，由于变动频繁，暂时不接受外部贡献。欢迎稳定后再提交 Pull Request .
+The project is still under development and due to frequent changes, external contributions are temporarily not accepted. Welcome to submit a Pull Request after stabilization
