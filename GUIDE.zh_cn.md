@@ -106,7 +106,7 @@ $ ./datetime
 
 `decorator` 允许同时使用多个装饰器来装饰目标函数, 但并不推荐这样做。 
 
-通过多个 `go:decor ` 来使用多个装饰器。
+通过多个 `//go:decor ` 来使用多个装饰器。
 
 例如，下面的 `datetime` 使用了3个装饰器,分别是 `logging`、`appendFile`、`timeFollowing`：
 
@@ -147,17 +147,17 @@ func datetime(timestamp int64) string {
 
 ### ctx.TargetOut
 
-目标函数的出餐列表。它是一个[]any slice, 其中每个元素的类型和目标函数的出参类型一致。 如果目标函数没有出参，列表为空。
+目标函数的出参列表。它是一个[]any slice, 其中每个元素的类型和目标函数的出参类型一致。 如果目标函数没有出参，列表为空。
 
 `ctx.TargetDo()` 会使用这个 slice 来接收真实调用的结果，因此改变它的元素值可以修改目标函数的出参。只在 `ctx.TargetDo()` 调用后修改有效。
 
-### ctx.TargetDO()
+### ctx.TargetDo()
 
 执行目标函数。它是对目标函数的无参化包装，调用它才会真正的执行目标函数逻辑。
 
 它从 `ctx.TargetIn` 获取到目标函数入参值，然后执行目标函数代码，再把得到的结果赋值到 `ctx.TargetOut`。
 
-如果装饰器中没有执行 `ctx.TargetDO()` ，意味着目标函数真实的逻辑不会被执行，调用目标函数得到的结果是零值（在没有修改 ctx.TargetOut 的情况下）。
+如果装饰器中没有执行 `ctx.TargetDo()` ，意味着目标函数真实的逻辑不会被执行，调用目标函数得到的结果是零值（在没有修改 ctx.TargetOut 的情况下）。
 
 ## 包引用
 
@@ -199,7 +199,7 @@ func test() {
 
 - 使用装饰器的目标函数范围**仅限当前项目内**。依赖的其他库即使使用 `//go:decor`也**无法**被装饰。
 
-例如，你的项目module名称时 `a/b/c` ，那么 `//go:decor` 只在 `a/b/c` 及其子包中生效（`a/b/c/d` 有效，`a/m/`无效）。
+例如，你的项目module名称是 `a/b/c` ，那么 `//go:decor` 只在 `a/b/c` 及其子包中生效（`a/b/c/d` 有效，`a/m/`无效）。
 
 但是`//go:decor`可以使用任意包的装饰器，没有范围限制。
 
