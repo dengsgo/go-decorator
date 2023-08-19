@@ -52,7 +52,7 @@ func logging(ctx *decor.Context) {
 
 这个函数 `logging` 就是一个合法的装饰器，它可以用在任意的一级函数上。
 
-关于 `ctx *decor.Context` 参数的含义，查看这里。
+关于 `ctx *decor.Context` 参数，跳转这里 [Context](#context)。
 
 ### 使用装饰器
 
