@@ -26,6 +26,10 @@ jobs:
       with:
         go-version: ${{ matrix.target }}
 
+    - name: TestFunctions
+      run: |
+        go test -v ./cmd/decorator/ 
+
     - name: Build
       run: |
         go install -a -work ./cmd/decorator/ 
@@ -34,7 +38,7 @@ jobs:
         cd ../single && go build -toolexec decorator -a && ./single
         cd ../..
 
-    - name: Test
+    - name: TestExample
       run: |
         go test -v ./example/single/ 
         go test -v ./example/packages/
