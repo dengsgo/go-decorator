@@ -33,6 +33,7 @@ jobs:
     - name: Build
       run: |
         go install -a -work ./cmd/decorator/ 
+        decorator
         decorator --help 
         cd ./example/packages/ && go build -toolexec decorator -a && ./packages
         cd ../single && go build -toolexec decorator -a && ./single
