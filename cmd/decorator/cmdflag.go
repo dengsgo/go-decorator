@@ -2,15 +2,20 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/dengsgo/go-decorator/cmd/logs"
 	"log"
 	"os"
 	"strings"
 )
 
+const version = `0.1.0beta`
+const opensourceUrl = `https://github.com/dengsgo/go-decorator`
+
 type CmdFlag struct {
-	Level   string // -decor.level
-	TempDir string // -decor.tempDir
+	Level   string // -d.log
+	TempDir string // -d.tempDir
+	Version string // -version
 
 	// go build args
 	toolPath  string
@@ -20,13 +25,19 @@ type CmdFlag struct {
 
 func initUseFlag() {
 	flag.StringVar(&cmdFlag.Level,
-		"decor.level",
+		"d.log",
 		"warn",
 		"output log level. all/debug/info/warn/error/close")
 	flag.StringVar(&cmdFlag.TempDir,
-		"decor.tempDir",
+		"d.tempDir",
 		"",
 		"tool workspace dir. default same as go build workspace")
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args[0])
+		fmt.Fprintf(flag.CommandLine.Output(),
+			"decorator [-d.level] [-d.tempDir] chainToolPath chainArgs\n")
+		flag.PrintDefaults()
+	}
 	flag.Parse()
 	switch cmdFlag.Level {
 	case "all":
@@ -42,7 +53,6 @@ func initUseFlag() {
 	case "close":
 		logs.Log.Level = logs.LevelClose
 	}
-	os.Setenv("GO_DECORATOR_LOG_LEVEL", cmdFlag.Level)
 	log.SetPrefix("decorator: ")
 	if logs.Log.Level < logs.LevelDebug {
 		log.SetFlags(0)
@@ -56,7 +66,9 @@ func initUseFlag() {
 		logs.Info("env key `GOTOOLDIR` not found")
 	}
 	if len(os.Args) < 2 {
-		logs.Error("at least one parameter input should be present")
+		fmt.Fprintf(flag.CommandLine.Output(),
+			"decorator %s , %s\n", version, opensourceUrl)
+		os.Exit(0)
 	}
 	for i, arg := range os.Args[1:] {
 		if goToolDir != "" && strings.HasPrefix(arg, goToolDir) {

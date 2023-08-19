@@ -37,7 +37,7 @@ func logg(level Level, v ...any) {
 		return
 	}
 	if level == LevelError {
-		if os.Getenv("GO_DECORATOR_LOG_LEVEL") == "debug" {
+		if Log.Level >= LevelDebug {
 			log.Panicln(append([]any{levelStrMap[level]}, v...)...)
 			return
 		}
