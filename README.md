@@ -1,4 +1,4 @@
-## go-decorator
+# go-decorator
 
 [中文](README.zh_cn.md) | English (Translated from Chinese document)
 
