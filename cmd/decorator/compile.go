@@ -178,7 +178,7 @@ func decorX(decorName string) string {
 }
 
 func visitAstDecl(f *ast.File, funVisitor func(*ast.FuncDecl)) {
-	if f.Decls == nil {
+	if f.Decls == nil || funVisitor == nil {
 		return
 	}
 	for _, t := range f.Decls {
