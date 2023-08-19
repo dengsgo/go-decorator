@@ -7,7 +7,7 @@
 
 A compilation chain tool for implementing decorator features in Go language.
 
-Simply `//go:decor your-decorator-function` to annotate your function. Enable you to quickly complete template code injection, change function behavior, control logical processes, and more.
+In the go code, use the `//go:decorator decoratorfunctionName` to annotate functions, and you can use the `decoratorfunctionName` to quickly complete template code injection, change function behavior, control logical flow, and more.
 
 The usage scenarios of decorators can be compared to other languages, such as Python and TypeScript.
 

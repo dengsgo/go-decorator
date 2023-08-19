@@ -7,7 +7,7 @@
 
 让 Go 语言实现装饰器特性的编译链工具。
 
-只需 `//go:decor your-decorator-function` 来注释你的函数即可。让你快速完成样板代码注入、改变函数行为、控制逻辑流程等。
+在 go 代码中，使用 `//go:decor decoratorfunctionName` 来注释函数，即可使用装饰器`decoratorfunctionName`，快速完成样板代码注入、改变函数行为、控制逻辑流程等。
 
 装饰器的使用场景，可以类比其他语言，比如 Python、TypeScript。
 
