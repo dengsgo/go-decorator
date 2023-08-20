@@ -5,6 +5,7 @@
   - [Install](#install)
   - [Usage](#usage)
     - [Adding parameters](#adding-parameters)
+    - [Add a dependency](#add-a-dependency)
     - [Destination functions and decorators](#destination-functions-and-decorators)
     - [Customizing decorators](#customizing-decorators)
     - [Using decorators](#using-decorators)
