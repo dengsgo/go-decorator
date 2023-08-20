@@ -207,15 +207,42 @@ func test() {
 但是`//go:decor`可以使用任意包的装饰器，没有范围限制。
 
 - **不能**在同一个目标函数上同时使用相同的装饰器重复装饰；  
-- **不能**对装饰器函数应用装饰器；
+- **不能**对装饰器函数应用装饰器；  
+- 升级 `decorator` 后或者调整编译参数可能需要在 go 命令中追加 `-a` 参数**强制编译**一次，以覆盖旧的编译缓存。
 
 ## 开发与调试
 
-`decorator` 作为 go 编译链中的一环，编译时被 go 加载使用。它与 go 的编译链保持兼容，不会产生副作用。
+`decorator` 作为 go 编译链中的一环，编译时被 go 编译器加载使用。它与 go 的编译链保持兼容，不会产生副作用。
 
 开发流程中要改变的只是给用到的 go 命令增加 `-toolexec decorator` 参数，其他完全一致，感觉不到有变化。  
 
-你也可以随时取消这个参数。来放弃项目对 go 装饰器的使用。即使代码中保留了 `//go:decor ` 注释也不会有任何副作用（因为它对于标准工具链来说只是无意义的注释而已）。
+你也可以随时取消这个参数。放弃项目对 go 装饰器的使用。即使代码中保留了 `//go:decor ` 注释也不会有任何副作用（因为它对于标准工具链来说只是无意义的注释而已）。
+
+调试同理。
+
+例如，在 vscode 中，编辑 `launch.json`:
+
+```json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch file",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${file}",
+            "buildFlags": "-toolexec decorator"
+        }
+    ]
+}
+```
+
+添加 `"buildFlags": "-toolexec decorator"` 这一行以启用 `decorator` 的装饰器编译。
+
+然后正常断点调试即可。
+
+> 调试体验会不断完善，如果发现问题请让我知道 [Issues](https://github.com/dengsgo/go-decorator/issues)。
 
 ## 性能
 
