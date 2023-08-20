@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-const version = `0.1.0beta`
+const version = `0.1.0 beta`
 const opensourceUrl = `https://github.com/dengsgo/go-decorator`
 
 type CmdFlag struct {
