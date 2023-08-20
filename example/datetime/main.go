@@ -27,4 +27,5 @@ func main() {
 
 func init() {
 	log.SetFlags(0)
+	time.Local = time.FixedZone("CST", 8*3600)
 }
