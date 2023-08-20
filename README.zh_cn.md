@@ -15,7 +15,7 @@
 
 ## Guide
 
-查看： [中文文档](GUIDE.zh_cn.md)  |  [English Guide](GUIDE.md)  |  更多
+查看： [中文文档](GUIDE.zh_cn.md#使用引导)  |  [English Guide](GUIDE.md#guide)  |  More
 
 ## Install
 
