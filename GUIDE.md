@@ -195,7 +195,7 @@ If `ctx.TargetDo()` is not executed in the decorator, it means that the real log
 
 ## Package references
 
-In the `datetime` [example/datetime](example/datetime) example above, our decorator and target function are in a package and we don't need to think about packages.
+In the `datetime` [example/datetime](example/datetime) example above, our decorator and target function are in a package, and we don't need to think about packages.
 
 Package references need to be considered when we have many packages.
 

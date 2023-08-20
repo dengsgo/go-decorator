@@ -7,11 +7,15 @@
 
 `go-decorator` 是实现 Go 语言装饰器特性的编译链工具。
 
-在 go 代码中，使用 `//go:decor decoratorfunctionName` 来注释函数，即可使用装饰器`decoratorfunctionName`，快速完成样板代码注入、改变函数行为、控制逻辑流程等。
+使用该工具，通过 `//go:decor decoratorfunctionName` 来注释函数，即可使用装饰器`decoratorfunctionName`，快速完成样板代码注入、改变函数行为、控制逻辑流程等。
 
 装饰器的使用场景，可以类比其他语言，比如 Python、TypeScript。
 
 `go-decorator` 是在编译时进行的装饰器注入，因此它不会破坏你项目的源文件，也不会额外在项目中生成新的`.go`文件和其他多余文件。 和 `go:generate` 生成式完全不同。
+
+## Guide
+
+查看： [中文文档](GUIDE.zh_cn.md)  |  [English Guide](GUIDE.md)  |  更多
 
 ## Install
 

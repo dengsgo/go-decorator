@@ -7,11 +7,14 @@
 
 `go-decorator` is a compilation chaining tool that implements the decorator feature of the Go language.
 
-In the go code, use the `//go:decorator decoratorfunctionName` to annotate functions, and you can use the `decoratorfunctionName` to quickly complete template code injection, change function behavior, control logical flow, and more.
-
+Using this tool, you can use the decorator `decoratorfunctionName` by annotating the function with `//go:decoratorfunctionName`, which allows you to quickly inject sample code, change the behavior of the function, control the flow of logic, and more.
 The usage scenarios of decorators can be compared to other languages, such as Python and TypeScript.
 
 `go-decorator` is a decorator injection performed during compilation, so it does not damage the source files of your project, nor does it generate new `.go` files or other unnecessary files in the project. It is completely different from the `go:generate` generative expression.
+
+## Guide
+
+查看： [中文文档](GUIDE.zh_cn.md)  |  [English Guide](GUIDE.md)  |  More
 
 ## Install
 
