@@ -96,14 +96,13 @@ func logging(ctx *decor.Context) {
 
 ## Example
 
-
 [example](example) This directory demonstrates how to write code correctly to use the `decorator` tool.
 
 [**single**](example/single): This is a single file example where both the decorator definition and the decorated function are located within the same package. In this case, there is no need to consider the issue of importing dependent packages, just use the example code.
 
 [**packages**](example/packages)：The example of this project is that the decorator definition and the decorated function are not in the same package, and anonymous package import is required.
 
-More examples and manuals are gradually being added.
+See more [Guide](#guide) .
 
 ## Requirement
 

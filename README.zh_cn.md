@@ -96,14 +96,13 @@ func logging(ctx *decor.Context) {
 
 ## Example
 
-
 [example](example)这个目录示范了如何正确编写代码来使用 go-decorator 工具。
 
 [**single**](example/single): 这个一个单文件示例，装饰器定义和被装饰的函数都位于一个包内。这种情况无需考虑导入依赖包的问题，按示例代码使用即可。
 
 [**packages**](example/packages)：该项目示例为装饰器定义和被装饰的函数不在同一个包内，需要使用匿名包导入。
 
-更多示例和手册陆续添加中...
+更多内容查看 [Guide](#guide) .
 
 ## Requirement
 
