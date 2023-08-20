@@ -32,6 +32,8 @@ Note: Please update frequently to install the latest version. Get the best exper
 
 ## Usage
 
+`decorator` is `go`'s compilation chaining tool, which relies on the `go` command to invoke it and compile the code.
+
 Simply add the `-toolexec decorator` parameter to the `go build` command.
 
 If you usually use `go build`, now all you need to do is add the toolchain parameter to become `go build -toolexec decorator`. Everything else is the same as before, no changes need to be made!

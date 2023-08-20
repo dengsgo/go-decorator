@@ -41,6 +41,8 @@ Note: Please update frequently to install the latest version. Get the best exper
 
 ## Usage
 
+`decorator` is `go`'s compilation chaining tool, which relies on the `go` command to invoke it and compile the code.
+
 ### Adding parameters
 
 Add the parameter `-toolexec decorator` to the `go` command.
@@ -50,6 +52,8 @@ For example: 'go build **-toolexec decorator**', 'go run **-toolexec decorator**
 This applies to most `go` subcommands.
 
 ### Add a dependency
+
+In your project root directory, add the `go-decorator` dependency.
 
 ```shell
 $ go get -u github.com/dengsgo/go-decorator

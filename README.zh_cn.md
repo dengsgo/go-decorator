@@ -33,6 +33,8 @@ $ go install github.com/dengsgo/go-decorator/cmd/decorator@latest
 
 ## Usage
 
+`decorator` 是 `go` 的编译链工具，依靠 `go` 命令来调用它运行，进行代码的编译。
+
 在 `go build` 命令中加入 `-toolexec 'decorator'` 参数即可。
 
 假如你平时就是使用 `go build`,那么现在只需要加上工具链参数变成 `go build -toolexec 'decorator'`。其他一切和以往一样，无需做任何更改！

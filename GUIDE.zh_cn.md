@@ -41,6 +41,8 @@ $ go install github.com/dengsgo/go-decorator/cmd/decorator@latest
 
 ## 使用 
 
+`decorator` 是 `go` 的编译链工具，依靠 `go` 命令来调用它运行，进行代码的编译。
+
 ### 添加参数
 
 在 `go` 命令中添加参数 `-toolexec decorator` 即可。
@@ -50,6 +52,8 @@ $ go install github.com/dengsgo/go-decorator/cmd/decorator@latest
 它适用于大多数 `go` 的子命令。
 
 ### 添加依赖
+
+在你的项目根目录，添加 `go-decorator` 依赖。
 
 ```shell
 $ go get -u github.com/dengsgo/go-decorator
