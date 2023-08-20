@@ -35,7 +35,7 @@ func initUseFlag() {
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args[0])
 		fmt.Fprintf(flag.CommandLine.Output(),
-			"decorator [-d.level] [-d.tempDir] chainToolPath chainArgs\n")
+			"decorator [-d.log] [-d.tempDir] chainToolPath chainArgs\n")
 		flag.PrintDefaults()
 	}
 	flag.Parse()
