@@ -48,6 +48,12 @@ $ go install github.com/dengsgo/go-decorator/cmd/decorator@latest
 
 它适用于大多数 `go` 的子命令。
 
+### 添加依赖
+
+```shell
+$ go get -u github.com/dengsgo/go-decorator
+```
+
 ### 目标函数和装饰器
 
 > 目标函数：即使用了装饰器的函数，也称为被装饰的函数。  
@@ -188,6 +194,8 @@ func datetime(timestamp int64) string {
 ## 包引用
 
 上面的 `datetime` [example/datetime](example/datetime) 例子中，我们的装饰器和目标函数都是在一个包中的，我们无需考虑包的问题。
+
+当我们有很多包时，需要考虑包引用。
 
 go 规范中，没有被当前文件里的代码使用到的包无法导入，这就导致了 `//go:decor` 这样的注释无法真正的导入包，因此需要我们使用匿名导入包的方式来导入对应的包。像这样 `import _ "path/to/your/package"`.
 

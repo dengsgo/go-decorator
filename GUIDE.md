@@ -48,6 +48,12 @@ For example: 'go build **-toolexec decorator**', 'go run **-toolexec decorator**
 
 This applies to most `go` subcommands.
 
+### Add a dependency
+
+```shell
+$ go get -u github.com/dengsgo/go-decorator
+```
+
 ### Destination functions and decorators
 
 > Target functions: functions that use a decorator, also known as decorated functions.  
@@ -190,6 +196,8 @@ If `ctx.TargetDo()` is not executed in the decorator, it means that the real log
 ## Package references
 
 In the `datetime` [example/datetime](example/datetime) example above, our decorator and target function are in a package and we don't need to think about packages.
+
+Package references need to be considered when we have many packages.
 
 The go specification prevents importing packages that aren't used by the code in the current file, which means that comments like `//go:decor` don't really import packages, so we need to use an anonymous package import to import the corresponding package. Like this `import _"path/to/your/package"`.
 

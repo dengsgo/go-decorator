@@ -15,21 +15,12 @@
 
 ## Install
 
-项目仍在积极开发，当前最好的安装方式是源码编译（后续稳定后会提供二进制分发）。
-
-```shell
-$ git clone https://github.com/dengsgo/go-decorator.git
-$ cd go-decorator/cmd/decorator
-$ go build
-```
-编译成功会得到 `decorator` 二进制文件。将此文件路径加入你的环境变量 `Path` 中以便后续调用。
-
-也可以直接 `go install`:
+通过 `go install` 安装:
 ```shell
 $ go install github.com/dengsgo/go-decorator/cmd/decorator@latest
 ```
 
-运行 `decorator --help`，出现`decorator`的帮助信息即为安装成功。
+运行 `decorator`，显示 `decorator` 版本信息即为安装成功。
 
 注意：请经常更新以安装最新版本。获得最佳体验。
 

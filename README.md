@@ -15,22 +15,12 @@ The usage scenarios of decorators can be compared to other languages, such as Py
 
 ## Install
 
-The project is still actively developing, and the best installation method currently is source code compilation (binary distribution will be provided after stabilization).
-
-```shell
-$ git clone https://github.com/dengsgo/go-decorator.git
-$ cd go-decorator/cmd/decorator
-$ go build
-```
-
-Successfully compiled will result in the `decorator` binary file. Add this file path to your environment variable `Path` for future calls.
-
-You can also directly `go install`:
+Install via `go install`.
 ```shell
 $ go install github.com/dengsgo/go-decorator/cmd/decorator@latest
 ```
 
-Run `decorator --help` and the help message `decorator` appears to indicate successful installation.
+Run `decorator` and it will show you the `decorator` version.
 
 Note: Please update frequently to install the latest version. Get the best experience.
 
