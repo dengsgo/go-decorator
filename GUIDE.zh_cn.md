@@ -86,8 +86,8 @@ func logging(ctx *decor.Context) {
 // Convert timestamp to string date format.
 //
 //go:decor logging
-func datetime(timestamp int64) string {
-    return time.Unix(timestamp, 0).String()
+func datetime(timestamp int) string {
+    return time.Unix(int64(timestamp), 0).String()
 }
 
 // Omitted code ...
