@@ -5,7 +5,7 @@
 > Don`t apply it in production environment !!!  
 > Project is still under iterative development and is open for testing only. 
 
-A compilation chain tool for implementing decorator features in Go language.
+`go-decorator` is a compilation chaining tool that implements the decorator feature of the Go language.
 
 In the go code, use the `//go:decorator decoratorfunctionName` to annotate functions, and you can use the `decoratorfunctionName` to quickly complete template code injection, change function behavior, control logical flow, and more.
 

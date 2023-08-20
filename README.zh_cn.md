@@ -5,7 +5,7 @@
 > 请勿应用于生产环境！！！  
 > 项目仍在迭代开发，仅公开测试阶段
 
-让 Go 语言实现装饰器特性的编译链工具。
+`go-decorator` 是实现 Go 语言装饰器特性的编译链工具。
 
 在 go 代码中，使用 `//go:decor decoratorfunctionName` 来注释函数，即可使用装饰器`decoratorfunctionName`，快速完成样板代码注入、改变函数行为、控制逻辑流程等。
 
