@@ -24,3 +24,7 @@ func main() {
 	s := datetime(t)
 	log.Printf("datetime(%d)=%s\n", t, s)
 }
+
+func init() {
+	log.SetFlags(0)
+}
