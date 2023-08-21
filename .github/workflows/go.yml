@@ -38,6 +38,7 @@ jobs:
         cd ./example/packages/ && go build -toolexec decorator -a && ./packages
         cd ../single && go build -toolexec decorator -a && ./single
         cd ../datetime && go build -toolexec decorator -a && ./datetime
+        cd ../emptyfunc && go build -toolexec decorator -a && ./emptyfunc
         cd ../..
 
     - name: TestExample
@@ -45,3 +46,4 @@ jobs:
         go test -v ./example/single/ 
         go test -v ./example/packages/
         go test -v ./example/datetime/
+        go test -v ./example/emptyfunc/
