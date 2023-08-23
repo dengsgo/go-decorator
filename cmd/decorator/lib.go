@@ -187,6 +187,33 @@ func (g *genIdentId) nextStr() string {
 	return g.ident + strconv.Itoa(g.id)
 }
 
+// TODO
+func funIsDecorator(fd *ast.FuncDecl) bool {
+	if fd == nil ||
+		fd.Recv != nil ||
+		fd.Type == nil ||
+		fd.Type.Params == nil ||
+		fd.Type.Params.NumFields() != 1 {
+		return false
+	}
+	if fd.Type.TypeParams == nil {
+		return false
+	}
+	if fd.Type.TypeParams.NumFields() != 1 {
+		return false
+	}
+	expr := fd.Type.TypeParams.List[0].Type
+	buffer := bytes.NewBuffer([]byte{})
+	err := printer.Fprint(buffer, emptyFset, expr)
+	if err != nil {
+		logs.Debug("funIsDecorator printer.Fprint fail", err)
+		return false
+	}
+	// TODO
+
+	return true
+}
+
 func getStmtList(s string) (r []ast.Stmt, i int, err error) {
 	s = "func(){\n" + s + "\n}()"
 	logs.Debug("getStmtList", s)
