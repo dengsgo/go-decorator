@@ -188,30 +188,25 @@ func (g *genIdentId) nextStr() string {
 }
 
 // TODO
-func funIsDecorator(fd *ast.FuncDecl) bool {
-	if fd == nil ||
+func funIsDecorator(fd *ast.FuncDecl, pkgName string) bool {
+	if pkgName == "" ||
+		fd == nil ||
 		fd.Recv != nil ||
 		fd.Type == nil ||
 		fd.Type.Params == nil ||
-		fd.Type.Params.NumFields() != 1 {
+		fd.Type.Params.NumFields() != 1 ||
+		fd.Type.Params.List[0] == nil ||
+		fd.Type.Params.List[0].Type == nil {
 		return false
 	}
-	if fd.Type.TypeParams == nil {
-		return false
-	}
-	if fd.Type.TypeParams.NumFields() != 1 {
-		return false
-	}
-	expr := fd.Type.TypeParams.List[0].Type
+	expr := fd.Type.Params.List[0].Type
 	buffer := bytes.NewBuffer([]byte{})
 	err := printer.Fprint(buffer, emptyFset, expr)
 	if err != nil {
 		logs.Debug("funIsDecorator printer.Fprint fail", err)
 		return false
 	}
-	// TODO
-
-	return true
+	return strings.TrimSpace(buffer.String()) == fmt.Sprintf("*%s.Context", pkgName)
 }
 
 func getStmtList(s string) (r []ast.Stmt, i int, err error) {
