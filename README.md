@@ -8,11 +8,18 @@
 > Don`t apply it in production environment !!!  
 > Project is still under iterative development and is open for testing only. 
 
-`go-decorator` is a compilation chaining tool that implements the decorator feature of the Go language.
+`go-decorator`, **go language middleware tool using annotation-injected decorators**.
 
-Using this tool, you can use the decorator `decoratorfunctionName` by annotating the function with `//go:decoratorfunctionName`, which allows you to quickly inject sample code, change the behavior of the function, control the flow of logic, and more.
+## Feature
 
-The usage scenarios of decorators can be compared to other languages, such as Python and TypeScript.
+- Annotating a function with `//go:decoratorfunctionName` allows you to use the decorator `decoratorfunctionName` for quick sample code injection, non-intrusive changes to function behavior, controlling the flow of logic, and more;
+- Implement a function of type func(*decor.Context), such as a decorator, that can be used on any top-level function.
+- Multiple (line) `//go:decor` decorators are allowed to decorate functions;
+- Friendly error hints that can more accurately detect problems at compile time and provide the cause of the error and the line number (e.g. missing decorator or package reference, etc.).
+- The target functions only operate at compile time without compromising the performance of the compiled program or causing reflection.
+- A basic bootstrap document.
+
+The usage scenarios of decorators can be compared to other languages like Python and TypeScript.
 
 `go-decorator` is a decorator injection performed during compilation, so it does not damage the source files of your project, nor does it generate new `.go` files or other unnecessary files in the project. It is completely different from the `go:generate` generative expression.
 
@@ -37,9 +44,9 @@ Note: Please update frequently to install the latest version. Get the best exper
 
 Simply add the `-toolexec decorator` parameter to the `go build` command.
 
-If you usually use `go build`, now all you need to do is add the toolchain parameter to become `go build -toolexec decorator`. Everything else is the same as before, no changes need to be made!
+If you usually use `go build`, now all you need to do is add the toolchain parameter to become `go build -toolexec decorator`. Everything remains the same, no changes need to be made!
 
-The other subcommands of go are also used in the same way.
+The other subcommands of go are also utilized in the same manner.
 
 ## Code
 
@@ -103,9 +110,13 @@ func logging(ctx *decor.Context) {
 
 [example](example) This directory demonstrates how to write code correctly to use the `decorator` tool.
 
-[**single**](example/single): This is a single file example where both the decorator definition and the decorated function are located within the same package. In this case, there is no need to consider the issue of importing dependent packages, just use the example code.
+| Project                           | Notes                                                                                                                                                                                                                                              |
+|-----------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [**single**](example/single)      | This is a single file example where both the decorator definition and the decorated function are located within the same package. In this case, there is no need to consider the issue of importing dependent packages, just use the example code. | 
+| [**packages**](example/packages)  | The example of this project is that the decorator definition and the decorated function are not in the same package, and anonymous package import is required.                                                                                     |
+| [**datetime**](example/datetime)  | The complete code used in the demonstration example in the Guide                                                                                                                                                                                   |
+| [**emptyfunc**](example/emptyfunc) | The difference between calling and not calling `TargetDo()` in the demo decorator                                                                                                                                                                  |
 
-[**packages**](example/packages)：The example of this project is that the decorator definition and the decorated function are not in the same package, and anonymous package import is required.
 
 See more [Guide](#guide) .
 
@@ -120,4 +131,13 @@ If you find any problems, you can provide feedback here. [GitHub Issues](https:/
 
 ## Contribute
 
-The project is still under development and due to frequent changes, external contributions are temporarily not accepted. Welcome to submit a Pull Request after stabilization
+The project is still under development and due to frequent changes, external contributions are temporarily not accepted. Welcome to submit a Pull Request after stabilization.
+
+## TODO
+
+- More documents.
+- IDE friendly tool support.
+- better performance.
+- More testing coverage.
+- More clear error reminders.
+- More...

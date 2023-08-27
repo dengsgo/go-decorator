@@ -3,14 +3,22 @@
 [![Actions](https://github.com/dengsgo/go-decorator/workflows/Go/badge.svg)](https://github.com/dengsgo/go-decorator/actions)  [![Go Report Card](https://goreportcard.com/badge/github.com/dengsgo/go-decorator)](https://goreportcard.com/report/github.com/dengsgo/go-decorator)  [![godoc.org](https://godoc.org/github.com/dengsgo/go-decorator/decor?status.svg)](https://godoc.org/github.com/dengsgo/go-decorator/decor)  [![Go doc](https://img.shields.io/badge/go.dev-reference-brightgreen?logo=go&logoColor=white&style=flat)](https://pkg.go.dev/github.com/dengsgo/go-decorator/decor)  [![Goproxy.cn](https://goproxy.cn/stats/github.com/dengsgo/go-decorator/badges/download-count.svg)](https://goproxy.cn)
 
 
-中文 | [English](README.md) (Translated from Chinese document)
+中文 | [English](README.md)  
 
 > 请勿应用于生产环境！！！  
 > 项目仍在迭代开发，仅公开测试阶段
 
-`go-decorator` 是实现 Go 语言装饰器特性的编译链工具。
+`go-decorator`, **使用注释注入装饰器的 go 语言中间件工具**.
 
-使用该工具，通过 `//go:decor decoratorfunctionName` 来注释函数，即可使用装饰器`decoratorfunctionName`，快速完成样板代码注入、改变函数行为、控制逻辑流程等。
+## Feature
+
+-   使用 `//go:decor decoratorfunctionName` 注释函数即可使用装饰器 `decoratorfunctionName`，快速完成样板代码注入、非侵入式改变函数行为、控制逻辑流程等；  
+-   实现 func(*decor.Context) 类型的函数，即为一个装饰器，可以用在任意的一级函数上（top-level function）;  
+-   允许使用多个（行）`//go:decor`装饰器来装饰函数；
+-   友好的错误提示，可以较为正确的在编译时发现问题并给出错误原因和错误行号（比如装饰器未定义/包未引用等）；  
+-   只在编译时增强目标函数，不会降低编译后程序的性能，更没有反射；
+-   基础使用的引导文档；
+
 
 装饰器的使用场景，可以类比其他语言，比如 Python、TypeScript。
 
@@ -108,7 +116,7 @@ func logging(ctx *decor.Context) {
 | [**single**](example/single)      | 这个一个单文件示例，装饰器定义和被装饰的函数都位于一个包内。这种情况无需考虑导入依赖包的问题，按示例代码使用即可。 | 
 | [**packages**](example/packages)  | 该项目示例为装饰器定义和被装饰的函数不在同一个包内，需要使用匿名包导入。                      |
 | [**datetime**](example/datetime)  | Guide 里演示示例所用到的完整代码                                       |
-| [**emptyfunc**](example/emptyfunc) | 演示装饰器中调用和不调用`targetDo()` 的区别                              |
+| [**emptyfunc**](example/emptyfunc) | 演示装饰器中调用和不调用`TargetDo()` 的区别                              |
 
 
 更多内容查看 [Guide](#guide) .
@@ -127,3 +135,12 @@ func logging(ctx *decor.Context) {
 ## Contribute
 
 项目仍在开发中，由于变动频繁，暂时不接受外部贡献。欢迎稳定后再提交 Pull Request .
+
+## TODO
+
+- More documents.
+- IDE friendly tool support.  
+- better performance.
+- More testing coverage.  
+- More clear error reminders.
+- More...
