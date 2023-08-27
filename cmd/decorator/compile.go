@@ -65,6 +65,7 @@ func compile(args []string) error {
 			originPath = file
 			//log.Printf("%+v\n", fd)
 			collDecors := []*ast.Comment{}
+			mapDecors := map[string]bool{}
 			for i := len(fd.Doc.List) - 1; i >= 0; i-- {
 				doc := fd.Doc.List[i]
 				if !strings.HasPrefix(doc.Text, decoratorScanFlag) {
@@ -73,11 +74,17 @@ func compile(args []string) error {
 				logs.Debug("HIT:", doc.Text)
 				decorName, decorArgs, ok := parseGoDecComment(doc.Text)
 				logs.Debug(decorName, decorArgs, ok)
+				if _, ok := mapDecors[decorName]; ok {
+					logs.Error("cannot use the same decorator for repeated decoration\n\t",
+						friendlyIDEPosition(fset, doc.Pos()))
+				}
+				mapDecors[decorName] = true
 				collDecors = append(collDecors, doc)
 			}
 			if len(collDecors) == 0 {
 				return
 			}
+
 			logs.Info("find the entry for using the decorator", friendlyIDEPosition(fset, fd.Pos()))
 			logs.Debug("collDecors", collDecors)
 			gi := newGenIdentId()
