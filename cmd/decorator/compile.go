@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"errors"
-	"github.com/dengsgo/go-decorator/cmd/logs"
 	"go/ast"
 	"go/parser"
 	"go/printer"
@@ -13,6 +12,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+
+	"github.com/dengsgo/go-decorator/cmd/logs"
 )
 
 const msgDecorPkgNotImported = "decorator used but package not imported (need add `import _ \"" + decoratorPackagePath + "\"`)"
@@ -117,8 +118,8 @@ func compile(args []string) error {
 					logs.Error(msgDecorPkgNotImported, "\n\t",
 						friendlyIDEPosition(fset, doc.Pos()))
 				} else if name == "_" {
-					imp.pathObjMap[decoratorPackagePath].Name = nil
-					imp.pathMap[decoratorPackagePath] = "decor"
+					imp.pathObjMap[decoratorPackagePath].Name = nil // rewrite this package import way
+					imp.pathMap[decoratorPackagePath] = "decor"     // mark finished
 				}
 
 				if x := decorX(decorName); x != "" {

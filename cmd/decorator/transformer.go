@@ -2,13 +2,14 @@ package main
 
 import (
 	"bytes"
-	"github.com/dengsgo/go-decorator/cmd/logs"
 	"go/ast"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/dengsgo/go-decorator/cmd/logs"
 )
 
 const listFormat = `GO.LIST.EXPORT={{.Export}}
@@ -91,18 +92,38 @@ func newImporter(f *ast.File) *importer {
 			if ip == nil {
 				continue
 			}
-			name := ""
+			var name string
 			pkg, _ := strconv.Unquote(ip.Path.Value)
-			if ip.Name != nil && ip.Name.Name != "" && ip.Name.Name != "_" {
-				name = ip.Name.Name
+			extName := strings.TrimRight(
+				filepath.Base(pkg),
+				filepath.Ext(pkg),
+			)
+
+			if ip.Name == nil {
+				// import path/name // name form pkg
+				name = extName
 			} else {
-				name = filepath.Base(pkg)
+				switch ip.Name.Name {
+				case "":
+					// import path/name // name form pkg
+					name = extName
+				case "_":
+					// import _ path/name // name pkg, about to be replaced
+					name = extName
+				case ".":
+					// import . path/name // ""
+					name = extName
+				default:
+					// import yname path/name // yname from alias
+					name = ip.Name.Name
+				}
 			}
+
 			nameMap[name] = pkg
 			pathObjMap[pkg] = ip
 			pathMap[pkg] = func() string {
-				if ip.Name != nil && ip.Name.Name == "_" {
-					return "_"
+				if ip.Name != nil {
+					return ip.Name.Name
 				}
 				return name
 			}()
