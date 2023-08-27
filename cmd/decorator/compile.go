@@ -17,6 +17,7 @@ import (
 )
 
 const msgDecorPkgNotImported = "decorator used but package not imported (need add `import _ \"" + decoratorPackagePath + "\"`)"
+const msgCantUsedOnDecoratorFunc = `decorators cannot be used on decorators`
 
 func compile(args []string) error {
 	files := make([]string, 0, len(args))
@@ -113,13 +114,19 @@ func compile(args []string) error {
 				//x.Body.Rbrace = x.Body.Lbrace + token.Pos(ofs)
 				//log.Printf("fd.Body.Pos() %+v\n", fd.Body.Pos())
 				updated = true
-				name, ok := imp.importedPath(decoratorPackagePath)
+				pkgDecorName, ok := imp.importedPath(decoratorPackagePath)
 				if !ok {
 					logs.Error(msgDecorPkgNotImported, "\n\t",
 						friendlyIDEPosition(fset, doc.Pos()))
-				} else if name == "_" {
+				} else if pkgDecorName == "_" {
 					imp.pathObjMap[decoratorPackagePath].Name = nil // rewrite this package import way
 					imp.pathMap[decoratorPackagePath] = "decor"     // mark finished
+					pkgDecorName = "decor"
+				}
+
+				if funIsDecorator(fd, pkgDecorName) {
+					logs.Error(msgCantUsedOnDecoratorFunc, "\n\t",
+						friendlyIDEPosition(fset, fd.Pos()))
 				}
 
 				if x := decorX(decorName); x != "" {

@@ -1,6 +1,10 @@
 package main
 
 import (
+	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"testing"
 )
 
@@ -85,4 +89,42 @@ b:=2`,
 			t.Fatalf("getStmtList('%s') should err, now = nil, case fail\n", cas)
 		}
 	}
+}
+
+func TestFunIsDecorator(t *testing.T) {
+	check := func(name, pkgName string) {
+		code := testGetCode(name, pkgName)
+		f, err := parser.ParseFile(token.NewFileSet(), "main.go", code, parser.ParseComments)
+		if err != nil || f == nil || len(f.Decls) == 0 {
+			t.Fatal("TestFunIsDecorator testGetCode parse error", err)
+		}
+		i := 0
+		for _, v := range f.Decls {
+			fd, ok := v.(*ast.FuncDecl)
+			if !ok {
+				continue
+			}
+			i++
+			if funIsDecorator(fd, pkgName) && fd.Name.Name != "isDecorator" {
+				t.Fatal(fd.Name.Name, "should not be a decorator function")
+			}
+		}
+		if i == 0 {
+			t.Fatal("f.Decls have type *ast.FuncDecl functions. but got 0")
+		}
+	}
+	check("", "decor")
+	check("dec", "dec")
+	check("a", "a")
+}
+
+func testGetCode(name, pkgName string) string {
+	return fmt.Sprintf(`
+package main
+import %s "github.com/dengsgo/go-decorator/decor"
+func isDecorator(ctx %s.Context) {}
+func notDecorator1(ctx %s.Context, a int) {}
+func notDecorator2(ctx %s.Contex) {}
+func notDecorator3(a int) {}
+`, name, pkgName, pkgName, pkgName)
 }
