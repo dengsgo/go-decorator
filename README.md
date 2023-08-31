@@ -8,21 +8,21 @@
 > Don`t apply it in production environment !!!  
 > Project is still under iterative development and is open for testing only. 
 
-`go-decorator`, **go language middleware tool using annotation-injected decorators**.
+`go-decorator` is a middleware tool for Go language compilers that enables non-intrusive decorator usage via annotations.
+
 
 ## Feature
 
-- Annotating a function with `//go:decoratorfunctionName` allows you to use the decorator `decoratorfunctionName` for quick sample code injection, non-intrusive changes to function behavior, controlling the flow of logic, and more;
-- Implement a function of type func(*decor.Context), such as a decorator, that can be used on any top-level function.
-- Multiple (line) `//go:decor` decorators are allowed to decorate functions;
-- Friendly error hints that can more accurately detect problems at compile time and provide the cause of the error and the line number (e.g. missing decorator or package reference, etc.).
-- The target functions only operate at compile time without compromising the performance of the compiled program or causing reflection.
-- A basic bootstrap document.
+- Use `//go:decoratorfunctionName` to annotate a function with the decorator `decoratorfunctionName` for quick sample code injection, non-intrusive changes to function behavior, and control of logic flow;  
+- Define a function of type `func(*decor.Context)`, which can be used as a decorator for any top-level function.  
+- support the use of multiple (line) `//go:decor` decorators to decorate functions.  
+- Provide helpful error hints to detect problems at compile time and give the cause and line number of the error (e.g. undefined decorator or unreferenced package, etc.).  
+- The target function is only executed at compile time and does not affect the performance of the compiled program, and without reflection operations.  
+- It provides a basic usage guide.  
 
-The usage scenarios of decorators can be compared to other languages like Python and TypeScript.
+Decorator usage can be similar to other languages such as Python, TypeScript. (Ideal for caching, forensics, logging, and other scenarios, as a aid to free up duplicate coding).
 
-`go-decorator` is a decorator injection performed during compilation, so it does not damage the source files of your project, nor does it generate new `.go` files or other unnecessary files in the project. It is completely different from the `go:generate` generative expression.
-
+`go-decorator` is a compile-time decorator injection technique. Using it does not affect your project's source files and does not generate additional `.go` files or other redundant files in your project. This injection method is very different from the `go:generate` generation method.
 ## Guide
 
 查看： [中文文档](GUIDE.zh_cn.md#使用引导)  |  [English Guide](GUIDE.md#guide)  |  More
