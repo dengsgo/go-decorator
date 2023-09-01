@@ -1,6 +1,6 @@
 # go-decorator
 
-[![Actions](https://github.com/dengsgo/go-decorator/workflows/Go/badge.svg)](https://github.com/dengsgo/go-decorator/actions)  [![Go Report Card](https://goreportcard.com/badge/github.com/dengsgo/go-decorator)](https://goreportcard.com/report/github.com/dengsgo/go-decorator)  [![godoc.org](https://godoc.org/github.com/dengsgo/go-decorator/decor?status.svg)](https://godoc.org/github.com/dengsgo/go-decorator/decor)  [![Go doc](https://img.shields.io/badge/go.dev-reference-brightgreen?logo=go&logoColor=white&style=flat)](https://pkg.go.dev/github.com/dengsgo/go-decorator/decor)  [![Goproxy.cn](https://goproxy.cn/stats/github.com/dengsgo/go-decorator/badges/download-count.svg)](https://goproxy.cn)
+[![Actions](https://github.com/dengsgo/go-decorator/workflows/Go/badge.svg)](https://github.com/dengsgo/go-decorator/actions)  [![Go Report Card](https://goreportcard.com/badge/github.com/dengsgo/go-decorator)](https://goreportcard.com/report/github.com/dengsgo/go-decorator)  [![godoc.org](https://godoc.org/github.com/dengsgo/go-decorator/decor?status.svg)](https://godoc.org/github.com/dengsgo/go-decorator/decor)  [![Go doc](https://img.shields.io/badge/go.dev-reference-brightgreen?logo=go&logoColor=white&style=flat)](https://pkg.go.dev/github.com/dengsgo/go-decorator/decor)  
 
 
 [中文](README.zh_cn.md) | English (Translated from Chinese document)
@@ -13,7 +13,7 @@
 
 ## Feature
 
-- Use `//go:decoratorfunctionName` to annotate a function with the decorator `decoratorfunctionName` for quick sample code injection, non-intrusive changes to function behavior, and control of logic flow;  
+- Use `//go:decor decoratorfunctionName` to annotate a function with the decorator `decoratorfunctionName` for quick sample code injection, non-intrusive changes to function behavior, and control of logic flow;  
 - Define a function of type `func(*decor.Context)`, which can be used as a decorator for any top-level function.  
 - support the use of multiple (line) `//go:decor` decorators to decorate functions.  
 - Provide helpful error hints to detect problems at compile time and give the cause and line number of the error (e.g. undefined decorator or unreferenced package, etc.).  
