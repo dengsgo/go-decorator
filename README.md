@@ -5,8 +5,7 @@
 
 [中文](README.zh_cn.md) | English 
 
-> Don`t apply it in production environment !!!  
-> Project is still under iterative development and is open for testing only. 
+> Beta versions, use with caution in production environments.  
 
 `go-decorator` is a middleware tool for Go language compilers that enables non-intrusive decorator usage via annotations.
 
