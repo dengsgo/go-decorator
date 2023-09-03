@@ -165,7 +165,7 @@ func datetime(timestamp int64) string {
 
 ## Context
 
-`decor.Context` 是装饰器函数的入参，它是目标函数（即使用了这个装饰器的函数，也称为被装饰的函数）上下文。
+`ctx *decor.Context` 是装饰器函数的入参，它是目标函数（即使用了这个装饰器的函数，也称为被装饰的函数）上下文。
 
 在装饰器中可以使用这个上下文来修改目标函数的出入参，调整执行逻辑等操作。
 
@@ -192,6 +192,10 @@ func datetime(timestamp int64) string {
 它从 `ctx.TargetIn` 获取到目标函数入参值，然后执行目标函数代码，再把得到的结果赋值到 `ctx.TargetOut`。
 
 如果装饰器中没有执行 `ctx.TargetDo()` ，意味着目标函数真实的逻辑不会被执行，调用目标函数得到的结果是零值（在没有修改 ctx.TargetOut 的情况下）。  
+
+### ctx.DoRef()  
+
+获取匿名包装类被执行的次数。通常它代表着装饰器函数中执行 TargetDo()的次数。
 
 > 在编写装饰器代码时要注意，一定要对 ctx.TargetIn、ctx.TargetOut 的元素值断言类型，任何类型错误的赋值都会产生 runtime panic。  
 > 不要改变 ctx.TargetIn、ctx.TargetOut 值（赋值/追加/删除等），这会导致 ctx.TargetDo()  调用时产生严重错误 panic。

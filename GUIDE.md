@@ -167,7 +167,7 @@ The use of multiple decorators may result in less readable code and increase the
 
 ## Context
 
-`decor.Context` is the entry parameter of the decorator function, which is the context of the target function (i.e., the function that uses this decorator, also known as the decorated function).
+`ctx *decor.Context` is the entry parameter of the decorator function, which is the context of the target function (i.e., the function that uses this decorator, also known as the decorated function).
 
 This context can be used in the decorator to modify the in- and out-parameters of the target function, adjust the execution logic, and so on.
 
@@ -193,7 +193,13 @@ Executes the target function. It is a parameterless wrapper around the target fu
 
 It gets the target function input from `ctx.TargetIn`, executes the target function code, and assigns the result to `ctx.TargetOut`.
 
-If `ctx.TargetDo()` is not executed in the decorator, it means that the real logic of the target function will not be executed, and the result of the call to the target function will be zero-value (without modifying ctx.TargetOut).
+If `ctx.TargetDo()` is not executed in the decorator, it means that the real logic of the target function will not be executed, and the result of the call to the target function will be zero-value (without modifying ctx.TargetOut).  
+
+### ctx.DoRef()
+
+`DoRef()` gets the number of times an anonymous wrapper class has been executed.
+
+Usually, it shows the number of times `TargetDo()` was called in the decorator function.
 
 > Be careful when writing decorator code, be sure to assert the type of the element values of ctx.TargetIn, ctx.TargetOut, any incorrectly-typed assignments will generate a runtime panic.  
 > Do not change ctx.TargetIn, ctx.TargetOut values (assign/append/delete, etc.), this will cause a serious error panic on ctx.TargetDo() calls.
