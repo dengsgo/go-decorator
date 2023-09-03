@@ -15,6 +15,7 @@
     - [ctx.TargetIn](#ctxtargetin)
     - [ctx.TargetOut](#ctxtargetout)
     - [ctx.TargetDo()](#ctxtargetdo)
+    - [ctx.DoRef()](#ctxdoref)
   - [Package references](#package-references)
   - [Conditions and restrictions](#conditions-and-restrictions)
   - [Development and Debugging](#development-and-debugging)
