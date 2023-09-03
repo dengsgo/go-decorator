@@ -69,7 +69,7 @@ func (d *Context) TargetDo() {
 	d.Func()
 }
 
-// DeRef gets the number of times an anonymous wrapper class has been executed.
+// DoRef gets the number of times an anonymous wrapper class has been executed.
 // Usually, it shows the number of times TargetDo() was called in the decorator function.
 func (d *Context) DoRef() int64 {
 	return d.doRef
