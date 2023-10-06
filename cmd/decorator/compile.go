@@ -94,7 +94,13 @@ func compile(args []string) error {
 				logs.Debug(decorName, decorArgs, ok)
 				// TODO 检查 decorName 是不是装饰器
 				if fd.Recv != nil {
-					logs.Warn("decor function is have Recv, ignore")
+					logs.Error("decorators cannot decorate struct method", biSymbol,
+						friendlyIDEPosition(fset, fd.Recv.Pos()))
+					continue
+				}
+				if fd.Type != nil && fd.Type.TypeParams != nil {
+					logs.Error("decorators cannot decorate function have type parameters", biSymbol,
+						friendlyIDEPosition(fset, fd.Type.TypeParams.Pos()))
 					continue
 				}
 				ra := builderReplaceArgs(fd, decorName, gi)
@@ -123,7 +129,7 @@ func compile(args []string) error {
 				updated = true
 				pkgDecorName, ok := imp.importedPath(decoratorPackagePath)
 				if !ok {
-					logs.Error(msgDecorPkgNotImported, "\n\t",
+					logs.Error(msgDecorPkgNotImported, biSymbol,
 						friendlyIDEPosition(fset, doc.Pos()))
 				} else if pkgDecorName == "_" {
 					imp.pathObjMap[decoratorPackagePath].Name = nil // rewrite this package import way
@@ -132,7 +138,7 @@ func compile(args []string) error {
 				}
 
 				if funIsDecorator(fd, pkgDecorName) {
-					logs.Error(msgCantUsedOnDecoratorFunc, "\n\t",
+					logs.Error(msgCantUsedOnDecoratorFunc, biSymbol,
 						friendlyIDEPosition(fset, fd.Pos()))
 				}
 
@@ -144,7 +150,7 @@ func compile(args []string) error {
 							imp.pathMap[xPath] = x
 						}
 					} else {
-						logs.Error(x, "package not found", "\n\t",
+						logs.Error(x, "package not found", biSymbol,
 							friendlyIDEPosition(fset, doc.Pos()))
 					}
 				}

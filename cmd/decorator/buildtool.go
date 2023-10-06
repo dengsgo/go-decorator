@@ -11,6 +11,7 @@ import (
 )
 
 const (
+	biSymbol             = "\n\t"
 	decoratorScanFlag    = "//go:decor "
 	decoratorPackagePath = "github.com/dengsgo/go-decorator/decor"
 )
