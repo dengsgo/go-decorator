@@ -1,3 +1,7 @@
+## v0.5.0 beta
+
+- Feat: decorator support for decorating generic functions
+
 ## v0.3.0 beta
 
 - Feat: add method Context.DoRef()  
