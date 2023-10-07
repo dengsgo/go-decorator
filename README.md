@@ -109,12 +109,13 @@ func logging(ctx *decor.Context) {
 
 [example](example) This directory demonstrates how to write code correctly to use the `decorator` tool.
 
-| Project                           | Notes                                                                                                                                                                                                                                              |
-|-----------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| [**single**](example/single)      | This is a single file example where both the decorator definition and the decorated function are located within the same package. In this case, there is no need to consider the issue of importing dependent packages, just use the example code. | 
-| [**packages**](example/packages)  | The example of this project is that the decorator definition and the decorated function are not in the same package, and anonymous package import is required.                                                                                     |
-| [**datetime**](example/datetime)  | The complete code used in the demonstration example in the Guide                                                                                                                                                                                   |
-| [**emptyfunc**](example/emptyfunc) | The difference between calling and not calling `TargetDo()` in the demo decorator                                                                                                                                                                  |
+| Project | Notes |
+|-----------|-----------|
+| [**single**](example/single) | This is a single file example where both the decorator definition and the decorated function are located within the same package. In this case, there is no need to consider the issue of importing dependent packages, just use the example code. | 
+| [**packages**](example/packages)  | The example of this project is that the decorator definition and the decorated function are not in the same package, and anonymous package import is required. |
+| [**datetime**](example/datetime) | The complete code used in the demonstration example in the Guide |
+| [**emptyfunc**](example/emptyfunc) | The difference between calling and not calling `TargetDo()` in the demo decorator |
+| [**genericfunc**](example/genericfunc) | Demonstrate how a generic function can use decorators (consistent with a normal function) |
 
 
 See more [Guide](#guide) .

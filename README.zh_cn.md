@@ -117,6 +117,7 @@ func logging(ctx *decor.Context) {
 | [**packages**](example/packages)  | 该项目示例为装饰器定义和被装饰的函数不在同一个包内，需要使用匿名包导入。                      |
 | [**datetime**](example/datetime)  | Guide 里演示示例所用到的完整代码                                       |
 | [**emptyfunc**](example/emptyfunc) | 演示装饰器中调用和不调用`TargetDo()` 的区别                              |
+| [**genericfunc**](example/genericfunc) | 演示泛型函函数如何使用装饰器 （和普通函数一致）                              |
 
 
 更多内容查看 [Guide](#guide) .
