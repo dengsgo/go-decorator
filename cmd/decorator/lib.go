@@ -63,6 +63,11 @@ func replace(args *ReplaceArgs) (string, error) {
 func builderReplaceArgs(f *ast.FuncDecl, decorName string, gi *genIdentId) *ReplaceArgs {
 	ra := &ReplaceArgs{false, gi.nextStr(), decorName, "", []string{}, []string{}, []string{}, []string{}, []string{}, []string{}, []string{}}
 	//funcMain
+	var tp *ast.FieldList
+	if f.Type != nil && f.Type.TypeParams != nil {
+		tp = f.Type.TypeParams
+		f.Type.TypeParams = nil
+	}
 	closure := &ast.FuncLit{
 		Type: f.Type,
 		Body: f.Body,
@@ -73,6 +78,7 @@ func builderReplaceArgs(f *ast.FuncDecl, decorName string, gi *genIdentId) *Repl
 	if err != nil {
 		logs.Error("builderReplaceArgs printer.Fprint fail", decorName, err)
 	}
+	f.Type.TypeParams = tp
 	ra.FuncMain = buffer.String()
 
 	// in result

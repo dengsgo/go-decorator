@@ -27,7 +27,9 @@ func link(args []string) {
 	if !buildmode || cfg == "" {
 		return
 	}
-	workspaceCleaner = func() {
-		_ = os.RemoveAll(tempDir)
+	if cmdFlag.ClearWork {
+		workspaceCleaner = func() {
+			_ = os.RemoveAll(tempDir)
+		}
 	}
 }

@@ -13,9 +13,10 @@ const version = `0.3.0 beta`
 const opensourceUrl = `https://github.com/dengsgo/go-decorator`
 
 type CmdFlag struct {
-	Level   string // -d.log
-	TempDir string // -d.tempDir
-	Version string // -version
+	Level     string // -d.log
+	TempDir   string // -d.tempDir
+	ClearWork bool   // -d.clearWork
+	Version   string // -version
 
 	// go build args
 	toolPath  string
@@ -32,6 +33,10 @@ func initUseFlag() {
 		"d.tempDir",
 		"",
 		"tool workspace dir. default same as go build workspace")
+	flag.BoolVar(&cmdFlag.ClearWork,
+		"d.clearWork",
+		true,
+		"empty workspace when compilation is complete")
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), "Usage of %s:\n", os.Args[0])
 		fmt.Fprintf(flag.CommandLine.Output(),

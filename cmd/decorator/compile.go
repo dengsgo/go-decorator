@@ -98,11 +98,6 @@ func compile(args []string) error {
 						friendlyIDEPosition(fset, fd.Recv.Pos()))
 					continue
 				}
-				if fd.Type != nil && fd.Type.TypeParams != nil {
-					logs.Error("decorators cannot decorate function have type parameters", biSymbol,
-						friendlyIDEPosition(fset, fd.Type.TypeParams.Pos()))
-					continue
-				}
 				ra := builderReplaceArgs(fd, decorName, gi)
 				rs, err := replace(ra)
 				if err != nil {
