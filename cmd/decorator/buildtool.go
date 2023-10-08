@@ -17,10 +17,10 @@ const (
 )
 
 var (
-	tempDir          = path.Join(os.TempDir(), "gobuild_decorator_works")
-	tempGenDir       = tempDir
-	projectDir, _    = os.Getwd()
-	workspaceCleaner = func() {}
+	tempDir       = path.Join(os.TempDir(), "gobuild_decorator_works")
+	tempGenDir    = tempDir
+	projectDir, _ = os.Getwd()
+	exitDo        = func() {}
 )
 
 func inits() {
@@ -53,9 +53,9 @@ func main() {
 	case "link":
 		link(chainArgs)
 		defer func() {
-			logs.Debug("workspaceCleaner() begin")
-			workspaceCleaner()
-			logs.Debug("workspaceCleaner() end")
+			logs.Debug("exitDo() begin")
+			exitDo()
+			logs.Debug("exitDo() end")
 		}()
 	}
 

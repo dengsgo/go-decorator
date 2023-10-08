@@ -28,7 +28,7 @@ func link(args []string) {
 		return
 	}
 	if cmdFlag.ClearWork {
-		workspaceCleaner = func() {
+		exitDo = func() {
 			_ = os.RemoveAll(tempDir)
 		}
 	}
