@@ -99,6 +99,17 @@ func newImporter(f *ast.File) *importer {
 				filepath.Ext(pkg),
 			)
 
+			// e.g. path/u/name/v2
+			if strings.HasPrefix(extName, "v") && func() bool {
+				v, err := strconv.Atoi(strings.TrimLeft(extName, "v"))
+				return err == nil && v > 1
+			}() {
+				arr := strings.Split(pkg, "/")
+				if len(arr) > 1 {
+					extName = arr[len(arr)-2]
+				}
+			}
+
 			if ip.Name == nil {
 				// import path/name // name form pkg
 				name = extName

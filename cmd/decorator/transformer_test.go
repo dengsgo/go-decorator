@@ -12,6 +12,7 @@ package main
  	_ "github.com/dengsgo/go-decorator/decor"
  	"github.com/dengsgo/cmd/logs"
  	"gopkg.in/yaml.v3"
+ 	_ "github.com/dengsgo/runner/v2"
 	. "log"
 	o "os"
  )
@@ -31,9 +32,9 @@ func TestImporter(t *testing.T) {
 		t.Fatal("parse importWays content error", err)
 	}
 	imp := newImporter(f)
-	cLen := 5
+	cLen := 6
 	if len(imp.nameMap) != cLen || len(imp.pathMap) != cLen || len(imp.pathObjMap) != cLen {
-		t.Fatal("newImporter() error,Clen=5 but got", len(imp.nameMap), len(imp.pathMap), len(imp.pathObjMap))
+		t.Fatal("newImporter() error,Clen=6 but got", len(imp.nameMap), len(imp.pathMap), len(imp.pathObjMap))
 	}
 	cases := []struct {
 		name,
@@ -42,6 +43,7 @@ func TestImporter(t *testing.T) {
 		{"decor", "github.com/dengsgo/go-decorator/decor"},
 		{"logs", "github.com/dengsgo/cmd/logs"},
 		{"yaml", "gopkg.in/yaml.v3"},
+		{"runner", "github.com/dengsgo/runner/v2"},
 		{"log", "log"},
 		{"o", "os"},
 	}
@@ -61,6 +63,7 @@ func TestImporter(t *testing.T) {
 		{"github.com/dengsgo/go-decorator/decor", "_"},
 		{"github.com/dengsgo/cmd/logs", "logs"},
 		{"gopkg.in/yaml.v3", "yaml"},
+		{"github.com/dengsgo/runner/v2", "_"},
 		{"log", "."},
 		{"os", "o"},
 	}
