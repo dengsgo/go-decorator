@@ -58,7 +58,7 @@ func compile(args []string) error {
 
 		updated := false
 
-		visitAstDecl(f, func(fd *ast.FuncDecl) {
+		visitAstDecl(f, func(fd *ast.FuncDecl) (r bool) {
 			if fd.Doc == nil || fd.Doc.List == nil || len(fd.Doc.List) == 0 {
 				return
 			}
@@ -151,6 +151,7 @@ func compile(args []string) error {
 				}
 
 			}
+			return
 		},
 		)
 
@@ -193,17 +194,20 @@ func decorX(decorName string) string {
 	return arr[0]
 }
 
-func visitAstDecl(f *ast.File, funVisitor func(*ast.FuncDecl)) {
+func visitAstDecl(f *ast.File, funVisitor func(*ast.FuncDecl) bool) {
 	if f.Decls == nil || funVisitor == nil {
 		return
 	}
+LOOP:
 	for _, t := range f.Decls {
 		if t == nil {
 			continue
 		}
 		switch decl := t.(type) {
 		case *ast.FuncDecl:
-			funVisitor(decl)
+			if funVisitor(decl) {
+				break LOOP
+			}
 		}
 	}
 }
