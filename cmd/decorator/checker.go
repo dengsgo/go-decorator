@@ -41,7 +41,7 @@ func checkDecorAndGetParam(pkgPath, funName string, annotationMap map[string]str
 	imp := newImporter(file)
 	pkgName, ok := imp.importedPath(decoratorPackagePath)
 	if !ok {
-		return "", errors.New(msgDecorPkgNotImported)
+		return "", errors.New(msgDecorPkgNotFound)
 	}
 	m := collDeclFuncParamsAnfTypes(decl)
 	if len(m) < 1 {
@@ -167,15 +167,12 @@ func (d *pkgLoader) loadPkg(pkgPath string) (set *pkgSet, err error) {
 		return
 	}
 	set = &pkgSet{}
-	pi := getPkgCompiledInfo(pkgPath)
-	if pi.dir == "" {
-		s := "getPkgCompiledInfo fail"
-		err = errors.New(s)
-		logs.Debug(s)
-		return
+	pi, err := getPackageInfo(pkgPath)
+	if err != nil {
+		return nil, err
 	}
 	set.fset = token.NewFileSet()
-	set.pkgs, err = parser.ParseDir(set.fset, pi.dir, nil, 0)
+	set.pkgs, err = parser.ParseDir(set.fset, pi.Dir, nil, 0)
 	d.pkg[pkgPath] = set
 	return
 }

@@ -17,6 +17,7 @@ import (
 )
 
 const msgDecorPkgNotImported = "decorator used but package not imported (need add `import _ \"" + decoratorPackagePath + "\"`)"
+const msgDecorPkgNotFound = "decor package is not found"
 const msgCantUsedOnDecoratorFunc = `decorators cannot be used on decorators`
 
 var packageInfo *_packageInfo
