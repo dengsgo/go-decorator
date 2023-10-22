@@ -19,9 +19,18 @@ import (
 const msgDecorPkgNotImported = "decorator used but package not imported (need add `import _ \"" + decoratorPackagePath + "\"`)"
 const msgCantUsedOnDecoratorFunc = `decorators cannot be used on decorators`
 
+var packageInfo *_packageInfo
+
 func compile(args []string) error {
+	{
+		var err error
+		packageInfo, err = getPackageInfo("")
+		if err != nil || packageInfo.Module.Path == "" {
+			logs.Error("doesn't seem to be a Go project:", err)
+		}
+	}
 	files := make([]string, 0, len(args))
-	projectName := getGoModPath()
+	projectName := packageInfo.Module.Path
 	logs.Debug("projectName", projectName)
 	//log.Printf("TOOLEXEC_IMPORTPATH %+v\n", os.Getenv("TOOLEXEC_IMPORTPATH"))
 	packageName := ""

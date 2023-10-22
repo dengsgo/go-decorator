@@ -2,17 +2,17 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
+	"github.com/dengsgo/go-decorator/cmd/logs"
 	"go/ast"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
-
-	"github.com/dengsgo/go-decorator/cmd/logs"
 )
 
-const listFormat = `GO.LIST.DIR={{.Dir}}`
+const listFormat = `'GO.LIST.DIR={{.Dir}}'`
 
 var decoratorBinaryPath = os.Getenv("GOPATH") + "/bin/decorator"
 
@@ -20,6 +20,47 @@ type pkgCompiled struct {
 	work,
 	export,
 	dir string
+}
+
+type _packageInfo struct {
+	Dir,
+	ImportPath,
+	Name,
+	Target,
+	Root,
+	StaleReason string
+	Stale  bool
+	Module struct {
+		Main bool
+		Path,
+		Dir,
+		GoMod,
+		GoVersion string
+	}
+	Match,
+	GoFiles,
+	Imports,
+	Deps []string
+}
+
+func getPackageInfo(pkgPath string) (*_packageInfo, error) {
+	command := []string{"go", "list", "-json"}
+	if pkgPath != "" && pkgPath != "main" {
+		command = append(command, pkgPath)
+	}
+	cmd := exec.Command(command[0], command[1:]...)
+	cmd.Dir = projectDir
+	cmd.Env = os.Environ()
+	bf, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+	p := &_packageInfo{}
+	err = json.Unmarshal(bf, p)
+	if err != nil {
+		return nil, err
+	}
+	return p, nil
 }
 
 func getPkgCompiledInfo(pkg string) *pkgCompiled {
@@ -41,20 +82,6 @@ func runGoListCommend(pkg string) *bytes.Buffer {
 	}
 	logs.Debug(projectDir+"/runGoListCommend.log", buf.String())
 	return buf
-}
-
-func getGoModPath() string {
-	var buf = bytes.NewBuffer([]byte{})
-	cmd := exec.Command("go", "list", "-f", "{{.Module.Path}}")
-	cmd.Stdout = buf
-	cmd.Stderr = buf
-	cmd.Dir = projectDir
-	cmd.Env = os.Environ()
-	err := cmd.Run()
-	if err != nil {
-		logs.Error("getGoModPath()", err)
-	}
-	return strings.TrimSpace(buf.String())
 }
 
 func pkgInfo(buf *bytes.Buffer) *pkgCompiled {
