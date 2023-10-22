@@ -12,8 +12,7 @@ import (
 	"github.com/dengsgo/go-decorator/cmd/logs"
 )
 
-const listFormat = `GO.LIST.EXPORT={{.Export}}
-GO.LIST.DIR={{.Dir}}`
+const listFormat = `GO.LIST.DIR={{.Dir}}`
 
 var decoratorBinaryPath = os.Getenv("GOPATH") + "/bin/decorator"
 
@@ -30,7 +29,7 @@ func getPkgCompiledInfo(pkg string) *pkgCompiled {
 func runGoListCommend(pkg string) *bytes.Buffer {
 	logs.Debug(decoratorBinaryPath)
 	var buf = bytes.NewBuffer([]byte{})
-	cmd := exec.Command("go", "list", "-f", listFormat, "-export", "-toolexec", decoratorBinaryPath /*"-work",*/, pkg)
+	cmd := exec.Command("go", "list", "-f", listFormat, pkg)
 	logs.Debug("runGoListCommend", strings.Join(cmd.Args, " "))
 	cmd.Stdout = buf
 	cmd.Stderr = buf
