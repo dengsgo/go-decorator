@@ -77,7 +77,7 @@ func test(v ...string) string {
 	return ""
 }
 
-func logging(ctx *decor.Context) {
+func logging(ctx *decor.Context, s string, a int, b bool) {
 	ctx.TargetDo()
 }
 
