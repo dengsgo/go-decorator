@@ -1,9 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
-	"github.com/dengsgo/go-decorator/cmd/logs"
 	"go/ast"
 	"os"
 	"os/exec"
@@ -12,15 +10,7 @@ import (
 	"strings"
 )
 
-const listFormat = `'GO.LIST.DIR={{.Dir}}'`
-
 var decoratorBinaryPath = os.Getenv("GOPATH") + "/bin/decorator"
-
-type pkgCompiled struct {
-	work,
-	export,
-	dir string
-}
 
 type _packageInfo struct {
 	Dir,
@@ -61,46 +51,6 @@ func getPackageInfo(pkgPath string) (*_packageInfo, error) {
 		return nil, err
 	}
 	return p, nil
-}
-
-func getPkgCompiledInfo(pkg string) *pkgCompiled {
-	return pkgInfo(runGoListCommend(pkg))
-}
-
-func runGoListCommend(pkg string) *bytes.Buffer {
-	logs.Debug(decoratorBinaryPath)
-	var buf = bytes.NewBuffer([]byte{})
-	cmd := exec.Command("go", "list", "-f", listFormat, pkg)
-	logs.Debug("runGoListCommend", strings.Join(cmd.Args, " "))
-	cmd.Stdout = buf
-	cmd.Stderr = buf
-	cmd.Dir = projectDir
-	cmd.Env = os.Environ()
-	err := cmd.Run()
-	if err != nil {
-		logs.Error("runGoListCommend fail", cmd.Args, err)
-	}
-	logs.Debug(projectDir+"/runGoListCommend.log", buf.String())
-	return buf
-}
-
-func pkgInfo(buf *bytes.Buffer) *pkgCompiled {
-	pc := &pkgCompiled{}
-	for {
-		line, err := buf.ReadString('\n')
-		if err != nil {
-			break
-		}
-		if strings.HasPrefix(line, "WORK=") {
-			pc.work = line[len("WORK=") : len(line)-1]
-		} else if strings.HasPrefix(line, "GO.LIST.EXPORT=") {
-			pc.export = line[len("GO.LIST.EXPORT=") : len(line)-1]
-		} else if strings.HasPrefix(line, "GO.LIST.DIR=") {
-			pc.dir = line[len("GO.LIST.DIR=") : len(line)-1]
-		}
-	}
-	logs.Debug("pkgInfo", pc)
-	return pc
 }
 
 type importer struct {
