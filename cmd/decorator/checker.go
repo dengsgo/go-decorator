@@ -10,6 +10,14 @@ import (
 	"go/printer"
 	"go/token"
 	"strings"
+	"unicode"
+	"unicode/utf8"
+)
+
+var (
+	errUsedDecorSyntaxErrorLossFunc = errors.New("syntax error using decorator: miss decorator name")
+	errUsedDecorSyntaxError         = errors.New("syntax error using decorator")
+	errCalledDecorNotDecorator      = errors.New("used decor is not a decorator function")
 )
 
 func isDecoratorFunc(fd *ast.FuncDecl, pkgName string) bool {
@@ -33,6 +41,63 @@ func isDecoratorFunc(fd *ast.FuncDecl, pkgName string) bool {
 	return strings.TrimSpace(buffer.String()) == fmt.Sprintf("*%s.Context", pkgName)
 }
 
+func parseDecorAndParameters(s string) (string, map[string]string, error) {
+	// s like:
+	//   function
+	//   function#{}
+	//   function#{key=""}
+	//   function#{key="", name=""}
+	//   function#{key="", name="", age=100}
+	//   function#{key="", name="", age=100, b = false}
+	if s == "" {
+		return "", nil, errUsedDecorSyntaxErrorLossFunc
+	}
+
+	callName, pStr, _ := strings.Cut(s, "#")
+	callName = cleanSpaceChar(callName)
+	if callName == "" {
+		return callName, nil, errUsedDecorSyntaxErrorLossFunc
+	}
+	p := map[string]string{}
+	if pStr == "" {
+		return callName, p, nil
+	}
+	if pStr[0] != '{' || pStr[len(pStr)-1] != '}' {
+		return callName, nil, errUsedDecorSyntaxError
+	}
+	if len(pStr) == 2 {
+		return callName, p, nil
+	}
+	if len(pStr) < 5 {
+		return callName, p, errUsedDecorSyntaxError
+	}
+	//str := pStr[1 : len(pStr)-1]
+	//for {
+	//	if isLet() {
+	//
+	//	}
+	//}
+
+	return callName, p, nil
+}
+
+func cleanSpaceChar(s string) string {
+	bf := bytes.NewBuffer([]byte{})
+	for len(s) > 0 {
+		r, size := utf8.DecodeRuneInString(s)
+		s = s[size:]
+		if unicode.IsSpace(r) {
+			continue
+		}
+		bf.WriteRune(r)
+	}
+	return bf.String()
+}
+
+func isLet() {
+
+}
+
 func checkDecorAndGetParam(pkgPath, funName string, annotationMap map[string]string) (args string, error error) {
 	decl, file, err := pkgILoader.findFunc(pkgPath, funName)
 	if err != nil {
@@ -45,7 +110,7 @@ func checkDecorAndGetParam(pkgPath, funName string, annotationMap map[string]str
 	}
 	m := collDeclFuncParamsAnfTypes(decl)
 	if len(m) < 1 {
-		return "", errors.New("used decor is not a decorator function")
+		return "", errCalledDecorNotDecorator
 	}
 	for _, v := range m {
 		if v.index == 0 && v.typ != fmt.Sprintf("*%s.Context", pkgName) {

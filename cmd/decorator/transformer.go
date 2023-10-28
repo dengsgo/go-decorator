@@ -29,12 +29,12 @@ type _packageInfo struct {
 	}
 	Match,
 	GoFiles,
-	Imports,
-	Deps []string
+	Imports, // TODO remove -find
+	Deps []string // TODO remove -find
 }
 
 func getPackageInfo(pkgPath string) (*_packageInfo, error) {
-	command := []string{"go", "list", "-json"}
+	command := []string{"go", "list", "-json", "-find"}
 	if pkgPath != "" && pkgPath != "main" {
 		command = append(command, pkgPath)
 	}

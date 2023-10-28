@@ -72,11 +72,13 @@ func main() {
 	}
 }
 
-//go:decor logging
 func test(v ...string) string {
 	return ""
 }
 
+//go:decor-linter required:{a, b, c}
+//go:decor-linter required: {a={"hello", "world"}, b=[,34], c}
+//go:decor-linter nonzero: {a}
 func logging(ctx *decor.Context, s string, a int, b bool) {
 	ctx.TargetDo()
 }
