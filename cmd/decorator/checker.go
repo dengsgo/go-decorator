@@ -15,9 +15,10 @@ import (
 )
 
 var (
-	errUsedDecorSyntaxErrorLossFunc = errors.New("syntax error using decorator: miss decorator name")
-	errUsedDecorSyntaxError         = errors.New("syntax error using decorator")
-	errCalledDecorNotDecorator      = errors.New("used decor is not a decorator function")
+	errUsedDecorSyntaxErrorLossFunc  = errors.New("syntax error using decorator: miss decorator name")
+	errUsedDecorSyntaxErrorLossValue = errors.New("syntax error using decorator: miss parameters value")
+	errUsedDecorSyntaxError          = errors.New("syntax error using decorator")
+	errCalledDecorNotDecorator       = errors.New("used decor is not a decorator function")
 )
 
 func isDecoratorFunc(fd *ast.FuncDecl, pkgName string) bool {
@@ -77,12 +78,39 @@ func parseDecorAndParameters(s string) (string, map[string]string, error) {
 	if len(pStr) < 5 {
 		return callName, p, errUsedDecorSyntaxError
 	}
-	for {
-		r, _ := utf8.DecodeRuneInString(pStr)
-		if r == utf8.RuneError {
-			break
+	consumerString := func(s string) (string, string) { // TODO
+		offset := 0
+		for offset < len(s) {
+			r, size := utf8.DecodeRuneInString(s[offset:])
+			if r == utf8.RuneError {
+				return s[0:offset], s[offset:]
+			}
+			offset += size
+			if r == '"' && s[offset-1:offset] != "\\" {
+				return s[0:offset], s[offset:]
+			}
 		}
+		return s[0:offset], s[offset:]
+	}
+	for {
+		key, value, _ := strings.Cut(pStr, "=")
+		key = strings.TrimSpace(key)
+		if !isLetters(key) {
+			return callName, p, errUsedDecorSyntaxError
+		}
+		value = strings.TrimLeftFunc(value, unicode.IsSpace)
+		if len(value) < 2 {
+			return callName, p, errUsedDecorSyntaxErrorLossValue
+		}
+		// TODO
+		if value[0] == '"' {
+			// consumer string
+			consumerString(value[1:])
+		} else if r, _ := utf8.DecodeRuneInString(value); r != utf8.RuneError && unicode.IsLetter(r) {
+			// consumer rune
+			p[key] = value
 
+		}
 	}
 
 	//str := pStr[1 : len(pStr)-1]
@@ -93,6 +121,21 @@ func parseDecorAndParameters(s string) (string, map[string]string, error) {
 	//}
 
 	return callName, p, nil
+}
+
+func isLetters(s string) (b bool) {
+	for offset := 0; offset < len(s); {
+		r, size := utf8.DecodeRuneInString(s[offset:])
+		if r == utf8.RuneError {
+			return b
+		}
+		offset += size
+		if !unicode.IsLetter(r) {
+			return false
+		}
+		b = true
+	}
+	return b
 }
 
 func cleanSpaceChar(s string) string {

@@ -31,3 +31,31 @@ func TestCleanSpaceChar(t *testing.T) {
 		}
 	}
 }
+
+func TestIsLetters(t *testing.T) {
+	cas := []struct {
+		s string
+		r bool
+	}{
+		{"thisisastring", true},
+		{"this isastring", false},
+		{"thisisastring ", false},
+		{" thisisastring", false},
+		{"这是string", true},
+		{"这 是string", false},
+		{"这是 string", false},
+		{"这是string\t", false},
+		{"这是\vstring", false},
+		{"\n这是string", false},
+		{"thisisa字符串", true},
+		{"", false},
+		{"\r", false},
+		{"😀/(ㄒoㄒ)/~~😊😄😄😄😄😄😄", false},
+		{" 😀/(ㄒoㄒ)/~ ~   😊😄	😄\v😄  😄😄😄  ", false},
+	}
+	for i, v := range cas {
+		if isLetters(v.s) != v.r {
+			t.Fatal("isLetters(v.s)!=r, pos", i, ": ", v.s, isLetters(v.s), "!=", v.r)
+		}
+	}
+}
