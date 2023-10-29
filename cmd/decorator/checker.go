@@ -56,21 +56,35 @@ func parseDecorAndParameters(s string) (string, map[string]string, error) {
 	callName, pStr, _ := strings.Cut(s, "#")
 	callName = cleanSpaceChar(callName)
 	if callName == "" {
+		// non
 		return callName, nil, errUsedDecorSyntaxErrorLossFunc
 	}
 	p := map[string]string{}
 	if pStr == "" {
+		if strings.HasSuffix(s, "#") {
+			// #
+			return callName, p, errUsedDecorSyntaxError
+		}
 		return callName, p, nil
 	}
 	if pStr[0] != '{' || pStr[len(pStr)-1] != '}' {
 		return callName, nil, errUsedDecorSyntaxError
 	}
 	if len(pStr) == 2 {
+		// {}
 		return callName, p, nil
 	}
 	if len(pStr) < 5 {
 		return callName, p, errUsedDecorSyntaxError
 	}
+	for {
+		r, _ := utf8.DecodeRuneInString(pStr)
+		if r == utf8.RuneError {
+			break
+		}
+
+	}
+
 	//str := pStr[1 : len(pStr)-1]
 	//for {
 	//	if isLet() {
@@ -83,9 +97,10 @@ func parseDecorAndParameters(s string) (string, map[string]string, error) {
 
 func cleanSpaceChar(s string) string {
 	bf := bytes.NewBuffer([]byte{})
-	for len(s) > 0 {
-		r, size := utf8.DecodeRuneInString(s)
-		s = s[size:]
+	offset := 0
+	for offset < len(s) {
+		r, size := utf8.DecodeRuneInString(s[offset:])
+		offset += size
 		if unicode.IsSpace(r) {
 			continue
 		}
