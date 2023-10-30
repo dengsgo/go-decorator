@@ -56,13 +56,20 @@ func parseDecorAndParameters(s string) (string, map[string]string, error) {
 	}
 
 	_callName, pStr, _ := strings.Cut(s, "#")
-	callName := cleanSpaceChar(_callName)
-	if callName == "" || len(callName) != len(strings.TrimSpace(_callName)) {
+	cAst, err := parser.ParseExpr(_callName)
+	if err != nil {
+		return "", nil, errUsedDecorSyntaxError
+	}
+	callName := ""
+	switch a := cAst.(type) {
+	case *ast.SelectorExpr, *ast.Ident:
+		callName = typeString(a)
+	default:
+		return "", nil, errUsedDecorSyntaxError
+	}
+	if callName == "" {
 		// non
 		return callName, nil, errUsedDecorSyntaxErrorLossFunc
-	}
-	if !isLetters(callName) {
-		return callName, nil, errUsedDecorSyntaxError
 	}
 	p := map[string]string{}
 	pStr = strings.TrimSpace(pStr)
