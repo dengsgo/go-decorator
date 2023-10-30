@@ -17,6 +17,7 @@ import (
 var (
 	errUsedDecorSyntaxErrorLossFunc  = errors.New("syntax error using decorator: miss decorator name")
 	errUsedDecorSyntaxErrorLossValue = errors.New("syntax error using decorator: miss parameters value")
+	errUsedDecorSyntaxErrorInvalidP  = errors.New("syntax error using decorator: invalid parameter format")
 	errUsedDecorSyntaxError          = errors.New("syntax error using decorator")
 	errCalledDecorNotDecorator       = errors.New("used decor is not a decorator function")
 )
@@ -46,21 +47,25 @@ func parseDecorAndParameters(s string) (string, map[string]string, error) {
 	// s like:
 	//   function
 	//   function#{}
-	//   function#{key=""}
-	//   function#{key="", name=""}
-	//   function#{key="", name="", age=100}
-	//   function#{key="", name="", age=100, b = false}
+	//   function#{key:""}
+	//   function#{key:"", name:""}
+	//   function#{key:"", name:"", age:100}
+	//   function#{key:"", name:"", age:100, b : false}
 	if s == "" {
 		return "", nil, errUsedDecorSyntaxErrorLossFunc
 	}
 
-	callName, pStr, _ := strings.Cut(s, "#")
-	callName = cleanSpaceChar(callName)
-	if callName == "" {
+	_callName, pStr, _ := strings.Cut(s, "#")
+	callName := cleanSpaceChar(_callName)
+	if callName == "" || len(callName) != len(strings.TrimSpace(_callName)) {
 		// non
 		return callName, nil, errUsedDecorSyntaxErrorLossFunc
 	}
+	if !isLetters(callName) {
+		return callName, nil, errUsedDecorSyntaxError
+	}
 	p := map[string]string{}
+	pStr = strings.TrimSpace(pStr)
 	if pStr == "" {
 		if strings.HasSuffix(s, "#") {
 			// #
@@ -78,49 +83,105 @@ func parseDecorAndParameters(s string) (string, map[string]string, error) {
 	if len(pStr) < 5 {
 		return callName, p, errUsedDecorSyntaxError
 	}
-	consumerString := func(s string) (string, string) { // TODO
-		offset := 0
-		for offset < len(s) {
-			r, size := utf8.DecodeRuneInString(s[offset:])
-			if r == utf8.RuneError {
-				return s[0:offset], s[offset:]
-			}
-			offset += size
-			if r == '"' && s[offset-1:offset] != "\\" {
-				return s[0:offset], s[offset:]
-			}
-		}
-		return s[0:offset], s[offset:]
+
+	exprList, err := parseDecorParameterStringToExprList(pStr)
+	if err != nil {
+		return callName, p, err
 	}
-	for {
-		key, value, _ := strings.Cut(pStr, "=")
-		key = strings.TrimSpace(key)
-		if !isLetters(key) {
-			return callName, p, errUsedDecorSyntaxError
-		}
-		value = strings.TrimLeftFunc(value, unicode.IsSpace)
-		if len(value) < 2 {
-			return callName, p, errUsedDecorSyntaxErrorLossValue
-		}
-		// TODO
-		if value[0] == '"' {
-			// consumer string
-			consumerString(value[1:])
-		} else if r, _ := utf8.DecodeRuneInString(value); r != utf8.RuneError && unicode.IsLetter(r) {
-			// consumer rune
-			p[key] = value
+	px := mapx(p)
+	if err := decorStmtListToMap(exprList, px); err != nil {
+		return callName, p, err
+	}
+	return callName, px, nil
+}
 
+type mapx map[string]string
+
+func (p mapx) put(key, value string) bool {
+	if _, ok := p[key]; ok {
+		return false
+	}
+	p[key] = value
+	return true
+}
+
+func decorStmtListToMap(exprList []ast.Expr, p mapx) error {
+	ident := func(v ast.Expr) string {
+		if v == nil {
+			return ""
+		}
+		id, ok := v.(*ast.Ident)
+		if !ok {
+			return ""
+		}
+		return id.Name
+	}
+	consumerKeyValue := func(expr *ast.KeyValueExpr) error {
+		key := ident(expr.Key)
+		if key == "" {
+			return errors.New("invalid parameter name") // error
+		}
+		switch value := expr.Value.(type) {
+		case *ast.BasicLit:
+			switch value.Kind {
+			// a:"b"
+			// a: 0
+			// a: 0.0
+			case token.STRING, token.INT, token.FLOAT:
+				if !p.put(key, value.Value) {
+					return errors.New("duplicate parameters key '" + key + "'")
+				}
+			default:
+				return errors.New("invalid parameter type") // error
+			}
+		case *ast.Ident:
+			val := ident(value)
+			if val != "true" && val != "false" {
+				return errors.New("invalid parameter value, should be bool")
+			}
+			if !p.put(key, val) {
+				return errors.New("duplicate parameters key '" + key + "'")
+			}
+		default:
+			return errors.New("invalid parameter value")
+		}
+		return nil
+	}
+	for _, v := range exprList {
+		switch expr := v.(type) {
+		case *ast.KeyValueExpr: // a:b
+			if err := consumerKeyValue(expr); err != nil {
+				return err
+			}
+		default:
+			return errUsedDecorSyntaxErrorInvalidP // error
 		}
 	}
+	return nil // error
+}
 
-	//str := pStr[1 : len(pStr)-1]
-	//for {
-	//	if isLet() {
-	//
-	//	}
-	//}
-
-	return callName, p, nil
+// s = {xxxxx}
+func parseDecorParameterStringToExprList(s string) ([]ast.Expr, error) {
+	s = "map[any]any" + s
+	stmts, _, err := getStmtList(s)
+	if err != nil {
+		return nil, errUsedDecorSyntaxErrorInvalidP
+	}
+	if len(stmts) != 1 {
+		return nil, errUsedDecorSyntaxErrorInvalidP
+	}
+	stmt, ok := stmts[0].(*ast.ExprStmt)
+	if !ok || stmt == nil {
+		return nil, errUsedDecorSyntaxErrorInvalidP
+	}
+	clit, ok := stmt.X.(*ast.CompositeLit)
+	if !ok || clit == nil {
+		return nil, errUsedDecorSyntaxErrorInvalidP
+	}
+	if clit.Elts == nil {
+		return nil, errUsedDecorSyntaxErrorInvalidP
+	}
+	return clit.Elts, nil
 }
 
 func isLetters(s string) (b bool) {
