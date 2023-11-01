@@ -191,39 +191,6 @@ func parseDecorParameterStringToExprList(s string) ([]ast.Expr, error) {
 	return clit.Elts, nil
 }
 
-func isLetters(s string) (b bool) {
-	for offset := 0; offset < len(s); {
-		r, size := utf8.DecodeRuneInString(s[offset:])
-		if r == utf8.RuneError {
-			return b
-		}
-		offset += size
-		if !unicode.IsLetter(r) {
-			return false
-		}
-		b = true
-	}
-	return b
-}
-
-func cleanSpaceChar(s string) string {
-	bf := bytes.NewBuffer([]byte{})
-	offset := 0
-	for offset < len(s) {
-		r, size := utf8.DecodeRuneInString(s[offset:])
-		offset += size
-		if unicode.IsSpace(r) {
-			continue
-		}
-		bf.WriteRune(r)
-	}
-	return bf.String()
-}
-
-func isLet() {
-
-}
-
 func checkDecorAndGetParam(pkgPath, funName string, annotationMap map[string]string) (args string, error error) {
 	decl, file, err := pkgILoader.findFunc(pkgPath, funName)
 	if err != nil {
@@ -366,4 +333,33 @@ func (d *pkgLoader) loadPkg(pkgPath string) (set *pkgSet, err error) {
 	set.pkgs, err = parser.ParseDir(set.fset, pi.Dir, nil, 0)
 	d.pkg[pkgPath] = set
 	return
+}
+
+func isLetters(s string) (b bool) {
+	for offset := 0; offset < len(s); {
+		r, size := utf8.DecodeRuneInString(s[offset:])
+		if r == utf8.RuneError {
+			return b
+		}
+		offset += size
+		if !unicode.IsLetter(r) {
+			return false
+		}
+		b = true
+	}
+	return b
+}
+
+func cleanSpaceChar(s string) string {
+	bf := bytes.NewBuffer([]byte{})
+	offset := 0
+	for offset < len(s) {
+		r, size := utf8.DecodeRuneInString(s[offset:])
+		offset += size
+		if unicode.IsSpace(r) {
+			continue
+		}
+		bf.WriteRune(r)
+	}
+	return bf.String()
 }
