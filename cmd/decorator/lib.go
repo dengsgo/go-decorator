@@ -242,7 +242,7 @@ func funIsDecorator(fd *ast.FuncDecl, pkgName string) bool {
 
 func getStmtList(s string) (r []ast.Stmt, i int, err error) {
 	s = "func(){\n" + s + "\n}()"
-	logs.Debug("getStmtList", s)
+	//logs.Debug("getStmtList", s)
 	expr, err := parser.ParseExpr(s)
 	if err != nil {
 		return

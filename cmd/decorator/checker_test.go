@@ -7,10 +7,73 @@ import (
 )
 
 func TestCheckDecorAndGetParam(t *testing.T) {
-	param, err := checkDecorAndGetParam("github.com/dengsgo/go-decorator/decor", "find", nil)
-	log.Println(param, err)
-	param, err = checkDecorAndGetParam("github.com/dengsgo/go-decorator/cmd/decorator", "logging", nil)
-	log.Println(param, err)
+	cas := []struct {
+		in map[string]string
+		r  []string
+	}{
+		{
+			map[string]string{"s": `"value"`},
+			[]string{`"value"`, "0", "false"},
+		},
+		{
+			map[string]string{"a": "11111"},
+			[]string{`""`, "11111", "false"},
+		},
+		{
+			map[string]string{"b": "true"},
+			[]string{`""`, "0", "true"},
+		},
+		{
+			map[string]string{"s": `"value"`, "a": "0", "b": "true"},
+			[]string{`"value"`, "0", "true"},
+		},
+		{
+			map[string]string{"a": "0", "s": `"value"`, "b": "true"},
+			[]string{`"value"`, "0", "true"},
+		},
+		{
+			map[string]string{"b": "true", "a": "0", "s": `"value"`},
+			[]string{`"value"`, "0", "true"},
+		},
+		{
+			map[string]string{"b": "false", "a": "0", "s": `"kkkk"`},
+			[]string{`"kkkk"`, "0", "false"},
+		},
+	}
+
+	targetPkg := "github.com/dengsgo/go-decorator/cmd/decorator"
+	for index, c := range cas {
+		param, err := checkDecorAndGetParam(targetPkg,
+			"logging", c.in)
+		if err != nil {
+			t.Fatal("checkDecorAndGetParam should err == nil but got error", err)
+		}
+		for i, v := range c.r {
+			if param[i] != v {
+				t.Fatalf("checkDecorAndGetParam should param == r but got: %s != %s, case index: %+v, i: %+v",
+					param[i], v, index, i)
+			}
+		}
+	}
+
+	_, err := checkDecorAndGetParam("github.com/dengsgo/go-decorator/decor", "find", nil)
+	if err == nil {
+		t.Fatal("checkDecorAndGetParam should return err but got nil")
+	}
+
+	// TODO
+	//failed := []map[string]string{
+	//	{"s": `value`, "a": "0", "b": "true"},
+	//	{"s": `if`, "a": "0", "b": "true"},
+	//	{"s": `"value"`, "a": "0.0", "b": "true"},
+	//	{"s": `"value"`, "a": "0", "b": "true1"},
+	//}
+	//for i, v := range failed {
+	//	_, err := checkDecorAndGetParam(targetPkg, "logging", v)
+	//	if err == nil {
+	//		t.Fatal("checkDecorAndGetParam should return err but got nil, index: ", i)
+	//	}
+	//}
 }
 
 func TestCleanSpaceChar(t *testing.T) {

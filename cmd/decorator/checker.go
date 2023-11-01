@@ -9,6 +9,7 @@ import (
 	"go/parser"
 	"go/printer"
 	"go/token"
+	"go/types"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -20,6 +21,28 @@ var (
 	errUsedDecorSyntaxErrorInvalidP  = errors.New("syntax error using decorator: invalid parameter format")
 	errUsedDecorSyntaxError          = errors.New("syntax error using decorator")
 	errCalledDecorNotDecorator       = errors.New("used decor is not a decorator function")
+)
+
+var (
+	decorOptionParamTypeMap = map[string]types.BasicInfo{
+		"bool": types.IsBoolean,
+
+		"int":    types.IsInteger,
+		"int8":   types.IsInteger,
+		"in16":   types.IsInteger,
+		"int32":  types.IsInteger,
+		"int64":  types.IsInteger,
+		"unit":   types.IsInteger,
+		"unit8":  types.IsInteger,
+		"unit16": types.IsInteger,
+		"unit32": types.IsInteger,
+		"unit64": types.IsInteger,
+
+		"float32": types.IsFloat,
+		"float64": types.IsFloat,
+
+		"string": types.IsString,
+	}
 )
 
 func isDecoratorFunc(fd *ast.FuncDecl, pkgName string) bool {
@@ -211,19 +234,20 @@ func checkDecorAndGetParam(pkgPath, funName string, annotationMap map[string]str
 		if value, ok := annotationMap[v.name]; ok {
 			params[v.index] = value
 		} else {
-			switch {
-			case strings.HasPrefix(v.typ, "int"):
-				params[v.index] = "0"
-			case strings.HasPrefix(v.typ, "float"):
-				params[v.index] = "0.0"
-			case v.typ == "string":
-				params[v.index] = `""`
-			case v.typ == "bool":
-				params[v.index] = "false"
-			default:
+			typ, ok := decorOptionParamTypeMap[v.typ]
+			if !ok {
 				return nil, errors.New("unsupported types '" + v.typ + "'")
 			}
-
+			switch typ {
+			case types.IsInteger:
+				params[v.index] = "0"
+			case types.IsFloat:
+				params[v.index] = "0.0"
+			case types.IsString:
+				params[v.index] = `""`
+			case types.IsBoolean:
+				params[v.index] = "false"
+			}
 		}
 	}
 
