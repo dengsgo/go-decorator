@@ -10,6 +10,7 @@ import (
 	"go/printer"
 	"go/token"
 	"go/types"
+	"path/filepath"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -310,6 +311,10 @@ func (d *pkgLoader) findTarget(pkgPath string, funName string) (target *ast.Func
 		return nil, nil, err
 	}
 	err = errors.New("target not found")
+	if ext := filepath.Ext(funName); ext != "" {
+		funName = ext[1:]
+	}
+	//log.Printf("pkgPath: %s, funName: %s, set: %+v \n", pkgPath, funName, set)
 	for _, v := range set.pkgs {
 		if v == nil || v.Files == nil {
 			continue
