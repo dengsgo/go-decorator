@@ -102,16 +102,6 @@ func parseDecorAndParameters(s string) (string, map[string]string, error) {
 	return callName, px, nil
 }
 
-type mapx map[string]string
-
-func (p mapx) put(key, value string) bool {
-	if _, ok := p[key]; ok {
-		return false
-	}
-	p[key] = value
-	return true
-}
-
 func decorStmtListToMap(exprList []ast.Expr, p mapx) error {
 	ident := func(v ast.Expr) string {
 		if v == nil {
@@ -191,27 +181,27 @@ func parseDecorParameterStringToExprList(s string) ([]ast.Expr, error) {
 	return clit.Elts, nil
 }
 
-func checkDecorAndGetParam(pkgPath, funName string, annotationMap map[string]string) (args string, error error) {
+func checkDecorAndGetParam(pkgPath, funName string, annotationMap map[string]string) ([]string, error) {
 	decl, file, err := pkgILoader.findFunc(pkgPath, funName)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	imp := newImporter(file)
 	pkgName, ok := imp.importedPath(decoratorPackagePath)
 	if !ok {
-		return "", errors.New(msgDecorPkgNotFound)
+		return nil, errors.New(msgDecorPkgNotFound)
 	}
 	m := collDeclFuncParamsAnfTypes(decl)
 	if len(m) < 1 {
-		return "", errCalledDecorNotDecorator
+		return nil, errCalledDecorNotDecorator
 	}
 	for _, v := range m {
 		if v.index == 0 && v.typ != fmt.Sprintf("*%s.Context", pkgName) {
-			return "", errors.New("used decor is not a decorator function")
+			return nil, errors.New("used decor is not a decorator function")
 		}
 	}
 	if len(m) == 1 {
-		return "", nil
+		return []string{}, nil
 	}
 	params := make([]string, len(m))
 	for _, v := range m {
@@ -231,14 +221,14 @@ func checkDecorAndGetParam(pkgPath, funName string, annotationMap map[string]str
 			case v.typ == "bool":
 				params[v.index] = "false"
 			default:
-				return
+				return nil, errors.New("unsupported types '" + v.typ + "'")
 			}
 
 		}
 	}
 
-	//go:decor logging#(key = "")   func(key, name, instance string)
-	return strings.Join(params[1:], ", "), nil
+	//go:decor logging#(key : "")   func(key, name, instance string)
+	return params[1:], nil
 }
 
 type decorParamType struct {

@@ -74,22 +74,24 @@ func compile(args []string) error {
 			}
 			originPath = file
 			//log.Printf("%+v\n", fd)
-			collDecors := []*ast.Comment{}
-			mapDecors := map[string]bool{}
+			var collDecors []*decorAnnotation
+			mapDecors := mapx{}
 			for i := len(fd.Doc.List) - 1; i >= 0; i-- {
 				doc := fd.Doc.List[i]
 				if !strings.HasPrefix(doc.Text, decoratorScanFlag) {
 					break
 				}
 				logs.Debug("HIT:", doc.Text)
-				decorName, decorArgs, ok := parseGoDecComment(doc.Text)
-				logs.Debug(decorName, decorArgs, ok)
-				if _, ok := mapDecors[decorName]; ok {
+				decorName, decorArgs, err := parseDecorAndParameters(doc.Text[len(decoratorScanFlag):])
+				logs.Debug(decorName, decorArgs, err)
+				if err != nil {
+					logs.Error(err, biSymbol, friendlyIDEPosition(fset, doc.Pos()))
+				}
+				if !mapDecors.put(decorName, "") {
 					logs.Error("cannot use the same decorator for repeated decoration\n\t",
 						friendlyIDEPosition(fset, doc.Pos()))
 				}
-				mapDecors[decorName] = true
-				collDecors = append(collDecors, doc)
+				collDecors = append(collDecors, newDecorAnnotation(doc, decorName, decorArgs))
 			}
 			if len(collDecors) == 0 {
 				return
@@ -98,17 +100,51 @@ func compile(args []string) error {
 			logs.Info("find the entry for using the decorator", friendlyIDEPosition(fset, fd.Pos()))
 			logs.Debug("collDecors", collDecors)
 			gi := newGenIdentId()
-			for _, doc := range collDecors {
-				logs.Debug("handler:", doc.Text)
-				decorName, decorArgs, ok := parseGoDecComment(doc.Text)
-				logs.Debug(decorName, decorArgs, ok)
-				// TODO 检查 decorName 是不是装饰器
+			for _, da := range collDecors {
+				logs.Debug("handler:", da.doc.Text)
+				// 检查 decorName 是不是装饰器
 				if fd.Recv != nil {
 					logs.Error("decorators cannot decorate struct method", biSymbol,
 						friendlyIDEPosition(fset, fd.Recv.Pos()))
 					continue
 				}
-				ra := builderReplaceArgs(fd, decorName, gi)
+				decorName, decorParams := da.name, da.parameters
+				logs.Debug(decorName, decorParams)
+				// check self is not decorator function
+				pkgDecorName, ok := imp.importedPath(decoratorPackagePath)
+				if !ok {
+					logs.Error(msgDecorPkgNotImported, biSymbol,
+						friendlyIDEPosition(fset, da.doc.Pos()))
+				} else if pkgDecorName == "_" {
+					imp.pathObjMap[decoratorPackagePath].Name = nil // rewrite this package import way
+					imp.pathMap[decoratorPackagePath] = "decor"     // mark finished
+					pkgDecorName = "decor"
+				}
+
+				if funIsDecorator(fd, pkgDecorName) {
+					logs.Error(msgCantUsedOnDecoratorFunc, biSymbol,
+						friendlyIDEPosition(fset, fd.Pos()))
+				}
+				// got package path
+				decorPkgPath := ""
+				if x := decorX(decorName); x != "" {
+					if xPath, ok := imp.importedName(x); ok {
+						name, _ := imp.importedPath(xPath)
+						if name == "_" {
+							imp.pathObjMap[xPath].Name = nil
+							imp.pathMap[xPath] = x
+						}
+						decorPkgPath = xPath
+					} else {
+						logs.Error(x, "package not found", biSymbol,
+							friendlyIDEPosition(fset, da.doc.Pos()))
+					}
+				}
+				params, err := checkDecorAndGetParam(decorPkgPath, decorName, decorParams)
+				if err != nil {
+					logs.Error(err, biSymbol, friendlyIDEPosition(fset, da.doc.Pos()))
+				}
+				ra := builderReplaceArgs(fd, decorName, params, gi)
 				rs, err := replace(ra)
 				if err != nil {
 					logs.Error(err)
@@ -126,40 +162,12 @@ func compile(args []string) error {
 					genStmts[1].(*ast.AssignStmt).Rhs[0].(*ast.FuncLit).Body.List[0].(*ast.AssignStmt).Rhs[0].(*ast.CallExpr).Fun.(*ast.FuncLit).Body.List = fd.Body.List
 				}
 				ce := genStmts[2].(*ast.ExprStmt).X.(*ast.CallExpr)
-				assignCorrectPos(doc, ce)
+				assignCorrectPos(da.doc, ce)
 
 				fd.Body.List = genStmts
 				//x.Body.Rbrace = x.Body.Lbrace + token.Pos(ofs)
 				//log.Printf("fd.Body.Pos() %+v\n", fd.Body.Pos())
 				updated = true
-				pkgDecorName, ok := imp.importedPath(decoratorPackagePath)
-				if !ok {
-					logs.Error(msgDecorPkgNotImported, biSymbol,
-						friendlyIDEPosition(fset, doc.Pos()))
-				} else if pkgDecorName == "_" {
-					imp.pathObjMap[decoratorPackagePath].Name = nil // rewrite this package import way
-					imp.pathMap[decoratorPackagePath] = "decor"     // mark finished
-					pkgDecorName = "decor"
-				}
-
-				if funIsDecorator(fd, pkgDecorName) {
-					logs.Error(msgCantUsedOnDecoratorFunc, biSymbol,
-						friendlyIDEPosition(fset, fd.Pos()))
-				}
-
-				if x := decorX(decorName); x != "" {
-					if xPath, ok := imp.importedName(x); ok {
-						name, _ := imp.importedPath(xPath)
-						if name == "_" {
-							imp.pathObjMap[xPath].Name = nil
-							imp.pathMap[xPath] = x
-						}
-					} else {
-						logs.Error(x, "package not found", biSymbol,
-							friendlyIDEPosition(fset, doc.Pos()))
-					}
-				}
-
 			}
 			return
 		},
@@ -248,27 +256,4 @@ func friendlyIDEPosition(fset *token.FileSet, p token.Pos) string {
 		return fset.Position(p).String()
 	}
 	return filepath.Join("./", fset.Position(p).String())
-}
-
-func parseGoDecComment(s string) (decName string, args map[string]string, ok bool) {
-	bodys := strings.Split(s[len(decoratorScanFlag):], "#")
-	if len(bodys) > 2 || len(bodys) == 0 {
-		return
-	}
-	decName = bodys[0]
-	args = map[string]string{}
-	if len(bodys) == 2 {
-		a := strings.Split(bodys[1], ",")
-		if len(a) > 0 {
-			for _, v := range a {
-				if len(v) > 0 {
-					kv := strings.Split(v, "=")
-					if len(kv) == 2 {
-						args[kv[0]] = kv[1]
-					}
-				}
-			}
-		}
-	}
-	return decName, args, true
 }

@@ -26,14 +26,16 @@ const replaceTpl = `    ${.DecorVarName} := &decor.Context{
     ${.DecorVarName}.Func = func() {
         ${if .HaveReturn}${stringer .DecorListOut} = ${end}${.FuncMain} (${stringer .DecorCallIn})
     }
-    ${.DecorCallName}(${.DecorVarName})
+    ${.DecorCallName}(${.DecorVarName}${if .HaveDecorParam}, ${stringer .DecorCallParams}${end})
     ${if .HaveReturn}return ${stringer .DecorCallOut}${end}`
 
 type ReplaceArgs struct {
-	HaveReturn    bool
+	HaveDecorParam,
+	HaveReturn bool
 	DecorVarName, // decor var
 	DecorCallName, // decor function name . logging
 	FuncMain string // (a, b, c) {raw func}
+	DecorCallParams, // decor function parameters. like "", 0, true, options, default empty
 	InArgNames, // a, b, c
 	OutArgNames, // c, d
 	InArgTypes, // int, int, int
@@ -41,6 +43,24 @@ type ReplaceArgs struct {
 	DecorListOut, // decor.TargetOut[0], decor.TargetOut[1]
 	DecorCallIn, // decor.TargetIn[0].(int), decor.TargetIn[1].(int), decor.TargetIn[2].(int)
 	DecorCallOut []string // decor.TargetOut[0].(int), decor.TargetOut[1].(int)
+}
+
+func newReplaceArgs(gi *genIdentId, decorName string) *ReplaceArgs {
+	return &ReplaceArgs{
+		false,
+		false,
+		gi.nextStr(),
+		decorName,
+		"",
+		[]string{},
+		[]string{},
+		[]string{},
+		[]string{},
+		[]string{},
+		[]string{},
+		[]string{},
+		[]string{},
+	}
 }
 
 func replace(args *ReplaceArgs) (string, error) {
@@ -60,8 +80,13 @@ func replace(args *ReplaceArgs) (string, error) {
 	return bf.String(), nil
 }
 
-func builderReplaceArgs(f *ast.FuncDecl, decorName string, gi *genIdentId) *ReplaceArgs {
-	ra := &ReplaceArgs{false, gi.nextStr(), decorName, "", []string{}, []string{}, []string{}, []string{}, []string{}, []string{}, []string{}}
+func builderReplaceArgs(f *ast.FuncDecl, decorName string, decorParams []string, gi *genIdentId) *ReplaceArgs {
+	ra := newReplaceArgs(gi, decorName)
+	// decor params
+	if decorParams != nil && len(decorParams) > 0 {
+		ra.HaveDecorParam = true
+		ra.DecorCallParams = decorParams
+	}
 	//funcMain
 	var tp *ast.FieldList
 	if f.Type != nil && f.Type.TypeParams != nil {
