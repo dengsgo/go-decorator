@@ -13,6 +13,7 @@ import (
 const (
 	biSymbol             = "\n\t"
 	decoratorScanFlag    = "//go:decor "
+	decorLintScanFlag    = "//go:decor-lint "
 	decoratorPackagePath = "github.com/dengsgo/go-decorator/decor"
 )
 

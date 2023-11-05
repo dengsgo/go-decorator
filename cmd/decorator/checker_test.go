@@ -2,6 +2,9 @@ package main
 
 import (
 	"errors"
+	"go/ast"
+	"go/parser"
+	"go/token"
 	"log"
 	"testing"
 )
@@ -244,4 +247,11 @@ func TestParseDecorAndParameters(t *testing.T) {
 				i, err, v.err, v.s)
 		}
 	}
+}
+
+func TestA(t *testing.T) {
+	s := `map[any]any{a, b:{"str", 1, 1.0, true, gte: 1}, c}`
+	a, err := parser.ParseExpr(s)
+	log.Println(err)
+	ast.Print(token.NewFileSet(), a)
 }

@@ -11,6 +11,7 @@ import (
 	"go/token"
 	"go/types"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -22,28 +23,6 @@ var (
 	errUsedDecorSyntaxErrorInvalidP  = errors.New("syntax error using decorator: invalid parameter format")
 	errUsedDecorSyntaxError          = errors.New("syntax error using decorator")
 	errCalledDecorNotDecorator       = errors.New("used decor is not a decorator function")
-)
-
-var (
-	decorOptionParamTypeMap = map[string]types.BasicInfo{
-		"bool": types.IsBoolean,
-
-		"int":    types.IsInteger,
-		"int8":   types.IsInteger,
-		"in16":   types.IsInteger,
-		"int32":  types.IsInteger,
-		"int64":  types.IsInteger,
-		"unit":   types.IsInteger,
-		"unit8":  types.IsInteger,
-		"unit16": types.IsInteger,
-		"unit32": types.IsInteger,
-		"unit64": types.IsInteger,
-
-		"float32": types.IsFloat,
-		"float64": types.IsFloat,
-
-		"string": types.IsString,
-	}
 )
 
 func isDecoratorFunc(fd *ast.FuncDecl, pkgName string) bool {
@@ -235,11 +214,7 @@ func checkDecorAndGetParam(pkgPath, funName string, annotationMap map[string]str
 		if value, ok := annotationMap[v.name]; ok {
 			params[v.index] = value
 		} else {
-			typ, ok := decorOptionParamTypeMap[v.typ]
-			if !ok {
-				return nil, errors.New("unsupported types '" + v.typ + "'")
-			}
-			switch typ {
+			switch v.typeKind() {
 			case types.IsInteger:
 				params[v.index] = "0"
 			case types.IsFloat:
@@ -248,6 +223,8 @@ func checkDecorAndGetParam(pkgPath, funName string, annotationMap map[string]str
 				params[v.index] = `""`
 			case types.IsBoolean:
 				params[v.index] = "false"
+			default:
+				return nil, errors.New("unsupported types '" + v.typ + "'")
 			}
 		}
 	}
@@ -256,14 +233,132 @@ func checkDecorAndGetParam(pkgPath, funName string, annotationMap map[string]str
 	return params[1:], nil
 }
 
-type decorParamType struct {
-	index int
-	name,
-	typ string
+func parseLinterFromDocGroup(doc *ast.CommentGroup, args decorArgsMap) {
+	if doc == nil || doc.List == nil || len(doc.List) == 0 {
+		return
+	}
+	for i := len(doc.List) - 1; i >= 0; i-- {
+		comment := doc.List[i]
+		if !strings.HasPrefix(comment.Text, decorLintScanFlag) {
+			break
+		}
+		// TODO
+		parseLinterFromAnnotation(comment.Text[len(decorLintScanFlag):], args)
+	}
 }
 
-func collDeclFuncParamsAnfTypes(fd *ast.FuncDecl) (m map[string]*decorParamType) {
-	m = map[string]*decorParamType{}
+func parseLinterFromAnnotation(s string, args decorArgsMap) {
+	switch {
+	case strings.HasPrefix(s, "required: "):
+		exprList, err := parseDecorParameterStringToExprList(strings.TrimLeft(s, "required: "))
+		if err != nil {
+			return
+		}
+		for _, v := range exprList {
+			obtainRequiredLinter(v, args)
+		}
+	case strings.HasPrefix(s, "nonzero: "):
+		exprList, err := parseDecorParameterStringToExprList(strings.TrimLeft(s, "nonzero: "))
+		if err != nil {
+			return
+		}
+		for _, v := range exprList {
+			obtainNonzeroLinter(v, args)
+		}
+	}
+}
+
+func obtainRequiredLinter(v ast.Expr, args decorArgsMap) {
+	initRequiredLinter := func(v *requiredLinter) {
+		if v != nil {
+			return
+		}
+		v = &requiredLinter{}
+	}
+	switch expr := v.(type) {
+	case *ast.Ident: // {a}
+		dpt, ok := args[expr.Name]
+		if !ok {
+			return // error
+		}
+		initRequiredLinter(dpt.required)
+	case *ast.KeyValueExpr: // {a:{}}
+		if _, ok := expr.Key.(*ast.Ident); !ok {
+			return // error
+		}
+		dpt, ok := args[expr.Key.(*ast.Ident).Name]
+		if !ok {
+			return // error
+		}
+		if _, ok := expr.Value.(*ast.CompositeLit); !ok {
+			return // error
+		}
+		for _, lit := range expr.Value.(*ast.CompositeLit).Elts {
+			switch lit := lit.(type) {
+			case *ast.BasicLit: // {a:{"", ""}}
+				if (lit.Kind == token.STRING && dpt.typeKind() != types.IsString) ||
+					(lit.Kind == token.INT && dpt.typeKind() != types.IsInteger) ||
+					(lit.Kind == token.FLOAT && dpt.typeKind() != types.IsFloat) {
+					return // error type not match
+				}
+				initRequiredLinter(dpt.required)
+				if dpt.required.enum == nil {
+					dpt.required.enum = []string{}
+				}
+				dpt.required.enum = append(dpt.required.enum, lit.Value)
+			case *ast.Ident: // {a:{true, false}}
+				if lit.Name != "true" && lit.Name != "false" {
+					return // error not true or false
+				}
+				initRequiredLinter(dpt.required)
+				if dpt.required.enum == nil {
+					dpt.required.enum = []string{}
+				}
+				dpt.required.enum = append(dpt.required.enum, lit.Name)
+			case *ast.KeyValueExpr: // {a:{gte:1.0, lte:1.0}}
+				if _, ok := lit.Key.(*ast.Ident); !ok {
+					return // error
+				}
+				key := lit.Key.(*ast.Ident).Name
+				if _, ok := lintRequiredRangeAllowKeyMap[key]; !ok {
+					return // error
+				}
+				if _, ok := lit.Value.(*ast.BasicLit); !ok {
+					return // error
+				}
+				lity := lit.Value.(*ast.BasicLit)
+				if lity.Kind != token.FLOAT && lity.Kind != token.INT {
+					return // error
+				}
+				initRequiredLinter(dpt.required)
+				dpt.required.initCompare()
+				var err error
+				dpt.required.compare[key], err = strconv.ParseFloat(lity.Value, 64)
+				if err != nil {
+					return // error
+				}
+
+			default:
+				return // error
+			}
+		}
+
+	}
+}
+
+func obtainNonzeroLinter(v ast.Expr, args decorArgsMap) {
+	switch expr := v.(type) {
+	case *ast.Ident: // {a}
+		dpt, ok := args[expr.Name]
+		if !ok {
+			return // error
+		}
+		dpt.nonzero = true
+	}
+}
+
+func collDeclFuncParamsAnfTypes(fd *ast.FuncDecl) (m decorArgsMap) {
+	m = decorArgsMap{}
 	if fd == nil ||
 		fd.Type == nil ||
 		fd.Type.Params == nil ||
@@ -275,7 +370,7 @@ func collDeclFuncParamsAnfTypes(fd *ast.FuncDecl) (m map[string]*decorParamType)
 	for _, field := range fd.Type.Params.List {
 		typ := typeString(field.Type)
 		for _, id := range field.Names {
-			m[id.Name] = &decorParamType{index, id.Name, typ}
+			m[id.Name] = &decorArg{index, id.Name, typ, nil, false}
 			index++
 		}
 	}
