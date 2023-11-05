@@ -17,12 +17,20 @@ import (
 	"unicode/utf8"
 )
 
+const (
+	msgLintArgsNotFound = "lint arg key not found: "
+	msgLintTypeNotMatch = "lint key '%s' type not match: want %s but got %s"
+	msgLint
+)
+
 var (
 	errUsedDecorSyntaxErrorLossFunc  = errors.New("syntax error using decorator: miss decorator name")
 	errUsedDecorSyntaxErrorLossValue = errors.New("syntax error using decorator: miss parameters value")
 	errUsedDecorSyntaxErrorInvalidP  = errors.New("syntax error using decorator: invalid parameter format")
 	errUsedDecorSyntaxError          = errors.New("syntax error using decorator")
 	errCalledDecorNotDecorator       = errors.New("used decor is not a decorator function")
+
+	errLintSyntaxError = errors.New("syntax error using go:decor-lint")
 )
 
 func isDecoratorFunc(fd *ast.FuncDecl, pkgName string) bool {
@@ -206,14 +214,27 @@ func checkDecorAndGetParam(pkgPath, funName string, annotationMap map[string]str
 	if len(m) == 1 {
 		return []string{}, nil
 	}
+	if err := parseLinterFromDocGroup(decl.Doc, m); err != nil {
+		return nil, err
+	}
 	params := make([]string, len(m))
 	for _, v := range m {
 		if v.index == 0 {
 			continue
 		}
 		if value, ok := annotationMap[v.name]; ok {
+			if err := v.passNonzeroLint(value); err != nil {
+				return nil, err
+			}
+			if err := v.passRequiredLint(value); err != nil {
+				return nil, err
+			}
 			params[v.index] = value
 		} else {
+			if v.nonzero {
+				return nil, errors.New(
+					fmt.Sprintf("lint: key '%s' can't pass nonzero lint, must have value", v.name))
+			}
 			switch v.typeKind() {
 			case types.IsInteger:
 				params[v.index] = "0"
@@ -233,42 +254,51 @@ func checkDecorAndGetParam(pkgPath, funName string, annotationMap map[string]str
 	return params[1:], nil
 }
 
-func parseLinterFromDocGroup(doc *ast.CommentGroup, args decorArgsMap) {
+func parseLinterFromDocGroup(doc *ast.CommentGroup, args decorArgsMap) error {
 	if doc == nil || doc.List == nil || len(doc.List) == 0 {
-		return
+		return nil
 	}
 	for i := len(doc.List) - 1; i >= 0; i-- {
 		comment := doc.List[i]
 		if !strings.HasPrefix(comment.Text, decorLintScanFlag) {
 			break
 		}
-		// TODO
-		parseLinterFromAnnotation(comment.Text[len(decorLintScanFlag):], args)
+		if err := parseLinterFromAnnotation(comment.Text[len(decorLintScanFlag):], args); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
-func parseLinterFromAnnotation(s string, args decorArgsMap) {
+func parseLinterFromAnnotation(s string, args decorArgsMap) error {
 	switch {
 	case strings.HasPrefix(s, "required: "):
 		exprList, err := parseDecorParameterStringToExprList(strings.TrimLeft(s, "required: "))
 		if err != nil {
-			return
+			return errLintSyntaxError
 		}
 		for _, v := range exprList {
-			obtainRequiredLinter(v, args)
+			if err := obtainRequiredLinter(v, args); err != nil {
+				return err
+			}
 		}
 	case strings.HasPrefix(s, "nonzero: "):
 		exprList, err := parseDecorParameterStringToExprList(strings.TrimLeft(s, "nonzero: "))
 		if err != nil {
-			return
+			return errLintSyntaxError
 		}
 		for _, v := range exprList {
-			obtainNonzeroLinter(v, args)
+			if err := obtainNonzeroLinter(v, args); err != nil {
+				return err
+			}
 		}
+	default:
+		return errors.New("invalid linter: " + s)
 	}
+	return nil
 }
 
-func obtainRequiredLinter(v ast.Expr, args decorArgsMap) {
+func obtainRequiredLinter(v ast.Expr, args decorArgsMap) error {
 	initRequiredLinter := func(v *requiredLinter) {
 		if v != nil {
 			return
@@ -279,19 +309,19 @@ func obtainRequiredLinter(v ast.Expr, args decorArgsMap) {
 	case *ast.Ident: // {a}
 		dpt, ok := args[expr.Name]
 		if !ok {
-			return // error
+			return errors.New(msgLintArgsNotFound + expr.Name) // error
 		}
 		initRequiredLinter(dpt.required)
 	case *ast.KeyValueExpr: // {a:{}}
 		if _, ok := expr.Key.(*ast.Ident); !ok {
-			return // error
+			return errLintSyntaxError
 		}
 		dpt, ok := args[expr.Key.(*ast.Ident).Name]
 		if !ok {
-			return // error
+			return errors.New(msgLintArgsNotFound + expr.Key.(*ast.Ident).Name)
 		}
 		if _, ok := expr.Value.(*ast.CompositeLit); !ok {
-			return // error
+			return errLintSyntaxError
 		}
 		for _, lit := range expr.Value.(*ast.CompositeLit).Elts {
 			switch lit := lit.(type) {
@@ -299,7 +329,8 @@ func obtainRequiredLinter(v ast.Expr, args decorArgsMap) {
 				if (lit.Kind == token.STRING && dpt.typeKind() != types.IsString) ||
 					(lit.Kind == token.INT && dpt.typeKind() != types.IsInteger) ||
 					(lit.Kind == token.FLOAT && dpt.typeKind() != types.IsFloat) {
-					return // error type not match
+					return errors.New(
+						fmt.Sprintf(msgLintTypeNotMatch, dpt.name, dpt.typ, lit.Kind.String()))
 				}
 				initRequiredLinter(dpt.required)
 				if dpt.required.enum == nil {
@@ -308,7 +339,8 @@ func obtainRequiredLinter(v ast.Expr, args decorArgsMap) {
 				dpt.required.enum = append(dpt.required.enum, lit.Value)
 			case *ast.Ident: // {a:{true, false}}
 				if lit.Name != "true" && lit.Name != "false" {
-					return // error not true or false
+					return errors.New(
+						fmt.Sprintf("lint required key '%s' value must be true or false, but got %s", dpt.name, lit.Name))
 				}
 				initRequiredLinter(dpt.required)
 				if dpt.required.enum == nil {
@@ -317,44 +349,53 @@ func obtainRequiredLinter(v ast.Expr, args decorArgsMap) {
 				dpt.required.enum = append(dpt.required.enum, lit.Name)
 			case *ast.KeyValueExpr: // {a:{gte:1.0, lte:1.0}}
 				if _, ok := lit.Key.(*ast.Ident); !ok {
-					return // error
+					return errLintSyntaxError
 				}
 				key := lit.Key.(*ast.Ident).Name
 				if _, ok := lintRequiredRangeAllowKeyMap[key]; !ok {
-					return // error
+					return errors.New(
+						fmt.Sprintf("lint required key '%s' not allow %s", dpt.name, key))
 				}
 				if _, ok := lit.Value.(*ast.BasicLit); !ok {
-					return // error
+					return errLintSyntaxError
 				}
 				lity := lit.Value.(*ast.BasicLit)
 				if lity.Kind != token.FLOAT && lity.Kind != token.INT {
-					return // error
+					return errors.New(
+						fmt.Sprintf("lint required key '%s' compare %s must be int or float, but got %s", dpt.name, key, lity.Kind.String()))
 				}
 				initRequiredLinter(dpt.required)
 				dpt.required.initCompare()
 				var err error
 				dpt.required.compare[key], err = strconv.ParseFloat(lity.Value, 64)
 				if err != nil {
-					return // error
+					return errors.New(
+						fmt.Sprintf("lint required key '%s' compare %s value canot be convert to float, %s; error: %+v", dpt.name, key, lity.Value, err))
 				}
 
 			default:
-				return // error
+				return errLintSyntaxError
 			}
 		}
 
+	default:
+		return errLintSyntaxError
 	}
+	return nil
 }
 
-func obtainNonzeroLinter(v ast.Expr, args decorArgsMap) {
+func obtainNonzeroLinter(v ast.Expr, args decorArgsMap) error {
 	switch expr := v.(type) {
 	case *ast.Ident: // {a}
 		dpt, ok := args[expr.Name]
 		if !ok {
-			return // error
+			return errors.New(msgLintArgsNotFound + expr.Name) // error
 		}
 		dpt.nonzero = true
+	default:
+		return errLintSyntaxError
 	}
+	return nil
 }
 
 func collDeclFuncParamsAnfTypes(fd *ast.FuncDecl) (m decorArgsMap) {

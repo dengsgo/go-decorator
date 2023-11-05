@@ -1,8 +1,11 @@
 package main
 
 import (
+	"errors"
+	"fmt"
 	"go/ast"
 	"go/types"
+	"strconv"
 	"strings"
 )
 
@@ -87,6 +90,64 @@ func (d *decorArg) typeKind() types.BasicInfo {
 	return types.IsUntyped
 }
 
+func (d *decorArg) passRequiredLint(value string) error {
+	if d.required != nil {
+		if !d.required.inEnum(value) {
+			return errors.New(
+				fmt.Sprintf("lint: key '%s' value '%s' can't pass lint enum", d.name, value))
+		}
+		if d.required.compare != nil {
+			val := 0.0
+			if d.typeKind() == types.IsString {
+				val = float64(len(value) - 2)
+			} else {
+				val, _ = strconv.ParseFloat(value, 64)
+			}
+			compare := func(c lintComparableKey, v float64) bool {
+				switch c {
+				case lintCpGt:
+					return val > v
+				case lintCpGte:
+					return val >= v
+				case lintCpLt:
+					return val < v
+				case lintCpLte:
+					return val <= v
+				}
+				return true
+			}
+			for c, v := range d.required.compare {
+				if !compare(c, v) {
+					return errors.New(
+						fmt.Sprintf("lint: key '%s' value '%s' can't pass lint %s:%s", d.name, value, c, v))
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (d *decorArg) passNonzeroLint(value string) error {
+	isZero := func() bool {
+		switch d.typeKind() {
+		case types.IsInteger,
+			types.IsFloat:
+			value, _ := strconv.ParseFloat(value, 64)
+			return value == 0
+		case types.IsString:
+			return value == `""`
+		case types.IsBoolean:
+			return value == "false"
+		}
+		return false
+	}
+	if d.nonzero && isZero() {
+		return errors.New(
+			fmt.Sprintf("lint: key '%s' value '%s' can't pass nonzero lint", d.name, value))
+	}
+	return nil
+}
+
 type decorArgsMap map[string]*decorArg
 
 type paramLint interface {
@@ -110,4 +171,16 @@ func (r *requiredLinter) initCompare() {
 	if r.compare == nil {
 		r.compare = map[lintComparableKey]float64{}
 	}
+}
+
+func (r *requiredLinter) inEnum(value string) bool {
+	if r.enum == nil {
+		return true
+	}
+	for _, v := range r.enum {
+		if v == value {
+			return true
+		}
+	}
+	return false
 }
