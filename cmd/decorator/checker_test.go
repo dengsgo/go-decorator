@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
@@ -199,6 +200,7 @@ func TestParseDecorAndParameters(t *testing.T) {
 		{"function #  }", errUsedDecorSyntaxError},
 		{"function #  }{", errUsedDecorSyntaxError},
 		{"function{}", errUsedDecorSyntaxError},
+		{"function#{{}}", errUsedDecorSyntaxError},
 		{"function{}#", errUsedDecorSyntaxError},
 		{"function#{#}", errUsedDecorSyntaxError},
 		{"function#{key}", errUsedDecorSyntaxErrorInvalidP},
@@ -245,6 +247,68 @@ func TestParseDecorAndParameters(t *testing.T) {
 		if err.Error() != v.err.Error() {
 			log.Fatalf("parseDecorAndParameters(v.s) err not match case, i:%+v, err: %+v, should: %+v, case: %s\n",
 				i, err, v.err, v.s)
+		}
+	}
+}
+
+func TestParseLinterFromAnnotation(t *testing.T) {
+	args := decorArgsMap{
+		"name":     &decorArg{1, "name", "string", nil, false},
+		"intVal":   &decorArg{2, "intVal", "int", nil, false},
+		"floatVal": &decorArg{3, "floatVal", "float64", nil, false},
+		"boolVal":  &decorArg{4, "boolVal", "bool", nil, false},
+		"rangeVal": &decorArg{4, "rangeVal", "int64", nil, false},
+		"emptyVal": &decorArg{5, "emptyVal", "string", nil, false},
+	}
+	cas := []string{
+		`required: {intVal}`,
+		`required: {name, floatVal}`,
+		`required: {name: {}, floatVal: {}}`,
+		`required: {name: {"a"}, intVal: {gt:1}, floatVal: {lte:0}}`,
+		`required: {name: {"a", "b", lte:10}, intVal: {1,2,3,4,5,10}, floatVal: {lte:0, 999.0}}`,
+		`required: {boolVal: {false}}`,
+		`required: {rangeVal: {100,200, gt:1, lt:999, gte: 0, lte: 1000}}`,
+		`nonzero: {name}`,
+		`nonzero: {name, floatVal}`,
+		`nonzero: {name, intVal}`,
+		`nonzero: {name, intVal, rangeVal}`,
+	}
+	for i, v := range cas {
+		err := parseLinterFromAnnotation(v, args)
+		if err != nil {
+			log.Fatalf("parseLinterFromAnnotation(s) should pass, i:%+v, err: %+v, case: %s\n",
+				i, err, v)
+		}
+	}
+	result := map[string]string{
+		"name":     `&{compare:map[lte:10] enum:["a" "a" "b"]}`,
+		"intVal":   `&{compare:map[gt:1] enum:[1 2 3 4 5 10]}`,
+		"floatVal": `&{compare:map[lte:0] enum:[999.0]}`,
+		"boolVal":  `&{compare:map[] enum:[false]}`,
+		"rangeVal": `&{compare:map[gt:1 gte:0 lt:999 lte:1000] enum:[100 200]}`,
+		"emptyVal": `<nil>`,
+	}
+	for k, v := range args {
+		fmt.Printf("k:%s, v:%+v\n", k, v.required)
+		if fmt.Sprintf("%+v", v.required) != result[k] {
+			log.Fatalf("parseLinterFromAnnotation(s) required result should pass, k:%+v, result[k]:%s, case: %+v\n",
+				k, result[k], v.required)
+		}
+	}
+
+	result = map[string]string{
+		"name":     `true`,
+		"intVal":   `true`,
+		"floatVal": `true`,
+		"boolVal":  `false`,
+		"rangeVal": `true`,
+		"emptyVal": `false`,
+	}
+	for k, v := range args {
+		fmt.Printf("k:%s, v:%+v\n", k, v.nonzero)
+		if fmt.Sprintf("%+v", v.nonzero) != result[k] {
+			log.Fatalf("parseLinterFromAnnotation(s) nonzero result should pass, k:%+v, result[k]:%s, case: %+v\n",
+				k, result[k], v.nonzero)
 		}
 	}
 }

@@ -299,11 +299,11 @@ func parseLinterFromAnnotation(s string, args decorArgsMap) error {
 }
 
 func obtainRequiredLinter(v ast.Expr, args decorArgsMap) error {
-	initRequiredLinter := func(v *requiredLinter) {
-		if v != nil {
+	initRequiredLinter := func(v *decorArg) {
+		if v.required != nil {
 			return
 		}
-		v = &requiredLinter{}
+		v.required = &requiredLinter{}
 	}
 	switch expr := v.(type) {
 	case *ast.Ident: // {a}
@@ -311,7 +311,7 @@ func obtainRequiredLinter(v ast.Expr, args decorArgsMap) error {
 		if !ok {
 			return errors.New(msgLintArgsNotFound + expr.Name) // error
 		}
-		initRequiredLinter(dpt.required)
+		initRequiredLinter(dpt)
 	case *ast.KeyValueExpr: // {a:{}}
 		if _, ok := expr.Key.(*ast.Ident); !ok {
 			return errLintSyntaxError
@@ -332,7 +332,7 @@ func obtainRequiredLinter(v ast.Expr, args decorArgsMap) error {
 					return errors.New(
 						fmt.Sprintf(msgLintTypeNotMatch, dpt.name, dpt.typ, lit.Kind.String()))
 				}
-				initRequiredLinter(dpt.required)
+				initRequiredLinter(dpt)
 				if dpt.required.enum == nil {
 					dpt.required.enum = []string{}
 				}
@@ -342,7 +342,7 @@ func obtainRequiredLinter(v ast.Expr, args decorArgsMap) error {
 					return errors.New(
 						fmt.Sprintf("lint required key '%s' value must be true or false, but got %s", dpt.name, lit.Name))
 				}
-				initRequiredLinter(dpt.required)
+				initRequiredLinter(dpt)
 				if dpt.required.enum == nil {
 					dpt.required.enum = []string{}
 				}
@@ -352,6 +352,10 @@ func obtainRequiredLinter(v ast.Expr, args decorArgsMap) error {
 					return errLintSyntaxError
 				}
 				key := lit.Key.(*ast.Ident).Name
+				if dpt.typeKind() == types.IsBoolean {
+					return errors.New(
+						fmt.Sprintf("lint required key '%s' can't use %s compare", dpt.name, key))
+				}
 				if _, ok := lintRequiredRangeAllowKeyMap[key]; !ok {
 					return errors.New(
 						fmt.Sprintf("lint required key '%s' not allow %s", dpt.name, key))
@@ -364,7 +368,7 @@ func obtainRequiredLinter(v ast.Expr, args decorArgsMap) error {
 					return errors.New(
 						fmt.Sprintf("lint required key '%s' compare %s must be int or float, but got %s", dpt.name, key, lity.Kind.String()))
 				}
-				initRequiredLinter(dpt.required)
+				initRequiredLinter(dpt)
 				dpt.required.initCompare()
 				var err error
 				dpt.required.compare[key], err = strconv.ParseFloat(lity.Value, 64)
