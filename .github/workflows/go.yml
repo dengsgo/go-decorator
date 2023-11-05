@@ -41,6 +41,7 @@ jobs:
         cd ../datetime && go build -toolexec decorator -a && ./datetime
         cd ../emptyfunc && go build -toolexec decorator -a && ./emptyfunc
         cd ../genericfunc && go build -toolexec decorator -a && ./genericfunc
+        cd ../argsfunc && go build -toolexec decorator -a && ./argsfunc
         cd ../..
 
     - name: TestExample
@@ -50,3 +51,4 @@ jobs:
         go test -v ./example/datetime/
         go test -v ./example/emptyfunc/
         go test -v ./example/genericfunc/
+        go test -v ./example/argsfunc/
