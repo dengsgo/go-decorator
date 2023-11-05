@@ -119,7 +119,7 @@ func (d *decorArg) passRequiredLint(value string) error {
 			for c, v := range d.required.compare {
 				if !compare(c, v) {
 					return errors.New(
-						fmt.Sprintf("lint: key '%s' value '%s' can't pass lint %s:%s", d.name, value, c, v))
+						fmt.Sprintf("lint: key '%s' value '%s' can't pass lint %s:%v", d.name, value, c, v))
 				}
 			}
 		}
