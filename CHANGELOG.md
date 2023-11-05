@@ -1,3 +1,10 @@
+## v0.10.0 beta
+
+- Feat: support for decorators with parameters  
+- Feat: the `go:decor-lint` annotation is supported to constrain the behavior of the caller  
+- Feat: two built-in types of parameter constraints are implemented: `required`、`nonzero`  
+- Update: new Scanning Implementation for Decorator Functions
+
 ## v0.5.0 beta
 
 - Feat: decorator support for decorating generic functions
