@@ -489,7 +489,7 @@ func (d *pkgLoader) loadPkg(pkgPath string) (set *pkgSet, err error) {
 		return nil, err
 	}
 	set.fset = token.NewFileSet()
-	set.pkgs, err = parser.ParseDir(set.fset, pi.Dir, nil, 0)
+	set.pkgs, err = parser.ParseDir(set.fset, pi.Dir, nil, parser.ParseComments)
 	d.pkg[pkgPath] = set
 	return
 }
