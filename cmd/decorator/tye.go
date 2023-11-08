@@ -91,37 +91,40 @@ func (d *decorArg) typeKind() types.BasicInfo {
 }
 
 func (d *decorArg) passRequiredLint(value string) error {
-	if d.required != nil {
-		if !d.required.inEnum(value) {
-			return errors.New(
-				fmt.Sprintf("lint: key '%s' value '%s' can't pass lint enum", d.name, value))
+	if d.required == nil {
+		return nil
+	}
+	if !d.required.inEnum(value) {
+		return errors.New(
+			fmt.Sprintf("lint: key '%s' value '%s' can't pass lint enum", d.name, value))
+	}
+	if d.required.compare == nil {
+		return nil
+	}
+
+	val := 0.0
+	if d.typeKind() == types.IsString {
+		val = float64(len(value) - 2)
+	} else {
+		val, _ = strconv.ParseFloat(value, 64)
+	}
+	compare := func(c lintComparableKey, v float64) bool {
+		switch c {
+		case lintCpGt:
+			return val > v
+		case lintCpGte:
+			return val >= v
+		case lintCpLt:
+			return val < v
+		case lintCpLte:
+			return val <= v
 		}
-		if d.required.compare != nil {
-			val := 0.0
-			if d.typeKind() == types.IsString {
-				val = float64(len(value) - 2)
-			} else {
-				val, _ = strconv.ParseFloat(value, 64)
-			}
-			compare := func(c lintComparableKey, v float64) bool {
-				switch c {
-				case lintCpGt:
-					return val > v
-				case lintCpGte:
-					return val >= v
-				case lintCpLt:
-					return val < v
-				case lintCpLte:
-					return val <= v
-				}
-				return true
-			}
-			for c, v := range d.required.compare {
-				if !compare(c, v) {
-					return errors.New(
-						fmt.Sprintf("lint: key '%s' value '%s' can't pass lint %s:%v", d.name, value, c, v))
-				}
-			}
+		return true
+	}
+	for c, v := range d.required.compare {
+		if !compare(c, v) {
+			return errors.New(
+				fmt.Sprintf("lint: key '%s' value '%s' can't pass lint %s:%v", d.name, value, c, v))
 		}
 	}
 	return nil
