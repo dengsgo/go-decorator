@@ -7,26 +7,27 @@
 
 > 公开测试版本，谨慎用于生产环境. 欢迎 ⭐star 关注项目进展
 
-`go-decorator` 是用于 Go 语言编译器的中间件工具，能够通过注释方式实现非侵入式的装饰器使用。
+`go-decorator` 使用一行注释就能把装饰器应用在任意函数上，非侵入式的实现装饰器特性。
 
 
 ## Feature
 
-- 使用 `//go:decor decoratorfunctionName` 注释函数即可使用装饰器 `decoratorfunctionName`，快速完成样板代码注入、非侵入式改变函数行为、控制逻辑流程等；  
-- 定义 `func(*decor.Context)` 类型的函数，即可作为装饰器，应用于任意一级函数（top-level function）;  
-- 支持使用多个（行）`//go:decor`装饰器来装饰函数;  
+- 使用 `//go:decor decoratorFunctionName` 注释声明即可使用装饰器 `decoratorfunctionName`，快速完成比如像“样板代码注入、非侵入式改变函数行为、控制逻辑流程”等需求；  
+- 可以自由定义函数作为装饰器，应用于任意一级函数上（top-level function）;  
+- 支持使用多个（行） `//go:decor` 装饰器装饰函数;
+- 装饰器支持可选参数，给开发带来更多可能；
+- 支持编译时 `lint` 验证，保证 Go 编译代码的健壮性；
 - 提供友好的错误提示，可在编译时发现问题并给出错误原因和错误行号（例如未定义的装饰器或未引用的包等）;   
-- 仅在编译时增强目标函数，不会降低编译后程序的性能，也没有反射操作;  
-- 提供基础使用指南。  
+- 仅在编译时增强目标函数，不会降低编译后程序的性能，亦没有反射操作;   
 
 装饰器的使用场景，可以类比其他语言，比如 Python、TypeScript。（非常适合在缓存、鉴权、日志等场景使用，作为辅助手段解放重复编码的困扰）。
 
-`go-decorator` 是一种编译时装饰器注入技术。使用它不会影响您项目的源文件，并且不会在项目中生成额外的 `.go` 文件或其他冗余文件。这种注入方法与 `go:generate` 生成方式截然不同。
+> `go-decorator` 是一种编译时代码注入技术。使用它不会影响您项目的源文件，并且不会在项目中生成额外的 `.go` 文件和其他冗余文件。这种注入方法与 `go:generate` 生成方式截然不同。
 
 
 ## Guide
 
-查看： [中文文档](GUIDE.zh_cn.md#使用引导)  |  [English Guide](GUIDE.md#guide)  |  More
+查看： [中文文档](GUIDE.zh_cn.md#使用引导)  |  [English Guide](GUIDE.md#guide) 
 
 ## Install
 
@@ -36,18 +37,26 @@ $ go install github.com/dengsgo/go-decorator/cmd/decorator@latest
 ```
 
 运行 `decorator`，显示 `decorator` 版本信息即为安装成功。
+```shell
+$ decorator
+decorator 0.10.0 beta , https://github.com/dengsgo/go-decorator
+```
 
-注意：请经常更新以安装最新版本。获得最佳体验。
+提醒：经常运行上述安装命令来安装最新版本，以获得 BUG 修复、增强体验和更多的新特性。
 
 ## Usage
 
-`decorator` 是 `go` 的编译链工具，依靠 `go` 命令来调用它运行，进行代码的编译。
+`decorator` 依赖原生 `go` 命令来调用它，在 `go` 的子命令中加入 `-toolexec decorator` 参数即可。
+例如：  
 
-在 `go build` 命令中加入 `-toolexec 'decorator'` 参数即可。
+|原生命令| 使用 `decorator` |
+|--------|--------|
+| `go build` | `go build -toolexec decorator` |
+| `go run main.go` | `go run -toolexec decorator main.go` |
+| `go test -v` | `go test -toolexec decorator -v` |
+| `go install` | `go install -toolexec decorator` |
+| `go ... -flags...` | `go ... -toolexec decorator -flags...` |
 
-假如你平时就是使用 `go build`,那么现在只需要加上工具链参数变成 `go build -toolexec 'decorator'`。其他一切和以往一样，无需做任何更改！
-
-go 的其他子命令也是同样的使用方法。
 
 ## Code
 
@@ -90,7 +99,7 @@ func myFunc() {
 }
 
 // 这是一个普通的函数
-// 但是它实现了 func(*decor.Context) 类型，因此它还是一个装饰器方法，
+// 但是它实现了 func(*decor.Context [, ...any]) 类型，因此它还是一个装饰器方法，
 // 可以在其他函数上使用这个装饰器。
 // 在函数中，ctx 是装饰器上下文，可以通过 ctx 获取到目标函数的出入参
 // 和目标方法的执行。
@@ -107,17 +116,55 @@ func logging(ctx *decor.Context) {
 
 ```
 
+带有可选参数的装饰器用法：
+
+```go
+package main
+
+import (
+	"github.com/dengsgo/go-decorator/decor"
+)
+
+func main()  {
+	optionalParametersFuncDemo()
+}
+
+// 它也是装饰器，不同于普通装饰器，它允许目标函数额外提供参数 `level` 。
+// decorator 提供了 lint 语法给开发者，在编译代码时强制进行校验。比如:
+// `required` 要求目标函数必须对该字段传值；
+// `nonzero` 要求目标函数传值不能时空值。
+// 如果编译检验时不通过，会编译失败。
+// 使用方式如下:(更多用法查看 Guide.md)：
+//
+//go:decor-lint required: {level}
+//go:decor-lint nonzero: {level}
+func levelLogging(ctx *decor.Context, level string)  {
+	if level == "debug" {
+		// to do something
+	}
+	ctx.TargetDo()
+}
+
+// 这个方法使用了装饰器 levelLogging，并且额外传递了 `level` 参数值 "debug" 给装饰器。
+// 
+//go:decor levelLogging#{level: "debug"}
+func optionalParametersFuncDemo()  {
+	// function code
+}
+```
+
 ## Example
 
 [example](example)这个目录示范了如何正确编写代码来使用 go-decorator 工具。
 
-| Project                           | Notes                                                     |
-|-----------------------------------|-----------------------------------------------------------|
-| [**single**](example/single)      | 这个一个单文件示例，装饰器定义和被装饰的函数都位于一个包内。这种情况无需考虑导入依赖包的问题，按示例代码使用即可。 | 
-| [**packages**](example/packages)  | 该项目示例为装饰器定义和被装饰的函数不在同一个包内，需要使用匿名包导入。                      |
-| [**datetime**](example/datetime)  | Guide 里演示示例所用到的完整代码                                       |
-| [**emptyfunc**](example/emptyfunc) | 演示装饰器中调用和不调用`TargetDo()` 的区别                              |
-| [**genericfunc**](example/genericfunc) | 演示泛型函函数如何使用装饰器 （和普通函数一致）                              |
+| Project | Notes  |
+|--------|--------|
+| [**single**](example/single) | 这个一个单文件示例，装饰器定义和被装饰的函数都位于一个包内。这种情况无需考虑导入依赖包的问题，按示例代码使用即可。 | 
+| [**packages**](example/packages) | 该项目示例为装饰器定义和被装饰的函数不在同一个包内，需要使用匿名包导入。 |
+| [**datetime**](example/datetime) | Guide 里演示示例所用到的完整代码 |
+| [**emptyfunc**](example/emptyfunc) | 演示装饰器中调用和不调用`TargetDo()` 的区别 |
+| [**genericfunc**](example/genericfunc) | 演示泛型函函数如何使用装饰器 （和普通函数一致） |
+| [**argsfunc**](example/argsfunc) | 演示带有可选参数的装饰器的用法 |
 
 
 更多内容查看 [Guide](#guide) .

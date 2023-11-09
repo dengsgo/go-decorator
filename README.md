@@ -12,19 +12,22 @@
 
 ## Feature
 
-- Use `//go:decor decoratorfunctionName` to annotate a function with the decorator `decoratorfunctionName` for quick sample code injection, non-intrusive changes to function behavior, and control of logic flow;  
-- Define a function of type `func(*decor.Context)`, which can be used as a decorator for any top-level function.  
-- support the use of multiple (line) `//go:decor` decorators to decorate functions.  
+- Use `//go:decor decoratorfunctionName` to annotate a function with the decorator `decoratorfunctionName` for quick sample code injection, non-intrusive changes to function behavior, and control of logic flow;
+- You can freely define functions as decorators and apply them to any top-level function.  
+- Supports the use of multiple (line) '//go: decor' decorator decorate the functions;  
+- The decorator supports optional parameters, which brings more possibilities for development.
+- Support compile-time `lint` verification to ensure the robustness of Go-compiled code.  
 - Provide helpful error hints to detect problems at compile time and give the cause and line number of the error (e.g. undefined decorator or unreferenced package, etc.).  
-- The target function is only executed at compile time and does not affect the performance of the compiled program, and without reflection operations.  
-- It provides a basic usage guide.  
+- The target function is only executed at compile time and does not affect the performance of the compiled program, and without reflection operations.
 
 Decorator usage can be similar to other languages such as Python, TypeScript. (Ideal for caching, forensics, logging, and other scenarios, as a aid to free up duplicate coding).
 
-`go-decorator` is a compile-time decorator injection technique. Using it does not affect your project's source files and does not generate additional `.go` files or other redundant files in your project. This injection method is very different from the `go:generate` generation method.
+> `go-decorator` is a compile-time decorator injection technique. Using it does not affect your project's source files and does not generate additional `.go` files or other redundant files in your project. This injection method is very different from the `go:generate` generation method.
+
+
 ## Guide
 
-查看： [中文文档](GUIDE.zh_cn.md#使用引导)  |  [English Guide](GUIDE.md#guide)  |  More
+查看： [中文文档](GUIDE.zh_cn.md#使用引导)  |  [English Guide](GUIDE.md#guide)  
 
 ## Install
 
@@ -35,17 +38,26 @@ $ go install github.com/dengsgo/go-decorator/cmd/decorator@latest
 
 Run `decorator` and it will show you the `decorator` version.
 
-Note: Please update frequently to install the latest version. Get the best experience.
+```shell
+$ decorator
+decorator 0.10.0 beta , https://github.com/dengsgo/go-decorator
+```
+
+Tip: Run the above installation command frequently to install the latest version for bug fixes, enhanced experience, and more new features.
 
 ## Usage
 
-`decorator` is `go`'s compilation chaining tool, which relies on the `go` command to invoke it and compile the code.
+`decorator` relies on the native `go` command to call it, just add the `-toolexec decorator` parameter to the subcommand of `go`.
+For example:
 
-Simply add the `-toolexec decorator` parameter to the `go build` command.
+|Native Command|Use `decorator`|
+|--------|--------|
+| `go build` | `go build -toolexec decorator` |
+| `go run main.go` | `go run -toolexec decorator main.go` |
+| `go test -v` | `go test -toolexec decorator -v` |
+| `go install` | `go install -toolexec decorator` |
+| `go ... -flags...` | `go ... -toolexec decorator -flags...` |
 
-If you usually use `go build`, now all you need to do is add the toolchain parameter to become `go build -toolexec decorator`. Everything remains the same, no changes need to be made!
-
-The other subcommands of go are also utilized in the same manner.
 
 ## Code
 
@@ -105,6 +117,43 @@ func logging(ctx *decor.Context) {
 
 ```
 
+Decorator usage with optional parameters:
+
+```go
+package main
+
+import (
+	"github.com/dengsgo/go-decorator/decor"
+)
+
+func main()  {
+	optionalParametersFuncDemo()
+}
+
+// It is also a decorator, unlike a normal decorator, which allows the objective function to provide an additional parameter 'level'.
+// Decorator provides lint syntax for developers to force verification when compiling code. For example:
+// `Required` requires that the target function must pass a value to this field;
+// `nonzero` requires that the objective function cannot pass values in time and space.
+// If the compilation test fails, the compilation will fail.
+// The usage is as follows: (See Guide.md for more usage):
+//
+//go:decor-lint required: {level}
+//go:decor-lint nonzero: {level}
+func levelLogging(ctx *decor.Context, level string)  {
+	if level == "debug" {
+		// to do something
+	}
+	ctx.TargetDo()
+}
+
+// This method uses the decorator levelLogging and passes the "level" parameter value "debug" to the decorator.
+// 
+//go:decor levelLogging#{level: "debug"}
+func optionalParametersFuncDemo()  {
+	// function code
+}
+```
+
 ## Example
 
 [example](example) This directory demonstrates how to write code correctly to use the `decorator` tool.
@@ -116,6 +165,7 @@ func logging(ctx *decor.Context) {
 | [**datetime**](example/datetime) | The complete code used in the demonstration example in the Guide |
 | [**emptyfunc**](example/emptyfunc) | The difference between calling and not calling `TargetDo()` in the demo decorator |
 | [**genericfunc**](example/genericfunc) | Demonstrate how a generic function can use decorators (consistent with a normal function) |
+| [**argsfunc**](example/argsfunc) | Demonstrates the use of a decorator with optional parameters |
 
 
 See more [Guide](#guide) .
