@@ -263,14 +263,14 @@ func parseLinterFromDocGroup(doc *ast.CommentGroup, args decorArgsMap) error {
 		if !strings.HasPrefix(comment.Text, decorLintScanFlag) {
 			break
 		}
-		if err := parseLinterFromAnnotation(comment.Text[len(decorLintScanFlag):], args); err != nil {
+		if err := resolveLinterFromAnnotation(comment.Text[len(decorLintScanFlag):], args); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func parseLinterFromAnnotation(s string, args decorArgsMap) error {
+func resolveLinterFromAnnotation(s string, args decorArgsMap) error {
 	switch {
 	case strings.HasPrefix(s, "required: "):
 		exprList, err := parseDecorParameterStringToExprList(strings.TrimLeft(s, "required: "))

@@ -251,7 +251,7 @@ func TestParseDecorAndParameters(t *testing.T) {
 	}
 }
 
-func TestParseLinterFromAnnotation(t *testing.T) {
+func TestResolveLinterFromAnnotation(t *testing.T) {
 	args := decorArgsMap{
 		"name":     &decorArg{1, "name", "string", nil, false},
 		"intVal":   &decorArg{2, "intVal", "int", nil, false},
@@ -274,9 +274,9 @@ func TestParseLinterFromAnnotation(t *testing.T) {
 		`nonzero: {name, intVal, rangeVal}`,
 	}
 	for i, v := range cas {
-		err := parseLinterFromAnnotation(v, args)
+		err := resolveLinterFromAnnotation(v, args)
 		if err != nil {
-			log.Fatalf("parseLinterFromAnnotation(s) should pass, i:%+v, err: %+v, case: %s\n",
+			log.Fatalf("resolveLinterFromAnnotation(s) should pass, i:%+v, err: %+v, case: %s\n",
 				i, err, v)
 		}
 	}
@@ -291,7 +291,7 @@ func TestParseLinterFromAnnotation(t *testing.T) {
 	for k, v := range args {
 		fmt.Printf("k:%s, v:%+v\n", k, v.required)
 		if fmt.Sprintf("%+v", v.required) != result[k] {
-			log.Fatalf("parseLinterFromAnnotation(s) required result should pass, k:%+v, result[k]:%s, case: %+v\n",
+			log.Fatalf("resolveLinterFromAnnotation(s) required result should pass, k:%+v, result[k]:%s, case: %+v\n",
 				k, result[k], v.required)
 		}
 	}
@@ -307,7 +307,7 @@ func TestParseLinterFromAnnotation(t *testing.T) {
 	for k, v := range args {
 		fmt.Printf("k:%s, v:%+v\n", k, v.nonzero)
 		if fmt.Sprintf("%+v", v.nonzero) != result[k] {
-			log.Fatalf("parseLinterFromAnnotation(s) nonzero result should pass, k:%+v, result[k]:%s, case: %+v\n",
+			log.Fatalf("resolveLinterFromAnnotation(s) nonzero result should pass, k:%+v, result[k]:%s, case: %+v\n",
 				k, result[k], v.nonzero)
 		}
 	}
