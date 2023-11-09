@@ -23,7 +23,7 @@
   - [More](#more)
 
 
-`go-decorator` is a compilation chaining tool that implements the decorator feature of the Go language.
+`go-decorator` is a compilation chain tool that implements the Go language decorator feature, allowing annotations to be used to apply decorators to any function.
 
 ## Requirement
 
@@ -38,7 +38,12 @@ $ go install github.com/dengsgo/go-decorator/cmd/decorator@latest
 
 Run `decorator` to display the current version.
 
-Note: Please update frequently to install the latest version. Get the best experience.
+```shell
+$ decorator
+decorator 0.10.0 beta , https://github.com/dengsgo/go-decorator
+```
+
+Tip: Run the above installation command frequently to install the latest version for bug fixes, enhanced experience, and more new features.
 
 ## Usage
 
@@ -46,11 +51,17 @@ Note: Please update frequently to install the latest version. Get the best exper
 
 ### Adding parameters
 
-Add the parameter `-toolexec decorator` to the `go` command.
+`decorator` relies on the native `go` command to call it, just add the `-toolexec decorator` parameter to the subcommand of `go`.
+For example:
 
-For example: 'go build **-toolexec decorator**', 'go run **-toolexec decorator** main.go'.
+|Native Command|Use `decorator`|
+|--------|--------|
+| `go build` | `go build -toolexec decorator` |
+| `go run main.go` | `go run -toolexec decorator main.go` |
+| `go test -v` | `go test -toolexec decorator -v` |
+| `go install` | `go install -toolexec decorator` |
+| `go ... -flags...` | `go ... -toolexec decorator -flags...` |
 
-This applies to most `go` subcommands.
 
 ### Add a dependency
 
@@ -60,16 +71,16 @@ In your project root directory, add the `go-decorator` dependency.
 $ go get -u github.com/dengsgo/go-decorator
 ```
 
-### Destination functions and decorators
+### Understand destination functions and decorators
 
 > Target functions: functions that use a decorator, also known as decorated functions.  
 > For example, if a function A uses a decorator B to decorate itself, A is the target function.
 
-A decorator is a concept that is often used to include decorations on a target function. When code is run to the target function, it doesn't actually execute it, but runs the decorator it uses. The actual target function logic is wrapped into the decorator and allows the decorator to control it.
+Decorators are also functions. When code is run to the target function, it doesn't actually execute it, but runs the decorator it uses. The actual target function logic is wrapped into the decorator and allows the decorator to control it.
 
 ### Customizing decorators
 
-A decorator is an ordinary `go` Top-level Function of type `func(*decor.Context)`. As long as the function satisfies this type, it is a legal decorator and can be used to decorate other functions in the project code.
+A decorator is an ordinary `go` Top-level Function of type `func(*decor.Context [, ...any])`. As long as the function satisfies this type, it is a legal decorator and can be used to decorate other functions in the project code.
 
 For example, here's a logging decorator that prints the arguments of the called function:
 
@@ -165,6 +176,113 @@ func datetime(timestamp int64) string {
 If more than one decorator is used, the decorator execution is prioritized from top to bottom, i.e. the one defined first is executed first. In the above decorator, the order of execution is `logging` -> `appendFile` -> `timeFollowing`.
 
 The use of multiple decorators may result in less readable code and increase the cost of understanding the logic flow, especially if the decorator itself is particularly complex. This is not recommended.
+
+
+### Decorator with additional parameters
+
+As the name suggests, decorators allow for defining additional parameters in addition to the first parameter `*decor.Context`, such as:
+
+```go
+package main
+import "github.com/dengsgo/go-decorator/decor"
+
+func hit(ctx *decor.Context, msg string, count int64, repeat bool, f float64, opt string) {
+	// code...
+} 
+```
+
+The `hit` function is a legitimate decorator with optional parameters, which allows the target function to pass in the corresponding value when calling, and the hit function can obtain the parameter value of the target function.
+
+The following parameter types are allowed:
+
+| types  | keyword|     
+|-----|-----|
+| Integer  | int,int8,int16.int32,int64,unit,unit8,unit16,unit32,unit64 |
+| Float | float32,float64 |
+| String | string |
+| Boolean | bool |
+
+If it exceeds the above types, it cannot be compiled.
+
+
+### Using Decorators with Parameters
+
+Use the `//go:decor function#{}` method to pass parameters to the decorator. Compared to non parametric calls, there is an additional section called `#{}`, which we refer to as the parameter field.
+
+The parameter field starts with a `#` identifier, followed by key value pairs such as `{key: value, key1: value1}`. The key is the formal parameter name of the decorator, and the value is the String, Boolean value, or Numerical value to be passed.
+
+For example, we need to call the `hit` decorator defined above:
+
+```go
+package main
+import "github.com/dengsgo/go-decorator/decor"
+
+func hit(ctx *decor.Context, msg string, count int64, repeat bool, f float64, opt string) {
+	// code...
+}
+
+//go:decor hit#{msg: "message from decor", repeat: true, count: 10, f:1}
+func useArgsDecor()  {}
+```
+
+The `decorator` will automatically pass the `{msg: "message from decor", repeat: true, count: 10, f: 1}` parameters to the `decorator` according to their formal parameter names during compilation.
+
+The order of parameters in the parameter field is independent of the formal parameter order of the decorator, and you can organize the code according to your own habits.
+
+When there is no corresponding formal parameter value in the parameter field, such as `opt`  above, the corresponding type's zero value will be passed by default.
+
+### Decorator constraints and validation
+
+`decorator` allows the use of annotations `//go:decor-lint linter: {}` on decorators to add decorator constraints. This constraint can be used at compile time to verify whether the call to the target function is legal.
+
+Currently, there are two built-in decorator constraints:
+
+#### required
+
+Validation parameters must be passed. For example:
+
+```go
+//go:decor-lint required: {msg, count, repeat, f}
+func hit(ctx *decor.Context, msg string, count int64, repeat bool, f float64, opt string) {
+	// code...
+}
+```
+
+The four parameters, `msg`, `count`, `repeat`, and `f`, require that the target function must be passed during invocation, otherwise compilation cannot pass.
+
+Not only that, `required` also supports validation of enumerations and scopes. For example:
+
+**Enumeration Value Restrictions**:
+
+`//Go: decor int required: {msg: {"hello", "world", "yeah"}, count, repeat, f}`: The argument to 'msg' must be one of the three values`"hello", "world", "yeah"`.
+
+**Scope limitations**:
+
+`//Go: decor int required: {msg: {gte: 8, lte: 24}, count, repeat, f}`: The string length range for 'msg' is required to be between '[8,24]'.
+
+There are currently four supported scope directives:
+
+| 范围指令  | 说明 |
+|-------|----|
+| `gte` | `>=` |
+| `gt`  | `>`  |
+| `lte` | `<=` |
+| `lt`  | `<`  |
+
+#### nonzero
+
+The validation parameter value cannot be zero. For example:
+
+```go
+//go:decor-lint nonzero: {msg, count, f}
+func hit(ctx *decor.Context, msg string, count int64, repeat bool, f float64, opt string) {
+	// code...
+}
+```
+
+The three parameters `msg`, `count`, and `f` require the target function to pass values that cannot be zero when called.
+
+> You can add '//go:decor-lint' rule constraints multiple times on the decorator, which means that the target function must all meet these constraints when calling the decorator in order to compile properly.
 
 ## Context
 
