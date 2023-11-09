@@ -77,8 +77,8 @@ func test(v ...string) string {
 	return ""
 }
 
-//go:decor-lint required:{a, b, c}
-//go:decor-lint required: {a={"hello", "world"}, b, c}
+//go:decor-lint required:{s, a, b}
+//go:decor-lint required: {s={"hello", "world"}, a, b}
 //go:decor-lint nonzero: {a}
 func logging(ctx *decor.Context, s string, a int, b bool) {
 	ctx.TargetDo()
