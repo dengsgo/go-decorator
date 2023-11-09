@@ -9,9 +9,15 @@ import (
 	"testing"
 )
 
-const out = `useArgsDecor()=hit received: msg=message from decor, count=10, repeat=true, f=1.000000, opt=
+const fOut = "hit received: msg=message from decor, count=10, repeat=true, f=1.000000, opt=\n"
+const out = `useArgsDecor()=` + fOut + "\n"
 
-`
+func TestFUseArgsDecor(t *testing.T) {
+	s := useArgsDecor()
+	if s != fOut {
+		t.Fatalf("useArgsDecor() fail, s: %s", s)
+	}
+}
 
 func TestUseArgsDecor(t *testing.T) {
 	args := []string{
