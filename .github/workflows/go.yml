@@ -28,8 +28,8 @@ jobs:
 
     - name: TestFunctions
       run: |
-        go test -v ./cmd/decorator/ 
-        go test -v ./decor/
+        go test -v -cover ./cmd/decorator/ 
+        go test -v -cover ./decor/
 
     - name: Build
       run: |
