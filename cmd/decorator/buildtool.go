@@ -13,6 +13,7 @@ import (
 const (
 	biSymbol             = "\n\t"
 	decoratorScanFlag    = "//go:decor "
+	decorLintScanFlag    = "//go:decor-lint "
 	decoratorPackagePath = "github.com/dengsgo/go-decorator/decor"
 )
 
@@ -72,12 +73,14 @@ func main() {
 	}
 }
 
-//go:decor logging
 func test(v ...string) string {
 	return ""
 }
 
-func logging(ctx *decor.Context) {
+// go:decor-lint required:{s, a, b}
+// go:decor-lint required: {s={"hello", "world"}, a, b}
+// go:decor-lint nonzero: {a}
+func logging(ctx *decor.Context, s string, a int, b bool) {
 	ctx.TargetDo()
 }
 

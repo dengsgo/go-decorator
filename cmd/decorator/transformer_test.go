@@ -18,11 +18,20 @@ package main
  )
 `
 
-func TestGetGoModPath(t *testing.T) {
-	s := getGoModPath()
-	if s != "github.com/dengsgo/go-decorator" {
-		t.Fatalf("getGoModPath != 'github.com/dengsgo/go-decorator', now = %s\n", s)
+func TestGetPackageInfo(t *testing.T) {
+	{
+		_, err := getPackageInfo("")
+		if err != nil {
+			t.Fatal("getPackageInfo('') error", err)
+		}
 	}
+	{
+		_, err := getPackageInfo("github.com/dengsgo/go-decorator/decor")
+		if err != nil {
+			t.Fatal("getPackageInfo('github.com/dengsgo/go-decorator/decor') error", err)
+		}
+	}
+
 }
 
 func TestImporter(t *testing.T) {

@@ -23,7 +23,7 @@
   - [更多](#更多)
 
 
-`go-decorator` 是实现 Go 语言装饰器特性的编译链工具。
+`go-decorator` 是实现 Go 语言装饰器特性的编译链工具, 允许使用注释就能把装饰器应用在任意函数上。
 
 ## 要求
 
@@ -38,17 +38,30 @@ $ go install github.com/dengsgo/go-decorator/cmd/decorator@latest
 
 运行 `decorator` 显示当前版本。
 
-提示：请经常更新以安装最新版本。获得最佳体验。
+```shell
+$ decorator
+decorator 0.10.0 beta , https://github.com/dengsgo/go-decorator
+```
+
+提示：经常运行上述安装命令来安装最新版本，以获得 BUG 修复、增强体验和更多的新特性。
 
 ## 使用 
 
-`decorator` 是 `go` 的编译链工具，依靠 `go` 命令来调用它运行，进行代码的编译。
+`decorator` 是 `go` 的编译链工具，依靠 `go` 命令来调用它，进行代码的编译。
 
 ### 添加参数
 
-在 `go` 命令中添加参数 `-toolexec decorator` 即可。
+在 `go` 子命令中添加参数 `-toolexec decorator` 即可。
 
-例如 'go build **-toolexec decorator**'、'go run **-toolexec decorator** main.go'.
+例如：
+
+|原生命令| 使用 `decorator` |
+|--------|--------|
+| `go build` | `go build -toolexec decorator` |
+| `go run main.go` | `go run -toolexec decorator main.go` |
+| `go test -v` | `go test -toolexec decorator -v` |
+| `go install` | `go install -toolexec decorator` |
+| `go ... -flags...` | `go ... -toolexec decorator -flags...` |
 
 它适用于大多数 `go` 的子命令。
 
@@ -60,16 +73,16 @@ $ go install github.com/dengsgo/go-decorator/cmd/decorator@latest
 $ go get -u github.com/dengsgo/go-decorator
 ```
 
-### 目标函数和装饰器
+### 了解目标函数和装饰器
 
 > 目标函数：即使用了装饰器的函数，也称为被装饰的函数。  
 > 比如 A 函数使用了装饰器 B 来装饰自己，A 即为目标函数。
 
-装饰器是一种概念，它通常用来对目标函数进行包含装饰。当代码运行到目标函数的时候，并不会真的执行它，而是运行它所使用的装饰器。实际的目标函数逻辑被包装到了装饰器中，并允许装饰器来控制它。
+装饰器也是函数，它通常用来对目标函数进行包含装饰。当代码运行到目标函数的时候，并不会真的执行它，而是运行它所使用的装饰器。实际的目标函数逻辑被包装到了装饰器中，并允许装饰器来控制它。
 
 ### 自定义装饰器
 
-装饰器是普通的 `go` 一级函数(Top-level Function)，它的类型是 `func(*decor.Context)`. 只要函数满足这个类型，它即是合法的装饰器，可以在项目代码里来装饰其他函数。
+装饰器是普通的 `go` 一级函数(Top-level Function)，它的类型是 `func(*decor.Context [, ...any])`. 只要函数满足这个类型，它即是合法的装饰器，可以在项目代码里来装饰其他函数。
 
 例如, 这里定义一个 logging 装饰器，它可以打印被调用函数的参数：
 
@@ -163,6 +176,110 @@ func datetime(timestamp int64) string {
 如果使用了多个装饰器，装饰器执行的优先级为从上往下，也就是说先定义的先被执行。上面的装饰器中，执行顺序为 `logging` -> `appendFile` -> `timeFollowing`.
 
 多个装饰器的使用，可能会导致代码的可读性变差，加大逻辑流程理解成本，尤其是装饰器本身的代码又特别复杂的情况。因此并不推荐这样使用。
+
+### 带有额外参数的装饰器
+
+顾名思义，装饰器允许定义除了第一个参数 `*decor.Context` 外的额外参数, 如：
+
+```go
+package main
+import "github.com/dengsgo/go-decorator/decor"
+
+func hit(ctx *decor.Context, msg string, count int64, repeat bool, f float64, opt string) {
+	// code...
+} 
+```
+
+`hit` 函数即为一个合法带有可选参数的装饰器，它允许目标函数调用时传入相应值， `hit` 函数就能获取到目标函数的参数值。
+
+以下的参数类型是被允许的：
+
+| 类型  | 关键字|     
+|-----|-----|
+| 整数  | int,int8,int16.int32,int64,unit,unit8,unit16,unit32,unit64 |
+| 浮点数 | float32,float64 |
+| 字符串 | string |
+| 布尔值 | bool |
+
+如果超出以上类型，无法通过编译。
+
+### 使用带有参数的装饰器
+
+使用 `//go:decor function#{}` 的方式给装饰器传参。相对于无参调用，多了 `#{}` 这一部分，这部分我们称为参数域。
+
+参数域以 `#` 标识开始，后跟 `{key:value, key1: value1}` 这样的键值对。其中键为装饰器的形参名，值为要传递的字符串、布尔值、或者数值。
+
+例如，我们要调用上面定义的 `hit` 装饰器：
+
+```go
+package main
+import "github.com/dengsgo/go-decorator/decor"
+
+func hit(ctx *decor.Context, msg string, count int64, repeat bool, f float64, opt string) {
+	// code...
+}
+
+//go:decor hit#{msg: "message from decor", repeat: true, count: 10, f:1}
+func useArgsDecor()  {}
+```
+
+`decorator` 在编译时就会把 `{msg: "message from decor", repeat: true, count: 10, f:1}` 参数按形参名自动对应传递到装饰器中。
+
+参数域中的参数顺序和装饰器的形参顺序无关，你可以按自己的习惯组织代码。
+
+当参数域中没有对应的形参值时，比如上面的 `opt` ，`decorator` 会默认传递对应类型的零值。
+
+### 装饰器约束和验证
+
+`decorator` 允许在装饰器上使用注释 `//go:decor-lint linter: {}` 来添加装饰器约束。这个约束可以在编译时用来验证目标函数的调用是否合法。
+
+目前内置了两种装饰器约束：
+
+#### required
+
+验证参数是必须要传的。例如：
+
+```go
+//go:decor-lint required: {msg, count, repeat, f}
+func hit(ctx *decor.Context, msg string, count int64, repeat bool, f float64, opt string) {
+	// code...
+}
+```
+
+`msg, count, repeat, f` 这四个参数就要求目标函数在调用时是必须要传的，否则编译无法通过。
+
+不仅如此，`required` 还支持验证枚举和范围。比如：
+
+**枚举值限制**：  
+`//go:decor-lint required: {msg: {"hello", "world", "yeah"}, count, repeat, f}`：要求 `msg` 的参数必须是 `"hello", "world", "yeah"` 这三个值中的一个。  
+
+**范围限制**：  
+`//go:decor-lint required: {msg: {gte: 8, lte: 24}, count, repeat, f}`：要求 `msg` 的字符串长度范围在 `[8,24]` 之间。
+目前支持的范围指令有四个：
+
+| 范围指令  | 说明 |
+|-------|----|
+| `gte` | `>=` |
+| `gt`  | `>`  |
+| `lte` | `<=` |
+| `lt`  | `<`  |
+
+
+#### nonzero
+
+验证参数值不能为零值。例如：
+
+```go
+//go:decor-lint nonzero: {msg, count, f}
+func hit(ctx *decor.Context, msg string, count int64, repeat bool, f float64, opt string) {
+	// code...
+}
+```
+
+`msg, count, f` 三个参数要求目标函数在调用时传值不能为零值。
+
+> 可以在装饰器上多次添加 `//go:decor-lint` 规则约束，这意味着目标函数在调用装饰器时，必须全部满足这些约束才能正常编译。
+
 
 ## Context
 
