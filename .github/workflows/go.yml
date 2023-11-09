@@ -51,4 +51,4 @@ jobs:
         go test -v ./example/datetime/
         go test -v ./example/emptyfunc/
         go test -v ./example/genericfunc/
-        go test -v ./example/argsfunc/
+        go test -v -toolexec decorator ./example/argsfunc/
