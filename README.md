@@ -15,10 +15,10 @@
 - Use `//go:decor decoratorfunctionName` to annotate a function with the decorator `decoratorfunctionName` for quick sample code injection, non-intrusive changes to function behavior, and control of logic flow;
 - You can freely define functions as decorators and apply them to any top-level function.  
 - Supports the use of multiple (line) '//go: decor' decorator decorate the functions;  
-- The decorator supports optional parameters, which brings more possibilities for development.
-- Support compile-time `lint` verification to ensure the robustness of Go-compiled code.  
+- The decorator supports optional parameters, which brings more possibilities to development.  
+- Support compile-time lint verification to ensure the robustness of Go compiled code.   
 - Provide helpful error hints to detect problems at compile time and give the cause and line number of the error (e.g. undefined decorator or unreferenced package, etc.).  
-- The target function is only executed at compile time and does not affect the performance of the compiled program, and without reflection operations.
+- Enhancing the target function only at compile time does not degrade the performance of the compiled program, nor does it have reflection operations.
 
 Decorator usage can be similar to other languages such as Python, TypeScript. (Ideal for caching, forensics, logging, and other scenarios, as a aid to free up duplicate coding).
 
