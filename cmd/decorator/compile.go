@@ -103,11 +103,11 @@ func compile(args []string) error {
 			for _, da := range collDecors {
 				logs.Debug("handler:", da.doc.Text)
 				// 检查 decorName 是不是装饰器
-				if fd.Recv != nil {
-					logs.Error("decorators cannot decorate struct method", biSymbol,
-						friendlyIDEPosition(fset, fd.Recv.Pos()))
-					continue
-				}
+				//if fd.Recv != nil {
+				//	logs.Error("decorators cannot decorate struct method", biSymbol,
+				//		friendlyIDEPosition(fset, fd.Recv.Pos()))
+				//	continue
+				//}
 				decorName, decorParams := da.name, da.parameters
 				logs.Debug(decorName, decorParams)
 				// check self is not decorator function

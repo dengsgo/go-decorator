@@ -19,7 +19,7 @@ const randSeeds = "abcdefghijklmnopqrstuvwxyz"
 var emptyFset = token.NewFileSet()
 
 const replaceTpl = `    ${.DecorVarName} := &decor.Context{
-        Kind:      decor.KFunc,
+        Kind:      decor.${.TKind},
         TargetIn:  []any{${stringer .InArgNames}},
         TargetOut: []any{${stringer .OutArgNames}},
     }
@@ -32,6 +32,7 @@ const replaceTpl = `    ${.DecorVarName} := &decor.Context{
 type ReplaceArgs struct {
 	HaveDecorParam,
 	HaveReturn bool
+	TKind, // target kind
 	DecorVarName, // decor var
 	DecorCallName, // decor function name . logging
 	FuncMain string // (a, b, c) {raw func}
@@ -49,6 +50,7 @@ func newReplaceArgs(gi *genIdentId, decorName string) *ReplaceArgs {
 	return &ReplaceArgs{
 		false,
 		false,
+		"KFunc", // decor.TKind,
 		gi.nextStr(),
 		decorName,
 		"",
@@ -86,6 +88,10 @@ func builderReplaceArgs(f *ast.FuncDecl, decorName string, decorParams []string,
 	if decorParams != nil && len(decorParams) > 0 {
 		ra.HaveDecorParam = true
 		ra.DecorCallParams = decorParams
+	}
+	// target TKind
+	if f.Recv != nil && f.Recv.List != nil && len(f.Recv.List) > 0 {
+		ra.TKind = "KMethod"
 	}
 	//funcMain
 	var tp *ast.FieldList

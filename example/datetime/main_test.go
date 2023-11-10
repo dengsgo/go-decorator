@@ -12,6 +12,8 @@ import (
 const out = `logging print target in [1692450000]
 logging print target out [2023-08-19 21:00:00 +0800 CST]
 datetime(1692450000)=2023-08-19 21:00:00 +0800 CST
+mike
+cook
 `
 
 func TestExampleDatetime(t *testing.T) {
