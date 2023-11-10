@@ -20,10 +20,11 @@ package decor
 // All of this is automatically completed at compile time!
 
 // TKind is target types above and below the decorator
-type TKind int
+type TKind uint8
 
 const (
-	KFunc TKind = iota // top-level function
+	KFunc   TKind = iota // top-level function
+	KMethod              // struct method
 )
 
 // Context The context of the decorator.
@@ -50,6 +51,12 @@ type Context struct {
 
 	// TargetOut : The result parameters of the decorated function
 	TargetOut []any
+
+	// The function or method name of the target
+	//TargetName string
+
+	// If Kind is 'KMethod', it is the Receiver of the target
+	//Receiver any
 
 	// The Non-parameter Packaging of the Objective Function // inner
 	Func func()
