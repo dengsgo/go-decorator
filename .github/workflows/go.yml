@@ -42,6 +42,7 @@ jobs:
         cd ../emptyfunc && go build -toolexec decorator -a && ./emptyfunc
         cd ../genericfunc && go build -toolexec decorator -a && ./genericfunc
         cd ../argsfunc && go build -toolexec decorator -a && ./argsfunc
+        cd ../usages && go build -toolexec decorator -a && ./usages && go clean && go clean -x
         cd ../..
 
     - name: TestExample
@@ -52,3 +53,4 @@ jobs:
         go test -v ./example/emptyfunc/
         go test -v ./example/genericfunc/
         cd ./example/argsfunc/ && go test -v -toolexec decorator 
+        cd ../argsfunc/ && go test -v -toolexec decorator 
