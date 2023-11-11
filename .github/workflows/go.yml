@@ -53,4 +53,4 @@ jobs:
         go test -v ./example/emptyfunc/
         go test -v ./example/genericfunc/
         cd ./example/argsfunc/ && go test -v -toolexec decorator 
-        cd ../argsfunc/ && go test -v -toolexec decorator 
+        cd ../usages/ && go test -v -toolexec decorator 
