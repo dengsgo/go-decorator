@@ -39,7 +39,7 @@ $ go install github.com/dengsgo/go-decorator/cmd/decorator@latest
 运行 `decorator`，显示 `decorator` 版本信息即为安装成功。
 ```shell
 $ decorator
-decorator 0.10.0 beta , https://github.com/dengsgo/go-decorator
+decorator 0.11.0 beta , https://github.com/dengsgo/go-decorator
 ```
 
 提示：经常运行上述安装命令来安装最新版本，以获得 BUG 修复、增强体验和更多的新特性。

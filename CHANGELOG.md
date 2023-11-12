@@ -1,3 +1,10 @@
+## v0.11.0 beta
+
+- Feat: support methods for using decorators
+- Feat: Reconstructed the demonstration project
+- Feat: `decor.Context` added 'KMethod' type
+- Fix: the issue of `required` lint reporting errors if negative numbers are used
+
 ## v0.10.0 beta
 
 - Feat: support for decorators with parameters  
