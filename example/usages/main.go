@@ -23,6 +23,14 @@ func main() {
 
 	// 泛型函数使用装饰器
 	g.PrintfLn("Sum(1, 2, 3, 4, 5, 6, 7, 8, 9) = %+v", Sum(1, 2, 3, 4, 5, 6, 7, 8, 9))
+
+	// 使用带有参数的装饰器，如何传值
+	g.PrintfLn("useArgsDecor() = %+v", useArgsDecor())
+	// 装饰器如何使用 Lint 在编译时约束验证目标函数的参数
+	g.Printf("useHitUseRequiredLint() = %+v", useHitUseRequiredLint())
+	g.Printf("useHitUseNonzeroLint() = %+v", useHitUseNonzeroLint())
+	g.Printf("useHitBothUseLint() = %+v", useHitBothUseLint())
+	g.Printf("useHitUseMultilineLintDecor() = %+v", useHitUseMultilineLintDecor())
 }
 
 func init() {
