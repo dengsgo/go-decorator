@@ -305,6 +305,26 @@ func obtainRequiredLinter(v ast.Expr, args decorArgsMap) error {
 		}
 		v.required = &requiredLinter{}
 	}
+	realBasicLit := func(v ast.Expr) *ast.BasicLit {
+		switch v := v.(type) {
+		case *ast.BasicLit:
+			return v
+		case *ast.UnaryExpr:
+			lit, ok := v.X.(*ast.BasicLit)
+			if !ok {
+				return nil
+			}
+			if v.Op == token.ADD {
+				return lit
+			}
+			if v.Op == token.SUB {
+				lit.Value = v.Op.String() + lit.Value
+				return lit
+			}
+			return nil
+		}
+		return nil
+	}
 	switch expr := v.(type) {
 	case *ast.Ident: // {a}
 		dpt, ok := args[expr.Name]
@@ -325,18 +345,22 @@ func obtainRequiredLinter(v ast.Expr, args decorArgsMap) error {
 		}
 		for _, lit := range expr.Value.(*ast.CompositeLit).Elts {
 			switch lit := lit.(type) {
-			case *ast.BasicLit: // {a:{"", ""}}
-				if (lit.Kind == token.STRING && dpt.typeKind() != types.IsString) ||
-					(lit.Kind == token.INT && dpt.typeKind() != types.IsInteger) ||
-					(lit.Kind == token.FLOAT && dpt.typeKind() != types.IsFloat) {
+			case *ast.BasicLit, *ast.UnaryExpr: // {a:{"", "", 1, -1}}
+				rlit := realBasicLit(lit)
+				if rlit == nil {
+					return errLintSyntaxError
+				}
+				if (rlit.Kind == token.STRING && dpt.typeKind() != types.IsString) ||
+					(rlit.Kind == token.INT && dpt.typeKind() != types.IsInteger) ||
+					(rlit.Kind == token.FLOAT && dpt.typeKind() != types.IsFloat) {
 					return errors.New(
-						fmt.Sprintf(msgLintTypeNotMatch, dpt.name, dpt.typ, lit.Kind.String()))
+						fmt.Sprintf(msgLintTypeNotMatch, dpt.name, dpt.typ, rlit.Kind.String()))
 				}
 				initRequiredLinter(dpt)
 				if dpt.required.enum == nil {
 					dpt.required.enum = []string{}
 				}
-				dpt.required.enum = append(dpt.required.enum, lit.Value)
+				dpt.required.enum = append(dpt.required.enum, rlit.Value)
 			case *ast.Ident: // {a:{true, false}}
 				if lit.Name != "true" && lit.Name != "false" {
 					return errors.New(
@@ -360,10 +384,10 @@ func obtainRequiredLinter(v ast.Expr, args decorArgsMap) error {
 					return errors.New(
 						fmt.Sprintf("lint required key '%s' not allow %s", dpt.name, key))
 				}
-				if _, ok := lit.Value.(*ast.BasicLit); !ok {
+				lity := realBasicLit(lit.Value)
+				if lity == nil {
 					return errLintSyntaxError
 				}
-				lity := lit.Value.(*ast.BasicLit)
 				if lity.Kind != token.FLOAT && lity.Kind != token.INT {
 					return errors.New(
 						fmt.Sprintf("lint required key '%s' compare %s must be int or float, but got %s", dpt.name, key, lity.Kind.String()))

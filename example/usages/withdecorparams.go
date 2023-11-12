@@ -56,7 +56,7 @@ func hitUseNonzeroLint(ctx *decor.Context, msg string, count int64, repeat bool,
 	hit(ctx, msg, count, repeat, f, opt)
 }
 
-//go:decor-lint required: {msg, repeat, count: {gte:5, lte:20}, f: {gt:0}}
+//go:decor-lint required: {msg, repeat, count: {gte:5, lte:20}, f: {gt:-10}}
 //go:decor-lint nonzero: {msg, count, f}
 func hitBothUseLint(ctx *decor.Context, msg string, count int64, repeat bool, f float64, opt string) {
 	hit(ctx, msg, count, repeat, f, opt)

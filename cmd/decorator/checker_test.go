@@ -264,8 +264,8 @@ func TestResolveLinterFromAnnotation(t *testing.T) {
 		`required: {intVal}`,
 		`required: {name, floatVal}`,
 		`required: {name: {}, floatVal: {}}`,
-		`required: {name: {"a"}, intVal: {gt:1}, floatVal: {lte:0}}`,
-		`required: {name: {"a", "b", lte:10}, intVal: {1,2,3,4,5,10}, floatVal: {lte:0, 999.0}}`,
+		`required: {name: {"a"}, intVal: {gt:1}, floatVal: {lt:-10}}`,
+		`required: {name: {"a", "b", lte:10}, intVal: {1,2,3,4,5,10,-5}, floatVal: {lte:0, 999.0}}`,
 		`required: {boolVal: {false}}`,
 		`required: {rangeVal: {100,200, gt:1, lt:999, gte: 0, lte: 1000}}`,
 		`nonzero: {name}`,
@@ -282,8 +282,8 @@ func TestResolveLinterFromAnnotation(t *testing.T) {
 	}
 	result := map[string]string{
 		"name":     `&{compare:map[lte:10] enum:["a" "a" "b"]}`,
-		"intVal":   `&{compare:map[gt:1] enum:[1 2 3 4 5 10]}`,
-		"floatVal": `&{compare:map[lte:0] enum:[999.0]}`,
+		"intVal":   `&{compare:map[gt:1] enum:[1 2 3 4 5 10 -5]}`,
+		"floatVal": `&{compare:map[lt:-10 lte:0] enum:[999.0]}`,
 		"boolVal":  `&{compare:map[] enum:[false]}`,
 		"rangeVal": `&{compare:map[gt:1 gte:0 lt:999 lte:1000] enum:[100 200]}`,
 		"emptyVal": `<nil>`,
@@ -314,7 +314,7 @@ func TestResolveLinterFromAnnotation(t *testing.T) {
 }
 
 func TestA(t *testing.T) {
-	s := `map[any]any{a, b:{"str", 1, 1.0, true, gte: 1}, c}`
+	s := `map[any]any{a, b:{"str", 1, 1.0, true, gte: -1}, c}`
 	a, err := parser.ParseExpr(s)
 	log.Println(err)
 	ast.Print(token.NewFileSet(), a)
