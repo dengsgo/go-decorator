@@ -12,8 +12,9 @@ func main() {
 
 	// 这是一个使用其他包装饰器的函数
 	useExternalaDecor()
+	g.PrintfLn("plus(2, 3) = %+v", plus(2, 3))
 
-	// Guide 演示使用装饰器的代码
+	// 文档 Guide.md 中演示使用装饰器的代码
 	{
 		t := 1692450000
 		s := datetime(t)

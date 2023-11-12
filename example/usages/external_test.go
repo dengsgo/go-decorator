@@ -17,3 +17,21 @@ Return String By [externala.deepexternal.FixedStringWhenReturnString]`
 	}
 	g.ResetTestBuffers()
 }
+
+func TestPlus(t *testing.T) {
+	cas := []struct {
+		a,
+		b,
+		r int
+	}{
+		{2, 3, 10},
+	}
+	for i, v := range cas {
+		num := plus(v.a, v.b)
+		if num != v.r {
+			t.Fatalf("TestPlus fail case %+v: plus(%+v, %+v) = %+v, but got %v",
+				i, v.a, v.b, num, v.r)
+		}
+	}
+	g.ResetTestBuffers()
+}
