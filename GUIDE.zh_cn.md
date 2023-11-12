@@ -148,7 +148,7 @@ $ ./datetime
 ```
 我们代码中只调用了 `datetime` 函数，但是可以看到使用的 logging 装饰器也被执行了！
 
-完整代码可以查看 [example/datetime](example/datetime). 
+完整代码可以查看 [example/usages](example/usages). 
 
 ### 使用多个装饰器
 
@@ -320,7 +320,7 @@ func hit(ctx *decor.Context, msg string, count int64, repeat bool, f float64, op
 
 ## 包引用
 
-上面的 `datetime` [example/datetime](example/datetime) 例子中，我们的装饰器和目标函数都是在一个包中的，我们无需考虑包的问题。
+上面的 `datetime` [example/usages](example/usages) 例子中，我们的装饰器和目标函数都是在一个包中的，我们无需考虑包的问题。
 
 当我们有很多包时，需要考虑包引用。
 
@@ -352,7 +352,7 @@ func test() {
 
 当然，如果包已经被文件里其他代码用到了，已经导入，那么就不需要再匿名导入了。
 
-完整的例子可以查看 [example/packages](example/packages) .
+完整的例子可以查看 [example/usages](example/usages) .
 
 ## 条件和限制
 

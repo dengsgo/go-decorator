@@ -148,7 +148,7 @@ The following output will be seen:
 
 Only the `datetime` function is called in our code, but you can see that the logging decorator used is also executed!
 
-The full code can be seen in the [example/datetime](example/datetime).
+The full code can be seen in the [example/usages](example/usages).
 
 ### Using multiple decorators
 
@@ -325,7 +325,7 @@ Usually, it shows the number of times `TargetDo()` was called in the decorator f
 
 ## Package references
 
-In the `datetime` [example/datetime](example/datetime) example above, our decorator and target function are in a package, and we don't need to think about packages.
+In the `datetime` [example/usages](example/usages) example above, our decorator and target function are in a package, and we don't need to think about packages.
 
 Package references need to be considered when we have many packages.
 
@@ -357,7 +357,7 @@ func test() {
 
 Of course, if the package is already used by other code in the file and has already been imported, then there is no need to import it anonymously.
 
-For a complete example check out the [example/packages](example/packages) .
+For a complete example check out the [example/usages](example/usages) .
 
 ## Conditions and restrictions
 

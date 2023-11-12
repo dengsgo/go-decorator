@@ -167,8 +167,8 @@ func main() {
 	useScopeInnerDecor("hello, world", 100)
 
 	section("external.go")
-	// Example: Functions using other wrapper decorators
-useExternalaDecor()
+	// Example: Functions using other wrapper decorators 
+	useExternalaDecor()
 	g.PrintfLn("plus(2, 3) = %+v", plus(2, 3))
 
 	section("datetime.go")
@@ -184,8 +184,8 @@ useExternalaDecor()
 	g.PrintfLn("Sum(1, 2, 3, 4, 5, 6, 7, 8, 9) = %+v", Sum(1, 2, 3, 4, 5, 6, 7, 8, 9))
 
 	section("withdecorparams.go")
-	// Example: How to pass values when using a decorator with parameters
-g.PrintfLn("useArgsDecor() = %+v", useArgsDecor())
+	// Example: How to pass values when using a decorator with parameters 
+	g.PrintfLn("useArgsDecor() = %+v", useArgsDecor())
 	// Example: How to use Lint to constrain and validate the parameters of the objective function during compilation in a decorator
 	g.Printf("useHitUseRequiredLint() = %+v", useHitUseRequiredLint())
 	g.Printf("useHitUseNonzeroLint() = %+v", useHitUseNonzeroLint())
