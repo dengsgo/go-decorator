@@ -20,6 +20,9 @@ func main() {
 		s := datetime(t)
 		g.Printf("datetime(%d)=%s\n", t, s)
 	}
+
+	// 泛型函数使用装饰器
+	g.PrintfLn("Sum(1, 2, 3, 4, 5, 6, 7, 8, 9) = %+v", Sum(1, 2, 3, 4, 5, 6, 7, 8, 9))
 }
 
 func init() {

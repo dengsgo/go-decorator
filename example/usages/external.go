@@ -5,6 +5,7 @@ package main
 // 因此需要我们使用匿名导入包的方式来导入对应的包。像这样 `import _ "path/to/your/package"`.
 // 如下面用到的 externala.OnlyPrintSelf 装饰器，需要这样导入： _ "github.com/dengsgo/go-decorator/example/usages/externala"
 // 另外，因为当前文件使用了 //go:decor 注释语法，还需要导入： _ "github.com/dengsgo/go-decorator/decor"
+// 如果缺少包导入，编译无法通过，并报告对应的错误。
 //
 // 如果包已经被用到，正常导入了，就无需再次匿名导入。
 // 如当前文件已经导入 "github.com/dengsgo/go-decorator/example/usages/externalb"，使用这个包的装饰器直接用就行了。
