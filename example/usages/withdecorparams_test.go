@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/dengsgo/go-decorator/example/usages/g"
 	"strings"
 	"testing"
 )
@@ -11,6 +12,7 @@ func TestUseArgsDecor(t *testing.T) {
 	if strings.TrimSpace(r) != s {
 		t.Fatalf("TestUseArgsDecor fail")
 	}
+	g.ResetTestBuffers()
 }
 
 func TestUseHitUseRequiredLint(t *testing.T) {
@@ -19,6 +21,7 @@ func TestUseHitUseRequiredLint(t *testing.T) {
 	if strings.TrimSpace(r) != s {
 		t.Fatalf("TestUseArgsDecor fail")
 	}
+	g.ResetTestBuffers()
 }
 
 func TestUseHitUseNonzeroLint(t *testing.T) {
@@ -27,6 +30,7 @@ func TestUseHitUseNonzeroLint(t *testing.T) {
 	if strings.TrimSpace(r) != s {
 		t.Fatalf("TestUseArgsDecor fail")
 	}
+	g.ResetTestBuffers()
 }
 
 func TestUseHitBothUseLint(t *testing.T) {
@@ -35,6 +39,7 @@ func TestUseHitBothUseLint(t *testing.T) {
 	if strings.TrimSpace(r) != s {
 		t.Fatalf("TestUseArgsDecor fail")
 	}
+	g.ResetTestBuffers()
 }
 
 func TestUseHitUseMultilineLintDecor(t *testing.T) {
@@ -43,4 +48,5 @@ func TestUseHitUseMultilineLintDecor(t *testing.T) {
 	if strings.TrimSpace(r) != s {
 		t.Fatalf("TestUseArgsDecor fail")
 	}
+	g.ResetTestBuffers()
 }

@@ -41,4 +41,4 @@ jobs:
 
     - name: TestExample
       run: |
-        cd ./example/usages/ && go test -v -cover -toolexec decorator 
+        cd ./example/usages/ && go test -v -toolexec decorator 
