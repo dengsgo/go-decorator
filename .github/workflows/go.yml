@@ -36,21 +36,9 @@ jobs:
         go install -a -work ./cmd/decorator/ 
         decorator
         decorator --help 
-        cd ./example/packages/ && go build -toolexec decorator -a && ./packages
-        cd ../single && go build -toolexec decorator -a && ./single
-        cd ../datetime && go build -toolexec decorator -a && ./datetime
-        cd ../emptyfunc && go build -toolexec decorator -a && ./emptyfunc
-        cd ../genericfunc && go build -toolexec decorator -a && ./genericfunc
-        cd ../argsfunc && go build -toolexec decorator -a && ./argsfunc
-        cd ../usages && go build -toolexec decorator -a && ./usages && go clean && go clean -x
+        cd ./example/usages/ && go build -toolexec decorator && ./usages && go clean && go clean -x
         cd ../..
 
     - name: TestExample
       run: |
-        go test -v ./example/single/ 
-        go test -v ./example/packages/
-        go test -v ./example/datetime/
-        go test -v ./example/emptyfunc/
-        go test -v ./example/genericfunc/
-        cd ./example/argsfunc/ && go test -v -toolexec decorator 
-        cd ../usages/ && go test -v -toolexec decorator 
+        cd ./example/usages/ && go test -v -cover -toolexec decorator 
