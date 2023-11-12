@@ -6,6 +6,8 @@ import (
 	"time"
 )
 
+// 文档 Guide.md 中演示使用装饰器的代码
+
 func logging(ctx *decor.Context) {
 	g.PrintfLn("logging print target in %+v", ctx.TargetIn)
 	ctx.TargetDo()
