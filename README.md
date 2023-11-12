@@ -5,9 +5,9 @@
 
 [中文](README.zh_cn.md) | English 
 
-> Beta versions, use with caution in production environments. Click ⭐Star to follow the project's progress. 
+> Beta version, use with caution in production environments. Click ⭐Star to follow the project's progress. 
 
-`go-decorator`, 让 Go 便捷使用装饰器的工具，装饰器能够切面(AOP)、代理(Proxy)任意的函数和方法，提供观察和控制函数的能力。
+`go-decorator`, 让 Go 便捷使用装饰器的工具，装饰器能够切面 (AOP)、代理 (Proxy) 任意的函数和方法，提供观察和控制函数的能力。
 
 `go-decorator` is a tool that allows Go to easily use decorators. The decorator can slice aspect (AOP) and proxy any function and method, providing the ability to observe and control functions.
 
@@ -158,17 +158,42 @@ func optionalParametersFuncDemo()  {
 
 ## Example
 
-[example](example) This directory demonstrates how to write code correctly to use the `decorator` tool.
+[example/usages](example/usages) This directory demonstrates how to write code correctly to use the `decorator` tool.
 
-| Project | Notes |
-|-----------|-----------|
-| [**single**](example/single) | This is a single file example where both the decorator definition and the decorated function are located within the same package. In this case, there is no need to consider the issue of importing dependent packages, just use the example code. | 
-| [**packages**](example/packages)  | The example of this project is that the decorator definition and the decorated function are not in the same package, and anonymous package import is required. |
-| [**datetime**](example/datetime) | The complete code used in the demonstration example in the Guide |
-| [**emptyfunc**](example/emptyfunc) | The difference between calling and not calling `TargetDo()` in the demo decorator |
-| [**genericfunc**](example/genericfunc) | Demonstrate how a generic function can use decorators (consistent with a normal function) |
-| [**argsfunc**](example/argsfunc) | Demonstrates the use of a decorator with optional parameters |
+```go
+func main() {
+	section("inner.go")
+	// Example: Using a function with a package decorator
+	useScopeInnerDecor("hello, world", 100)
 
+	section("external.go")
+	// Example: Functions using other wrapper decorators
+useExternalaDecor()
+	g.PrintfLn("plus(2, 3) = %+v", plus(2, 3))
+
+	section("datetime.go")
+	// Example: Code demonstrating the use of decorators in document Guide.md
+	{
+		t := 1692450000
+		s := datetime(t)
+		g.Printf("datetime(%d)=%s\n", t, s)
+	}
+
+	section("genericfunc.go")
+	// Example: Generic functions using decorators
+	g.PrintfLn("Sum(1, 2, 3, 4, 5, 6, 7, 8, 9) = %+v", Sum(1, 2, 3, 4, 5, 6, 7, 8, 9))
+
+	section("withdecorparams.go")
+	// Example: How to pass values when using a decorator with parameters
+g.PrintfLn("useArgsDecor() = %+v", useArgsDecor())
+	// Example: How to use Lint to constrain and validate the parameters of the objective function during compilation in a decorator
+	g.Printf("useHitUseRequiredLint() = %+v", useHitUseRequiredLint())
+	g.Printf("useHitUseNonzeroLint() = %+v", useHitUseNonzeroLint())
+	g.Printf("useHitBothUseLint() = %+v", useHitBothUseLint())
+	g.Printf("useHitUseMultilineLintDecor() = %+v", useHitUseMultilineLintDecor())
+}
+
+```
 
 See more [Guide](#guide) .
 

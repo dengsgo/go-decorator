@@ -155,19 +155,44 @@ func optionalParametersFuncDemo()  {
 
 ## Example
 
-[example](example)这个目录示范了如何正确编写代码来使用 go-decorator 工具。
+[example/usages](example/usages) Example 项目示范了如何正确编写代码使用 go-decorator 工具。 
 
-| Project | Notes  |
-|--------|--------|
-| [**single**](example/single) | 这个一个单文件示例，装饰器定义和被装饰的函数都位于一个包内。这种情况无需考虑导入依赖包的问题，按示例代码使用即可。 | 
-| [**packages**](example/packages) | 该项目示例为装饰器定义和被装饰的函数不在同一个包内，需要使用匿名包导入。 |
-| [**datetime**](example/datetime) | Guide 里演示示例所用到的完整代码 |
-| [**emptyfunc**](example/emptyfunc) | 演示装饰器中调用和不调用`TargetDo()` 的区别 |
-| [**genericfunc**](example/genericfunc) | 演示泛型函函数如何使用装饰器 （和普通函数一致） |
-| [**argsfunc**](example/argsfunc) | 演示带有可选参数的装饰器的用法 |
+```go
+func main() {
+	section("inner.go")
+	// 示例：使用包内装饰器的函数
+	useScopeInnerDecor("hello, world", 100)
 
+	section("external.go")
+	// 示例：使用其他包装饰器的函数
+	useExternalaDecor()
+	g.PrintfLn("plus(2, 3) = %+v", plus(2, 3))
 
-更多内容查看 [Guide](#guide) .
+	section("datetime.go")
+	// 示例：文档 Guide.md 中演示使用装饰器的代码
+	{
+		t := 1692450000
+		s := datetime(t)
+		g.Printf("datetime(%d)=%s\n", t, s)
+	}
+
+	section("genericfunc.go")
+	// 示例：泛型函数使用装饰器
+	g.PrintfLn("Sum(1, 2, 3, 4, 5, 6, 7, 8, 9) = %+v", Sum(1, 2, 3, 4, 5, 6, 7, 8, 9))
+
+	section("withdecorparams.go")
+	// 示例：使用带有参数的装饰器，如何传值
+	g.PrintfLn("useArgsDecor() = %+v", useArgsDecor())
+	// 示例：装饰器如何使用 Lint 在编译时约束验证目标函数的参数
+	g.Printf("useHitUseRequiredLint() = %+v", useHitUseRequiredLint())
+	g.Printf("useHitUseNonzeroLint() = %+v", useHitUseNonzeroLint())
+	g.Printf("useHitBothUseLint() = %+v", useHitBothUseLint())
+	g.Printf("useHitUseMultilineLintDecor() = %+v", useHitUseMultilineLintDecor())
+}
+
+```
+
+详细文档查看 [Guide](#guide) .
 
 ## Requirement
 
