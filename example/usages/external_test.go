@@ -25,6 +25,9 @@ func TestPlus(t *testing.T) {
 		r int
 	}{
 		{2, 3, 10},
+		{55, 10, 130},
+		{1, 1, 4},
+		{91, 2, 186},
 	}
 	for i, v := range cas {
 		num := plus(v.a, v.b)
