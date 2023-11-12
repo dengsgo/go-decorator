@@ -7,13 +7,13 @@
 
 > 公开测试版本，谨慎用于生产环境. 欢迎 ⭐star 关注项目进展
 
-`go-decorator`, 使用注释就能把装饰器应用在任意函数上，非侵入式的实现装饰器特性的工具。
+`go-decorator`, 让 Go 便捷使用装饰器的工具，装饰器能够切面(AOP)、代理(Proxy)任意的函数和方法，提供观察和控制函数的能力。
 
 
 ## Feature
 
 - 使用 `//go:decor decoratorFunctionName` 注释声明即可使用装饰器 `decoratorfunctionName`，快速完成比如像“样板代码注入、非侵入式改变函数行为、控制逻辑流程”等需求；  
-- 可以自由定义函数作为装饰器，应用于任意一级函数上（top-level function）;  
+- 可以自由定义函数作为装饰器，应用于任意一级函数和方法上（top-level function or method）;  
 - 支持使用多个（行） `//go:decor` 装饰器装饰函数;
 - 装饰器支持可选参数，给开发带来更多可能；
 - 支持编译时 `lint` 验证，保证 Go 编译代码的健壮性；

@@ -7,13 +7,15 @@
 
 > Beta versions, use with caution in production environments. Click ⭐Star to follow the project's progress. 
 
-`go-decorator` is a middleware tool for Go language compilers that enables non-intrusive decorator usage via annotations.
+`go-decorator`, 让 Go 便捷使用装饰器的工具，装饰器能够切面(AOP)、代理(Proxy)任意的函数和方法，提供观察和控制函数的能力。
+
+`go-decorator` is a tool that allows Go to easily use decorators. The decorator can slice aspect (AOP) and proxy any function and method, providing the ability to observe and control functions.
 
 
 ## Feature
 
 - Use `//go:decor decoratorfunctionName` to annotate a function with the decorator `decoratorfunctionName` for quick sample code injection, non-intrusive changes to function behavior, and control of logic flow;
-- You can freely define functions as decorators and apply them to any top-level function.  
+- You can freely define functions as decorators and apply them to any top-level function or method.  
 - Supports the use of multiple (line) '//go: decor' decorator decorate the functions;  
 - The decorator supports optional parameters, which brings more possibilities to development.  
 - Support compile-time lint verification to ensure the robustness of Go compiled code.   

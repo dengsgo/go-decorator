@@ -23,7 +23,7 @@
   - [More](#more)
 
 
-`go-decorator` is a compilation chain tool that implements the Go language decorator feature, allowing annotations to be used to apply decorators to any function.
+`go-decorator` is a tool that allows Go to easily use decorators. The decorator can slice aspect (AOP) and proxy any function and method, providing the ability to observe and control functions.
 
 ## Requirement
 
