@@ -183,6 +183,17 @@ func main() {
 	// Example: Generic functions using decorators
 	g.PrintfLn("Sum(1, 2, 3, 4, 5, 6, 7, 8, 9) = %+v", Sum(1, 2, 3, 4, 5, 6, 7, 8, 9))
 
+    section("method.go")
+    // Example: methods using decorators
+    {
+        m := &methodTestPointerStruct{}
+        m.doSomething("main called")
+    }
+    {
+        m := methodTestRawStruct{}
+        m.doSomething("main called")
+    }
+
 	section("withdecorparams.go")
 	// Example: How to pass values when using a decorator with parameters 
 	g.PrintfLn("useArgsDecor() = %+v", useArgsDecor())
