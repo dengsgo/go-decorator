@@ -34,7 +34,7 @@ func TestUseHitUseNonzeroLint(t *testing.T) {
 }
 
 func TestUseHitBothUseLint(t *testing.T) {
-	s := `hit received: msg=message from decor, useHitBothUseLint, count=10, repeat=true, f=1.000000, opt=`
+	s := `hit received: msg=message from decor, useHitBothUseLint, count=10, repeat=true, f=-1.000000, opt=`
 	r := useHitBothUseLint()
 	if strings.TrimSpace(r) != s {
 		t.Fatalf("TestUseArgsDecor fail")

@@ -28,6 +28,17 @@ func main() {
 	// 泛型函数使用装饰器
 	g.PrintfLn("Sum(1, 2, 3, 4, 5, 6, 7, 8, 9) = %+v", Sum(1, 2, 3, 4, 5, 6, 7, 8, 9))
 
+	section("method.go")
+	// 结构体方法使用装饰器
+	{
+		m := &methodTestPointerStruct{}
+		m.doSomething("main called")
+	}
+	{
+		m := methodTestRawStruct{}
+		m.doSomething("main called")
+	}
+
 	section("withdecorparams.go")
 	// 使用带有参数的装饰器，如何传值
 	g.PrintfLn("useArgsDecor() = %+v", useArgsDecor())
