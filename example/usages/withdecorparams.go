@@ -80,7 +80,7 @@ func useHitUseNonzeroLint() (s string) {
 	return
 }
 
-//go:decor hitBothUseLint#{msg: "message from decor, useHitBothUseLint", repeat: true, count: 10, f:1}
+//go:decor hitBothUseLint#{msg: "message from decor, useHitBothUseLint", repeat: true, count: 10, f:-1}
 func useHitBothUseLint() (s string) {
 	return
 }

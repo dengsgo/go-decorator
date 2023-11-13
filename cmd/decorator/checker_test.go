@@ -24,6 +24,14 @@ func TestCheckDecorAndGetParam(t *testing.T) {
 			[]string{`""`, "11111", "false"},
 		},
 		{
+			map[string]string{"a": "-11111"},
+			[]string{`""`, "-11111", "false"},
+		},
+		{
+			map[string]string{"a": "-1e9"},
+			[]string{`""`, "-1e9", "false"},
+		},
+		{
 			map[string]string{"b": "true"},
 			[]string{`""`, "0", "true"},
 		},
@@ -141,6 +149,9 @@ func TestParseDecorAndParameters(t *testing.T) {
 		{"function#{}", "function", map[string]string{}},
 		{`function#{key:""}`, "function", map[string]string{"key": `""`}},
 		{`function#{age:100}`, "function", map[string]string{"age": "100"}},
+		{`function#{age:1e3}`, "function", map[string]string{"age": "1e3"}},
+		{`function#{age:-100}`, "function", map[string]string{"age": "-100"}},
+		{`function#{age:-1e8}`, "function", map[string]string{"age": "-1e8"}},
 		{`function#{f:0.110}`, "function", map[string]string{"f": "0.110"}},
 		{`function#{b:true}`, "function", map[string]string{"b": "true"}},
 		{`function#{b:true, key:"", f:0.110, age:100}`, "function", map[string]string{"b": "true", "key": `""`, "age": "100", "f": "0.110"}},
@@ -264,7 +275,7 @@ func TestResolveLinterFromAnnotation(t *testing.T) {
 		`required: {intVal}`,
 		`required: {name, floatVal}`,
 		`required: {name: {}, floatVal: {}}`,
-		`required: {name: {"a"}, intVal: {gt:1}, floatVal: {lt:-10}}`,
+		`required: {name: {"a"}, intVal: {gt:1}, floatVal: {lt:-10, gt:1e2}}`,
 		`required: {name: {"a", "b", lte:10}, intVal: {1,2,3,4,5,10,-5}, floatVal: {lte:0, 999.0}}`,
 		`required: {boolVal: {false}}`,
 		`required: {rangeVal: {100,200, gt:1, lt:999, gte: 0, lte: 1000}}`,
@@ -283,7 +294,7 @@ func TestResolveLinterFromAnnotation(t *testing.T) {
 	result := map[string]string{
 		"name":     `&{compare:map[lte:10] enum:["a" "a" "b"]}`,
 		"intVal":   `&{compare:map[gt:1] enum:[1 2 3 4 5 10 -5]}`,
-		"floatVal": `&{compare:map[lt:-10 lte:0] enum:[999.0]}`,
+		"floatVal": `&{compare:map[gt:100 lt:-10 lte:0] enum:[999.0]}`,
 		"boolVal":  `&{compare:map[] enum:[false]}`,
 		"rangeVal": `&{compare:map[gt:1 gte:0 lt:999 lte:1000] enum:[100 200]}`,
 		"emptyVal": `<nil>`,

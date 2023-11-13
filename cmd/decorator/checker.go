@@ -130,13 +130,17 @@ func decorStmtListToMap(exprList []ast.Expr, p mapx) error {
 			return errors.New("invalid parameter name") // error
 		}
 		switch value := expr.Value.(type) {
-		case *ast.BasicLit:
-			switch value.Kind {
+		case *ast.BasicLit, *ast.UnaryExpr:
+			val := realBasicLit(value)
+			if val == nil {
+				return errors.New("invalid parameters value, key '" + key + "'")
+			}
+			switch val.Kind {
 			// a:"b"
 			// a: 0
 			// a: 0.0
 			case token.STRING, token.INT, token.FLOAT:
-				if !p.put(key, value.Value) {
+				if !p.put(key, val.Value) {
 					return errors.New("duplicate parameters key '" + key + "'")
 				}
 			default:
@@ -304,26 +308,6 @@ func obtainRequiredLinter(v ast.Expr, args decorArgsMap) error {
 			return
 		}
 		v.required = &requiredLinter{}
-	}
-	realBasicLit := func(v ast.Expr) *ast.BasicLit {
-		switch v := v.(type) {
-		case *ast.BasicLit:
-			return v
-		case *ast.UnaryExpr:
-			lit, ok := v.X.(*ast.BasicLit)
-			if !ok {
-				return nil
-			}
-			if v.Op == token.ADD {
-				return lit
-			}
-			if v.Op == token.SUB {
-				lit.Value = v.Op.String() + lit.Value
-				return lit
-			}
-			return nil
-		}
-		return nil
 	}
 	switch expr := v.(type) {
 	case *ast.Ident: // {a}
@@ -516,6 +500,27 @@ func (d *pkgLoader) loadPkg(pkgPath string) (set *pkgSet, err error) {
 	set.pkgs, err = parser.ParseDir(set.fset, pi.Dir, nil, parser.ParseComments)
 	d.pkg[pkgPath] = set
 	return
+}
+
+func realBasicLit(v ast.Expr) *ast.BasicLit {
+	switch v := v.(type) {
+	case *ast.BasicLit:
+		return v
+	case *ast.UnaryExpr:
+		lit, ok := v.X.(*ast.BasicLit)
+		if !ok {
+			return nil
+		}
+		if v.Op == token.ADD {
+			return lit
+		}
+		if v.Op == token.SUB {
+			lit.Value = v.Op.String() + lit.Value
+			return lit
+		}
+		return nil
+	}
+	return nil
 }
 
 func isLetters(s string) (b bool) {
