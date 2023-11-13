@@ -1,3 +1,8 @@
+## v0.12.0 beta
+
+- Add: `usages/methods` demonstration cases
+- Fix: the issue of decorators with parameters reporting errors if negative numbers are used
+
 ## v0.11.0 beta
 
 - Feat: support methods for using decorators
