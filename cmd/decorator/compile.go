@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"errors"
 	"go/ast"
-	"go/parser"
 	"go/printer"
 	"go/token"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -21,6 +21,8 @@ const msgDecorPkgNotFound = "decor package is not found"
 const msgCantUsedOnDecoratorFunc = `decorators cannot be used on decorators`
 
 var packageInfo *_packageInfo
+
+var printerCfg = &printer.Config{Tabwidth: 8, Mode: printer.SourcePos}
 
 func compile(args []string) error {
 	{
@@ -56,13 +58,20 @@ func compile(args []string) error {
 
 	var originPath string
 
-	for _, file := range files {
-		fset := token.NewFileSet()
+	fset := token.NewFileSet()
+	pkg, err := parserGOFiles(fset, files...)
+	if err != nil {
+		logs.Error(err)
+	}
+
+	typeDecorRebuild(pkg)
+
+	for file, f := range pkg.Files {
 		logs.Debug("file Parse", file)
-		f, err := parser.ParseFile(fset, file, nil, parser.ParseComments)
-		if err != nil {
-			continue
-		}
+		//f, err := parser.ParseFile(fset, file, nil, parser.ParseComments)
+		//if err != nil {
+		//	continue
+		//}
 		logs.Debug(f.Decls)
 		imp := newImporter(f)
 
@@ -179,7 +188,7 @@ func compile(args []string) error {
 
 		var output []byte
 		buffer := bytes.NewBuffer(output)
-		err = (&printer.Config{Tabwidth: 8, Mode: printer.SourcePos}).Fprint(buffer, fset, f)
+		err = printerCfg.Fprint(buffer, fset, f)
 		if err != nil {
 			return errors.New("fprint original code")
 		}
@@ -230,8 +239,10 @@ LOOP:
 	}
 }
 
+// Reset the line of the behavior annotation where the decorator call is located
 func assignCorrectPos(doc *ast.Comment, ce *ast.CallExpr) {
 	ce.Lparen = doc.Pos()
+	ce.Rparen = doc.Pos()
 	offset := token.Pos(0)
 	if t, ok := ce.Fun.(*ast.Ident); ok {
 		t.NamePos = doc.Pos()
@@ -241,14 +252,135 @@ func assignCorrectPos(doc *ast.Comment, ce *ast.CallExpr) {
 			id.NamePos = doc.Pos()
 			offset = token.Pos(len(id.Name))
 		}
-		t.Sel.NamePos = doc.Pos() + offset + 1
+		//t.Sel.NamePos = doc.Pos() + offset + 1
+		t.Sel.NamePos = doc.Pos()
 		offset += token.Pos(len(t.Sel.Name)) + 1
 	}
 	for _, arg := range ce.Args {
-		if id, ok := arg.(*ast.Ident); ok {
-			id.NamePos = doc.Pos() + offset
+		//ast.Print(token.NewFileSet(), arg)
+		//if id, ok := arg.(*ast.Ident); ok {
+		//	//id.NamePos = doc.Pos() + offset
+		//	id.NamePos = doc.Pos()
+		//}
+		switch arg := arg.(type) {
+		case *ast.Ident:
+			arg.NamePos = doc.Pos()
+		case *ast.BasicLit:
+			arg.ValuePos = doc.Pos()
+		case *ast.UnaryExpr:
+			arg.OpPos = doc.Pos()
+			if a, ok := arg.X.(*ast.Ident); ok {
+				a.NamePos = doc.Pos()
+			}
 		}
 	}
+}
+
+func reverseSlice[T any](ele []T) []T {
+	r := make([]T, 0)
+	for i := len(ele) - 1; i >= 0; i-- {
+		r = append(r, ele[i])
+	}
+	return r
+}
+
+func typeDecorRebuild(pkg *ast.Package) {
+	//
+	typeDeclVisitor := func(decls []ast.Decl, fn func(*ast.TypeSpec, *ast.CommentGroup)) {
+		if decls == nil || len(decls) == 0 {
+			return
+		}
+		for _, decl := range decls {
+			gd, ok := decl.(*ast.GenDecl)
+			if !ok || gd.Specs == nil || len(gd.Specs) == 0 {
+				continue
+			}
+			for _, spec := range gd.Specs {
+				ts, ok := spec.(*ast.TypeSpec)
+				if !ok {
+					continue
+				}
+				fn(ts, gd.Doc)
+			}
+		}
+
+	}
+	findAndCollDecorComments := func(cg *ast.CommentGroup) []*ast.Comment {
+		comments := make([]*ast.Comment, 0)
+		if cg == nil || cg.List == nil {
+			return comments
+		}
+		for i := len(cg.List) - 1; i >= 0; i-- {
+			if !strings.HasPrefix(cg.List[i].Text, decoratorScanFlag) {
+				break
+			}
+			comments = append(comments, cg.List[i])
+		}
+		return reverseSlice(comments)
+	}
+	typeNameMapDecorComments := map[string][]*ast.Comment{}
+	errs := []error{}
+	for _, f := range pkg.Files {
+		typeDeclVisitor(f.Decls, func(spec *ast.TypeSpec, typeDoc *ast.CommentGroup) {
+			if (spec.Doc == nil || spec.Doc.List == nil) &&
+				(typeDoc == nil || typeDoc.List == nil) {
+				return
+			}
+			comments := findAndCollDecorComments(spec.Doc)
+			log.Printf("findAndCollDecorComments(spec.Doc): %+v \n", comments)
+			comments = append(comments, findAndCollDecorComments(typeDoc)...)
+			log.Printf("append(comments, findAndCollDecorComments(typeDoc)...): %+v \n", comments)
+			if len(comments) == 0 {
+				return
+			}
+			if _, ok := typeNameMapDecorComments[spec.Name.Name]; ok {
+				errs = append(errs, errors.New("duplicate type definition"))
+				return
+			}
+			typeNameMapDecorComments[spec.Name.Name] = comments
+		})
+	}
+	log.Printf("typeNameMapDecorComments: %+v \n", typeNameMapDecorComments)
+	log.Printf("errs: %+v \n", errs)
+	if len(typeNameMapDecorComments) == 0 {
+		return
+	}
+	for _, f := range pkg.Files {
+		visitAstDecl(f, func(decl *ast.FuncDecl) (r bool) {
+			if decl.Recv == nil ||
+				decl.Recv.List == nil ||
+				len(decl.Recv.List) != 1 ||
+				decl.Recv.List[0].Type == nil {
+				return
+			}
+			var typeId *ast.Ident
+			switch typ := decl.Recv.List[0].Type.(type) {
+			case *ast.Ident:
+				typeId = typ
+			case *ast.StarExpr:
+				id, ok := typ.X.(*ast.Ident)
+				if !ok {
+					return
+				}
+				typeId = id
+			}
+			if typeId.Name == "" {
+				return
+			}
+			comments, ok := typeNameMapDecorComments[typeId.Name]
+			if !ok || len(comments) == 0 {
+				return
+			}
+			log.Printf("decl: %+v, comments: %+v\n", decl, comments)
+			if decl.Doc == nil {
+				decl.Doc = &ast.CommentGroup{List: comments}
+			} else {
+				decl.Doc.List = append(decl.Doc.List, comments...)
+			}
+			return
+		})
+	}
+
 }
 
 func friendlyIDEPosition(fset *token.FileSet, p token.Pos) string {

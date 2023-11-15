@@ -257,3 +257,22 @@ func getStmtList(s string) (r []ast.Stmt, i int, err error) {
 	i = 0
 	return
 }
+
+// same like /usr/local/go/src/go/parser/interface.go:139#ParseDir
+func parserGOFiles(fset *token.FileSet, files ...string) (*ast.Package, error) {
+	var pkg *ast.Package
+	for _, file := range files {
+		f, err := parser.ParseFile(fset, file, nil, parser.ParseComments)
+		if err != nil {
+			return pkg, err
+		}
+		if pkg == nil {
+			pkg = &ast.Package{
+				Name:  f.Name.Name,
+				Files: make(map[string]*ast.File),
+			}
+		}
+		pkg.Files[file] = f
+	}
+	return pkg, nil
+}
