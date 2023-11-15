@@ -284,27 +284,26 @@ func reverseSlice[T any](ele []T) []T {
 	return r
 }
 
-func typeDecorRebuild(pkg *ast.Package) {
-	//
-	typeDeclVisitor := func(decls []ast.Decl, fn func(*ast.TypeSpec, *ast.CommentGroup)) {
-		if decls == nil || len(decls) == 0 {
-			return
+func typeDeclVisitor(decls []ast.Decl, fn func(*ast.TypeSpec, *ast.CommentGroup)) {
+	if decls == nil || len(decls) == 0 {
+		return
+	}
+	for _, decl := range decls {
+		gd, ok := decl.(*ast.GenDecl)
+		if !ok || gd.Specs == nil || len(gd.Specs) == 0 {
+			continue
 		}
-		for _, decl := range decls {
-			gd, ok := decl.(*ast.GenDecl)
-			if !ok || gd.Specs == nil || len(gd.Specs) == 0 {
+		for _, spec := range gd.Specs {
+			ts, ok := spec.(*ast.TypeSpec)
+			if !ok {
 				continue
 			}
-			for _, spec := range gd.Specs {
-				ts, ok := spec.(*ast.TypeSpec)
-				if !ok {
-					continue
-				}
-				fn(ts, gd.Doc)
-			}
+			fn(ts, gd.Doc)
 		}
-
 	}
+}
+
+func typeDecorRebuild(pkg *ast.Package) {
 	findAndCollDecorComments := func(cg *ast.CommentGroup) []*ast.Comment {
 		comments := make([]*ast.Comment, 0)
 		if cg == nil || cg.List == nil {
