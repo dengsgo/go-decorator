@@ -277,9 +277,9 @@ func assignCorrectPos(doc *ast.Comment, ce *ast.CallExpr) {
 }
 
 func reverseSlice[T any](ele []T) []T {
-	r := make([]T, 0)
-	for i := len(ele) - 1; i >= 0; i-- {
-		r = append(r, ele[i])
+	r := make([]T, len(ele))
+	for i, v := range ele {
+		r[len(ele)-1-i] = v
 	}
 	return r
 }
