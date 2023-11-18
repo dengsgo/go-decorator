@@ -7,13 +7,13 @@
 
 > 公开测试版本，谨慎用于生产环境. 欢迎 ⭐star 关注项目进展
 
-`go-decorator`, 让 Go 便捷使用装饰器的工具，装饰器能够切面(AOP)、代理(Proxy)任意的函数和方法，提供观察和控制函数的能力。
+`go-decorator`, Go 便捷使用装饰器的工具，装饰器能够切面(AOP)、代理(Proxy)任意的函数和方法，提供观察和控制函数的能力。
 
 
 ## Feature
 
-- 使用 `//go:decor decoratorFunctionName` 注释声明即可使用装饰器 `decoratorfunctionName`，快速完成比如像“样板代码注入、非侵入式改变函数行为、控制逻辑流程”等需求；  
-- 可以自由定义函数作为装饰器，应用于任意一级函数和方法上（top-level function or method）;  
+- 使用简单注释 `//go:decor xxx` 即可使用装饰器（`xxx` 为装饰器函数），快速完成“样板代码注入、非侵入式改变函数行为、控制逻辑流程”等需求；  
+- 可以自由定义函数作为装饰器，应用于任意一级函数和方法上（top-level function or method）;
 - 支持使用多个（行） `//go:decor` 装饰器装饰函数;
 - 装饰器支持可选参数，给开发带来更多可能；
 - 支持编译时 `lint` 验证，保证 Go 编译代码的健壮性；
@@ -46,7 +46,7 @@ decorator 0.12.0 beta , https://github.com/dengsgo/go-decorator
 
 ## Usage
 
-`decorator` 依赖原生 `go` 命令来调用它，在 `go` 的子命令中加入 `-toolexec decorator` 参数即可。
+`decorator` 依赖原生 `go` 命令来调用它，使用只需在 `go` 的子命令中加入 `-toolexec decorator` 参数即可。
 例如：  
 
 |原生命令| 使用 `decorator` |
@@ -101,8 +101,8 @@ func myFunc() {
 // 这是一个普通的函数
 // 但是它实现了 func(*decor.Context [, ...any]) 类型，因此它还是一个装饰器方法，
 // 可以在其他函数上使用这个装饰器。
-// 在函数中，ctx 是装饰器上下文，可以通过 ctx 获取到目标函数的出入参
-// 和目标方法的执行。
+// 在函数中，ctx 是装饰器上下文，可以通过 ctx 获取到目标函数的函数名、出入参
+// 以及执行目标函数。
 // 如果函数中没有执行 ctx.TargetDo(), 那么意味着目标函数不会执行，
 // 即使你代码里调用了被装饰的目标函数！这时候，目标函数返回的都是零值。
 // 在 ctx.TargetDo() 之前，可以修改 ctx.TargetIn 来改变入参值。
@@ -133,7 +133,7 @@ func main()  {
 // decorator 提供了 lint 语法给开发者，在编译代码时强制进行校验。比如:
 // `required` 要求目标函数必须对该字段传值；
 // `nonzero` 要求目标函数传值不能时空值。
-// 如果编译检验时不通过，会编译失败。
+// 如果编译时校验不通过，会编译失败。
 // 使用方式如下:(更多用法查看 Guide.md)：
 //
 //go:decor-lint required: {level}
@@ -180,16 +180,16 @@ func main() {
 	// 示例：泛型函数使用装饰器
 	g.PrintfLn("Sum(1, 2, 3, 4, 5, 6, 7, 8, 9) = %+v", Sum(1, 2, 3, 4, 5, 6, 7, 8, 9))
 
-    section("method.go")
-    // 方法使用装饰器
-    {
-        m := &methodTestPointerStruct{}
-        m.doSomething("main called")
-    }
-    {
-        m := methodTestRawStruct{}
-        m.doSomething("main called")
-    }
+	section("method.go")
+	// 方法使用装饰器
+	{
+		m := &methodTestPointerStruct{}
+		m.doSomething("main called")
+	}
+	{
+		m := methodTestRawStruct{}
+		m.doSomething("main called")
+	}
 	
 	section("withdecorparams.go")
 	// 示例：使用带有参数的装饰器，如何传值
