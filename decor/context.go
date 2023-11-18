@@ -53,10 +53,10 @@ type Context struct {
 	TargetOut []any
 
 	// The function or method name of the target
-	//TargetName string
+	TargetName string
 
 	// If Kind is 'KMethod', it is the Receiver of the target
-	//Receiver any
+	Receiver any
 
 	// The Non-parameter Packaging of the Objective Function // inner
 	Func func()
