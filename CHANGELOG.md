@@ -1,3 +1,9 @@
+## v0.15.0 beta
+
+- Feat: `decor.Context` added fields `TargetName`、`Receiver`
+- Add: `TargetName` the function or method name of the objective function.
+- Add: `Receiver` the receiver of the objective function. If `ctx.Kind == decor.KFunc` (i.e. function type), with a value of nil
+
 ## v0.12.0 beta
 
 - Add: `usages/methods` demonstration cases
