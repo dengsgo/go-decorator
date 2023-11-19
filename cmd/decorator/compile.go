@@ -392,7 +392,7 @@ func typeDecorRebuild(pkg *ast.Package) (pos token.Pos, err error) {
 			return
 		})
 	}
-
+	return
 }
 
 func friendlyIDEPosition(fset *token.FileSet, p token.Pos) string {
