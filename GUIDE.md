@@ -40,7 +40,7 @@ Run `decorator` to display the current version.
 
 ```shell
 $ decorator
-decorator 0.12.0 beta , https://github.com/dengsgo/go-decorator
+decorator 0.15.0 beta , https://github.com/dengsgo/go-decorator
 ```
 
 Tip: Run the above installation command frequently to install the latest version for bug fixes, enhanced experience, and more new features.
@@ -73,7 +73,7 @@ $ go get -u github.com/dengsgo/go-decorator
 
 ### Understand destination functions and decorators
 
-> Target functions: functions that use a decorator, also known as decorated functions.  
+> Target functions: A functions or method that uses a decorator, also called a decorated function or object.  
 > For example, if a function A uses a decorator B to decorate itself, A is the target function.
 
 Decorators are also functions. When code is run to the target function, it doesn't actually execute it, but runs the decorator it uses. The actual target function logic is wrapped into the decorator and allows the decorator to control it.
@@ -292,7 +292,18 @@ This context can be used in the decorator to modify the in- and out-parameters o
 
 ### ctx.Kind
 
-Target function type, currently only `decor.KFunc`, function type.
+Target function type.
+
+`Decor KFunc`: function, the objective function is the function.  
+`Decor KMethod`: Method, the objective function is a method, and in this case, `ctx.Receiver`  value is the recipient of the method.
+
+### ctx.TargetName
+
+The function or method name of the objective function.
+
+### ctx.Receiver
+
+The receiver of the objective function. If `ctx.Kind == decor.KFunc` (i.e. function type), with a value of nil.
 
 ### ctx.TargetIn
 

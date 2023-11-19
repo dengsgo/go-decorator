@@ -20,8 +20,8 @@ func useScopeInnerDecor(s string, i int) string {
 // 它的作用是在目标方法执行前和执行后分别打印出他们的 ctx 内容，
 // 包括目标函数的类型、输入、输出、执行的次数。
 func dumpDecorContext(ctx *decor.Context) {
-	tpl := " dumpDecorContext: Kind: %+v, TargetIn: %+v, TargetOut: %+v, doRef: %+v\n"
-	g.Printf("=>"+tpl, ctx.Kind, ctx.TargetIn, ctx.TargetOut, ctx.DoRef())
+	tpl := " dumpDecorContext: Kind: %+v, TargetName: %+v, Receiver: %+v, TargetIn: %+v, TargetOut: %+v, doRef: %+v\n"
+	g.Printf("=>"+tpl, ctx.Kind, ctx.TargetName, ctx.Receiver, ctx.TargetIn, ctx.TargetOut, ctx.DoRef())
 	ctx.TargetDo()
-	g.Printf("<="+tpl, ctx.Kind, ctx.TargetIn, ctx.TargetOut, ctx.DoRef())
+	g.Printf("<="+tpl, ctx.Kind, ctx.TargetName, ctx.Receiver, ctx.TargetIn, ctx.TargetOut, ctx.DoRef())
 }

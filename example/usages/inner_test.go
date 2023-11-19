@@ -26,13 +26,13 @@ func TestUseScopeInnerDecor(t *testing.T) {
 	}{
 		{
 			"hello, world", 100,
-			`=> dumpDecorContext: Kind: 0, TargetIn: [hello, world 100], TargetOut: [], doRef: 0
-<= dumpDecorContext: Kind: 0, TargetIn: [hello, world 100], TargetOut: [useLocalScopeDecor concat: hello, world], doRef: 1`,
+			`=> dumpDecorContext: Kind: 0, TargetName: useScopeInnerDecor, Receiver: <nil>, TargetIn: [hello, world 100], TargetOut: [], doRef: 0
+<= dumpDecorContext: Kind: 0, TargetName: useScopeInnerDecor, Receiver: <nil>, TargetIn: [hello, world 100], TargetOut: [useLocalScopeDecor concat: hello, world], doRef: 1`,
 		},
 		{
 			"hello,中国", 999,
-			`=> dumpDecorContext: Kind: 0, TargetIn: [hello,中国 999], TargetOut: [], doRef: 0
-<= dumpDecorContext: Kind: 0, TargetIn: [hello,中国 999], TargetOut: [useLocalScopeDecor concat: hello,中国], doRef: 1`,
+			`=> dumpDecorContext: Kind: 0, TargetName: useScopeInnerDecor, Receiver: <nil>, TargetIn: [hello,中国 999], TargetOut: [], doRef: 0
+<= dumpDecorContext: Kind: 0, TargetName: useScopeInnerDecor, Receiver: <nil>, TargetIn: [hello,中国 999], TargetOut: [useLocalScopeDecor concat: hello,中国], doRef: 1`,
 		},
 	}
 	for i, v := range cas {

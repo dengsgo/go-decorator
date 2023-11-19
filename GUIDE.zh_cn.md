@@ -40,7 +40,7 @@ $ go install github.com/dengsgo/go-decorator/cmd/decorator@latest
 
 ```shell
 $ decorator
-decorator 0.12.0 beta , https://github.com/dengsgo/go-decorator
+decorator 0.15.0 beta , https://github.com/dengsgo/go-decorator
 ```
 
 提示：经常运行上述安装命令来安装最新版本，以获得 BUG 修复、增强体验和更多的新特性。
@@ -51,7 +51,7 @@ decorator 0.12.0 beta , https://github.com/dengsgo/go-decorator
 
 ### 添加参数
 
-在 `go` 子命令中添加参数 `-toolexec decorator` 即可。
+在 `go` 子命令中添加参数 `-toolexec decorator` 即可使用该工具。
 
 例如：
 
@@ -75,7 +75,7 @@ $ go get -u github.com/dengsgo/go-decorator
 
 ### 了解目标函数和装饰器
 
-> 目标函数：即使用了装饰器的函数，也称为被装饰的函数。  
+> 目标函数：即使用了装饰器的函数或方法，也称为被装饰的函数、目标对象。  
 > 比如 A 函数使用了装饰器 B 来装饰自己，A 即为目标函数。
 
 装饰器也是函数，它通常用来对目标函数进行包含装饰。当代码运行到目标函数的时候，并不会真的执行它，而是运行它所使用的装饰器。实际的目标函数逻辑被包装到了装饰器中，并允许装饰器来控制它。
@@ -289,7 +289,17 @@ func hit(ctx *decor.Context, msg string, count int64, repeat bool, f float64, op
 
 ### ctx.Kind
 
-目标函数类型，目前只有 `decor.KFunc`, 函数类型。
+目标函数类型。
+`decor.KFunc`: 函数, 目标函数是函数。  
+`decor.KMethod`: 方法, 目标函数是个方法，此时的 `ctx.Receiver` 值为方法的接收者。
+
+### ctx.TargetName
+
+目标函数的函数名或方法名。
+
+### ctx.Receiver
+
+目标函数的接收者。如果 `ctx.Kind == decor.KFunc` （即函数类型），值为 nil。
 
 ### ctx.TargetIn
 

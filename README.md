@@ -14,7 +14,7 @@
 
 ## Feature
 
-- Use `//go:decor decoratorfunctionName` to annotate a function with the decorator `decoratorfunctionName` for quick sample code injection, non-intrusive changes to function behavior, and control of logic flow;
+- Use a simple comment `//go:decor xxx` to use the decorator (where `xxx` is the decorator function), quickly completing requirements such as "template code injection, non-invasive change of function behavior, and control of logical flow";  
 - You can freely define functions as decorators and apply them to any top-level function or method.  
 - Supports the use of multiple (line) '//go: decor' decorator decorate the functions;  
 - The decorator supports optional parameters, which brings more possibilities to development.  
@@ -42,7 +42,7 @@ Run `decorator` and it will show you the `decorator` version.
 
 ```shell
 $ decorator
-decorator 0.12.0 beta , https://github.com/dengsgo/go-decorator
+decorator 0.15.0 beta , https://github.com/dengsgo/go-decorator
 ```
 
 Tip: Run the above installation command frequently to install the latest version for bug fixes, enhanced experience, and more new features.
@@ -104,8 +104,8 @@ func myFunc() {
 // This is a regular function. 
 // But it implements the func (*decor.Context) type, so it is still a decorator method,
 // You can use this decorator on other functions.
-// In the function, ctx is the decorator context, and the input and output parameters of the target function 
-// can be obtained through ctx and the execution of the target method.
+// In the function, ctx is the decorator context, and the function name, input and output 
+// parameters, and execution of the target function can be obtained through ctx.
 // If ctx.TargetDo() is not executed in the function, it means that the target function will not execute,
 // Even if you call the decorated target function in your code! At this point, the objective function returns zero values.
 // Before ctx.TargetDo(), ctx.TargetIn can be modified to change the input parameter values.
@@ -183,16 +183,16 @@ func main() {
 	// Example: Generic functions using decorators
 	g.PrintfLn("Sum(1, 2, 3, 4, 5, 6, 7, 8, 9) = %+v", Sum(1, 2, 3, 4, 5, 6, 7, 8, 9))
 
-    section("method.go")
-    // Example: methods using decorators
-    {
-        m := &methodTestPointerStruct{}
-        m.doSomething("main called")
-    }
-    {
-        m := methodTestRawStruct{}
-        m.doSomething("main called")
-    }
+	section("method.go")
+	// Example: methods using decorators
+	{
+		m := &methodTestPointerStruct{}
+		m.doSomething("main called")
+	}
+	{
+		m := methodTestRawStruct{}
+		m.doSomething("main called")
+	}
 
 	section("withdecorparams.go")
 	// Example: How to pass values when using a decorator with parameters 

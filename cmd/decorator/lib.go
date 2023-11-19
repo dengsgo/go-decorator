@@ -19,9 +19,11 @@ const randSeeds = "abcdefghijklmnopqrstuvwxyz"
 var emptyFset = token.NewFileSet()
 
 const replaceTpl = `    ${.DecorVarName} := &decor.Context{
-        Kind:      decor.${.TKind},
-        TargetIn:  []any{${stringer .InArgNames}},
-        TargetOut: []any{${stringer .OutArgNames}},
+        Kind:       decor.${.TKind},
+        TargetName: ${.TargetName},
+        Receiver:   ${.ReceiverVarName},
+        TargetIn:   []any{${stringer .InArgNames}},
+        TargetOut:  []any{${stringer .OutArgNames}},
     }
     ${.DecorVarName}.Func = func() {
         ${if .HaveReturn}${stringer .DecorListOut} = ${end}${.FuncMain} (${stringer .DecorCallIn})
@@ -33,6 +35,8 @@ type ReplaceArgs struct {
 	HaveDecorParam,
 	HaveReturn bool
 	TKind, // target kind
+	TargetName,
+	ReceiverVarName, // Receiver var
 	DecorVarName, // decor var
 	DecorCallName, // decor function name . logging
 	FuncMain string // (a, b, c) {raw func}
@@ -46,11 +50,13 @@ type ReplaceArgs struct {
 	DecorCallOut []string // decor.TargetOut[0].(int), decor.TargetOut[1].(int)
 }
 
-func newReplaceArgs(gi *genIdentId, decorName string) *ReplaceArgs {
+func newReplaceArgs(gi *genIdentId, targetName, decorName string) *ReplaceArgs {
 	return &ReplaceArgs{
 		false,
 		false,
 		"KFunc", // decor.TKind,
+		`"` + targetName + `"`,
+		"nil",
 		gi.nextStr(),
 		decorName,
 		"",
@@ -83,7 +89,7 @@ func replace(args *ReplaceArgs) (string, error) {
 }
 
 func builderReplaceArgs(f *ast.FuncDecl, decorName string, decorParams []string, gi *genIdentId) *ReplaceArgs {
-	ra := newReplaceArgs(gi, decorName)
+	ra := newReplaceArgs(gi, f.Name.Name, decorName)
 	// decor params
 	if decorParams != nil && len(decorParams) > 0 {
 		ra.HaveDecorParam = true
@@ -92,6 +98,7 @@ func builderReplaceArgs(f *ast.FuncDecl, decorName string, decorParams []string,
 	// target TKind
 	if f.Recv != nil && f.Recv.List != nil && len(f.Recv.List) > 0 {
 		ra.TKind = "KMethod"
+		ra.ReceiverVarName = f.Recv.List[0].Names[0].Name
 	}
 	//funcMain
 	var tp *ast.FieldList

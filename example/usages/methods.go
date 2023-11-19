@@ -1,6 +1,9 @@
 package main
 
-import _ "github.com/dengsgo/go-decorator/decor"
+import (
+	"github.com/dengsgo/go-decorator/decor"
+	"github.com/dengsgo/go-decorator/example/usages/g"
+)
 
 // 这个文件演示带有 Receiver 的方法如何装饰器。
 // 无论 Receiver 是结构体自己还是指针，用法和普通的函数没有人任何区别，
@@ -18,4 +21,21 @@ type methodTestRawStruct struct{}
 //go:decor dumpDecorContext
 func (m methodTestRawStruct) doSomething(s string) string {
 	return "methodTestRawStruct.recPointerDoSomething: " + s
+}
+
+type methodTestStruct struct{}
+
+//go:decor validCtxReceiver
+func (m *methodTestStruct) todo() {}
+
+func validCtxReceiver(ctx *decor.Context) {
+	if ctx.Kind == decor.KMethod &&
+		ctx.TargetName == "todo" && func() bool {
+		_, ok := ctx.Receiver.(*methodTestStruct)
+		return ok
+	}() {
+		g.Printf("validCtxReceiver OK")
+	} else {
+		g.Printf("validCtxReceiver FAIL")
+	}
 }
