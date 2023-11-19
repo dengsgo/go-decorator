@@ -47,6 +47,39 @@ func main() {
 	g.Printf("useHitUseNonzeroLint() = %+v", useHitUseNonzeroLint())
 	g.Printf("useHitBothUseLint() = %+v", useHitBothUseLint())
 	g.Printf("useHitUseMultilineLintDecor() = %+v", useHitUseMultilineLintDecor())
+
+	section("types.go")
+	// 注释 `type T types` 类型声明，decorator 会自动装饰代理 `T` 类型下的所有方法：
+	{
+		// 注释结构体的用法
+		s := &structType{"main say hello"}
+		g.PrintfLn("s.Name() = %+v", s.Name())
+		s.StrName("StrName() set")
+		g.PrintfLn("s.Name() = %+v", s.Name())
+		s.empty()
+	}
+	{
+		// 注释基础类型的用法
+		v := varIntType(100)
+		g.PrintfLn("v.value() = %+v", v.value())
+		v.zeroSelf()
+		g.PrintfLn("v.value() = %+v", v.value())
+	}
+	{
+		// 注释基础类型的用法
+		v := VarStringType("hello")
+		g.PrintfLn("v.value() = %+v", v.value())
+	}
+	{
+		// 注释结构体的用法，该类型没有任何方法
+		v := nonMethodType{}
+		g.PrintfLn("nonMethodType = %+v", v)
+	}
+	{
+		// 注释结构体的用法，该类型的方法定义在包内的其他文件里
+		o := &otherFileDefMethodType{}
+		g.PrintfLn("o.string() = %+v", o.string())
+	}
 }
 
 func section(s string) {
