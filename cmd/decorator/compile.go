@@ -6,7 +6,6 @@ import (
 	"go/ast"
 	"go/printer"
 	"go/token"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -64,7 +63,11 @@ func compile(args []string) error {
 		logs.Error(err)
 	}
 
-	typeDecorRebuild(pkg)
+	errPos, err := typeDecorRebuild(pkg)
+	if err != nil {
+		logs.Error(err, biSymbol,
+			friendlyIDEPosition(fset, errPos))
+	}
 
 	for file, f := range pkg.Files {
 		logs.Debug("file Parse", file)
@@ -303,7 +306,7 @@ func typeDeclVisitor(decls []ast.Decl, fn func(*ast.TypeSpec, *ast.CommentGroup)
 	}
 }
 
-func typeDecorRebuild(pkg *ast.Package) {
+func typeDecorRebuild(pkg *ast.Package) (pos token.Pos, err error) {
 	findAndCollDecorComments := func(cg *ast.CommentGroup) []*ast.Comment {
 		comments := make([]*ast.Comment, 0)
 		if cg == nil || cg.List == nil {
@@ -318,7 +321,11 @@ func typeDecorRebuild(pkg *ast.Package) {
 		return reverseSlice(comments)
 	}
 	typeNameMapDecorComments := map[string][]*ast.Comment{}
-	errs := []error{}
+	type errSet struct {
+		pos token.Pos
+		err error
+	}
+	errs := []*errSet{}
 	for _, f := range pkg.Files {
 		typeDeclVisitor(f.Decls, func(spec *ast.TypeSpec, typeDoc *ast.CommentGroup) {
 			if (spec.Doc == nil || spec.Doc.List == nil) &&
@@ -326,21 +333,27 @@ func typeDecorRebuild(pkg *ast.Package) {
 				return
 			}
 			comments := findAndCollDecorComments(spec.Doc)
-			log.Printf("findAndCollDecorComments(spec.Doc): %+v \n", comments)
+			//log.Printf("findAndCollDecorComments(spec.Doc): %+v \n", comments)
 			comments = append(comments, findAndCollDecorComments(typeDoc)...)
-			log.Printf("append(comments, findAndCollDecorComments(typeDoc)...): %+v \n", comments)
+			//log.Printf("append(comments, findAndCollDecorComments(typeDoc)...): %+v \n", comments)
 			if len(comments) == 0 {
 				return
 			}
 			if _, ok := typeNameMapDecorComments[spec.Name.Name]; ok {
-				errs = append(errs, errors.New("duplicate type definition"))
+				errs = append(errs, &errSet{
+					pos: spec.Name.NamePos,
+					err: errors.New("duplicate type definition: " + spec.Name.Name),
+				})
 				return
 			}
 			typeNameMapDecorComments[spec.Name.Name] = comments
 		})
+		if len(errs) > 0 {
+			return errs[0].pos, errs[0].err
+		}
 	}
-	log.Printf("typeNameMapDecorComments: %+v \n", typeNameMapDecorComments)
-	log.Printf("errs: %+v \n", errs)
+	//log.Printf("typeNameMapDecorComments: %+v \n", typeNameMapDecorComments)
+	//log.Printf("errs: %+v \n", errs)
 	if len(typeNameMapDecorComments) == 0 {
 		return
 	}
@@ -370,7 +383,7 @@ func typeDecorRebuild(pkg *ast.Package) {
 			if !ok || len(comments) == 0 {
 				return
 			}
-			log.Printf("decl: %+v, comments: %+v\n", decl, comments)
+			//log.Printf("decl: %+v, comments: %+v\n", decl, comments)
 			if decl.Doc == nil {
 				decl.Doc = &ast.CommentGroup{List: comments}
 			} else {
