@@ -35,8 +35,8 @@ func (v varIntType) zeroSelf() {
 //go:decor dumpTargetType
 type VarStringType string
 
-func (v *VarStringType) value() string {
-	return string(*v)
+func (v VarStringType) value() string {
+	return string(v)
 }
 
 //go:decor dumpTargetType
@@ -55,6 +55,6 @@ func (g *genericType[T]) value() T {
 }
 
 func dumpTargetType(ctx *decor.Context) {
-	g.PrintfLn("dumpTargetType say: Receiver: %v, TargetName: %+v", ctx.Receiver, ctx.TargetName)
+	g.PrintfLn("dumpTargetType say: Receiver: %+v, TargetName: %+v", ctx.Receiver, ctx.TargetName)
 	ctx.TargetDo()
 }
