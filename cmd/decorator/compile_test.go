@@ -68,6 +68,9 @@ const name string = ""
 func E(){}
 func (m maps[K, V])W(){}
 func (m *maps[K, V])M(){}
+func (g *genericType[T]) value() T {
+	return g.t
+}
 `
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, "", src, parser.ParseComments)

@@ -363,7 +363,12 @@ func typeDecorRebuild(pkg *ast.Package) (pos token.Pos, err error) {
 		switch expr := expr.(type) {
 		case *ast.Ident: // normal: var
 			return expr.Name
-		case *ast.IndexListExpr: // var[K,V]
+		case *ast.IndexListExpr: // var[T]
+			if v, ok := expr.X.(*ast.Ident); ok {
+				return v.Name
+			}
+			return ""
+		case *ast.IndexExpr: //  var[K,V]
 			if v, ok := expr.X.(*ast.Ident); ok {
 				return v.Name
 			}
@@ -372,6 +377,11 @@ func typeDecorRebuild(pkg *ast.Package) (pos token.Pos, err error) {
 			switch x := expr.X.(type) {
 			case *ast.Ident: // *var
 				return x.Name
+			case *ast.IndexExpr: // *var[K]
+				if v, ok := x.X.(*ast.Ident); ok {
+					return v.Name
+				}
+				return ""
 			case *ast.IndexListExpr: // *var[K,V]
 				if v, ok := x.X.(*ast.Ident); ok {
 					return v.Name
