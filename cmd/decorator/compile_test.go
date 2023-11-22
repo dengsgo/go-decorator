@@ -66,11 +66,15 @@ type SI struct{}
 var a string = ""
 const name string = ""
 func E(){}
+func (m maps[K, V])W(){}
+func (m *maps[K, V])M(){}
 `
-	f, err := parser.ParseFile(token.NewFileSet(), "", src, parser.ParseComments)
+	fset := token.NewFileSet()
+	f, err := parser.ParseFile(fset, "", src, parser.ParseComments)
 	if err != nil {
 		t.Fatal(err)
 	}
+	//ast.Print(fset, f)
 	sym := []string{"S", "I", "Struct", "SI"}
 	count := 0
 	typeDeclVisitor(f.Decls, func(spec *ast.TypeSpec, group *ast.CommentGroup) {

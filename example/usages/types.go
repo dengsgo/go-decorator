@@ -46,6 +46,6 @@ type nonMethodType struct{}
 type otherFileDefMethodType struct{}
 
 func dumpTargetType(ctx *decor.Context) {
-	g.PrintfLn("Receiver: %v, TargetName: %+v", ctx.Receiver, ctx.TargetName)
+	g.PrintfLn("dumpTargetType say: Receiver: %v, TargetName: %+v", ctx.Receiver, ctx.TargetName)
 	ctx.TargetDo()
 }

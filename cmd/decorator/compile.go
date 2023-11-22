@@ -359,6 +359,30 @@ func typeDecorRebuild(pkg *ast.Package) (pos token.Pos, err error) {
 	if len(typeNameMapDecorComments) == 0 {
 		return
 	}
+	identName := func(expr ast.Expr) string {
+		switch expr := expr.(type) {
+		case *ast.Ident: // normal: var
+			return expr.Name
+		case *ast.IndexListExpr: // var[K,V]
+			if v, ok := expr.X.(*ast.Ident); ok {
+				return v.Name
+			}
+			return ""
+		case *ast.StarExpr: // pointer
+			switch x := expr.X.(type) {
+			case *ast.Ident: // *var
+				return x.Name
+			case *ast.IndexListExpr: // *var[K,V]
+				if v, ok := x.X.(*ast.Ident); ok {
+					return v.Name
+				}
+				return ""
+			default:
+				return ""
+			}
+		}
+		return ""
+	}
 	for _, f := range pkg.Files {
 		visitAstDecl(f, func(decl *ast.FuncDecl) (r bool) {
 			if decl.Recv == nil ||
@@ -367,21 +391,11 @@ func typeDecorRebuild(pkg *ast.Package) (pos token.Pos, err error) {
 				decl.Recv.List[0].Type == nil {
 				return
 			}
-			var typeId *ast.Ident
-			switch typ := decl.Recv.List[0].Type.(type) {
-			case *ast.Ident:
-				typeId = typ
-			case *ast.StarExpr:
-				id, ok := typ.X.(*ast.Ident)
-				if !ok {
-					return
-				}
-				typeId = id
-			}
-			if typeId.Name == "" {
+			typeIdName := identName(decl.Recv.List[0].Type)
+			if typeIdName == "" {
 				return
 			}
-			comments, ok := typeNameMapDecorComments[typeId.Name]
+			comments, ok := typeNameMapDecorComments[typeIdName]
 			if !ok || len(comments) == 0 {
 				return
 			}
