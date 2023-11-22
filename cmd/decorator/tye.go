@@ -46,14 +46,29 @@ var (
 	}
 )
 
-type mapx map[string]string
+type mapV[K comparable, V any] struct {
+	items map[K]V
+}
 
-func (p mapx) put(key, value string) bool {
-	if _, ok := p[key]; ok {
+func newMapV[K comparable, V any]() *mapV[K, V] {
+	return &mapV[K, V]{
+		items: make(map[K]V),
+	}
+}
+
+func (m *mapV[K, V]) put(key K, value V) bool {
+	if _, ok := m.items[key]; ok {
 		return false
 	}
-	p[key] = value
+	m.items[key] = value
 	return true
+}
+
+func (m *mapV[K, V]) get(key K) (v V) {
+	if v, ok := m.items[key]; ok {
+		return v
+	}
+	return
 }
 
 type decorAnnotation struct {

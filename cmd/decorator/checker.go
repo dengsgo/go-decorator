@@ -82,38 +82,37 @@ func parseDecorAndParameters(s string) (string, map[string]string, error) {
 		// non
 		return callName, nil, errUsedDecorSyntaxErrorLossFunc
 	}
-	p := map[string]string{}
+	p := newMapV[string, string]()
 	pStr = strings.TrimSpace(pStr)
 	if pStr == "" {
 		if strings.HasSuffix(s, "#") {
 			// #
-			return callName, p, errUsedDecorSyntaxError
+			return callName, p.items, errUsedDecorSyntaxError
 		}
-		return callName, p, nil
+		return callName, p.items, nil
 	}
 	if pStr[0] != '{' || pStr[len(pStr)-1] != '}' {
 		return callName, nil, errUsedDecorSyntaxError
 	}
 	if len(pStr) == 2 {
 		// {}
-		return callName, p, nil
+		return callName, p.items, nil
 	}
 	if len(pStr) < 5 {
-		return callName, p, errUsedDecorSyntaxError
+		return callName, p.items, errUsedDecorSyntaxError
 	}
 
 	exprList, err := parseDecorParameterStringToExprList(pStr)
 	if err != nil {
-		return callName, p, err
+		return callName, p.items, err
 	}
-	px := mapx(p)
-	if err := decorStmtListToMap(exprList, px); err != nil {
-		return callName, p, err
+	if err := decorStmtListToMap(exprList, p); err != nil {
+		return callName, p.items, err
 	}
-	return callName, px, nil
+	return callName, p.items, nil
 }
 
-func decorStmtListToMap(exprList []ast.Expr, p mapx) error {
+func decorStmtListToMap(exprList []ast.Expr, p *mapV[string, string]) error {
 	ident := func(v ast.Expr) string {
 		if v == nil {
 			return ""

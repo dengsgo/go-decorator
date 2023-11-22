@@ -87,7 +87,7 @@ func compile(args []string) error {
 			originPath = file
 			//log.Printf("%+v\n", fd)
 			var collDecors []*decorAnnotation
-			mapDecors := mapx{}
+			mapDecors := newMapV[string, *ast.Comment]()
 			for i := len(fd.Doc.List) - 1; i >= 0; i-- {
 				doc := fd.Doc.List[i]
 				if !strings.HasPrefix(doc.Text, decoratorScanFlag) {
@@ -99,9 +99,10 @@ func compile(args []string) error {
 				if err != nil {
 					logs.Error(err, biSymbol, friendlyIDEPosition(fset, doc.Pos()))
 				}
-				if !mapDecors.put(decorName, "") {
-					logs.Error("cannot use the same decorator for repeated decoration\n\t",
-						friendlyIDEPosition(fset, doc.Pos()))
+				if !mapDecors.put(decorName, doc) {
+					logs.Error("cannot use the same decorator for repeated decoration", biSymbol,
+						"Decor:", friendlyIDEPosition(fset, doc.Pos()), biSymbol,
+						"Repeated:", friendlyIDEPosition(fset, mapDecors.get(decorName).Pos()))
 				}
 				collDecors = append(collDecors, newDecorAnnotation(doc, decorName, decorArgs))
 			}
@@ -126,7 +127,8 @@ func compile(args []string) error {
 				pkgDecorName, ok := imp.importedPath(decoratorPackagePath)
 				if !ok {
 					logs.Error(msgDecorPkgNotImported, biSymbol,
-						friendlyIDEPosition(fset, da.doc.Pos()))
+						"Target:", friendlyIDEPosition(fset, fd.Pos()), biSymbol,
+						"Decor:", friendlyIDEPosition(fset, da.doc.Pos()))
 				} else if pkgDecorName == "_" {
 					imp.pathObjMap[decoratorPackagePath].Name = nil // rewrite this package import way
 					imp.pathMap[decoratorPackagePath] = "decor"     // mark finished
