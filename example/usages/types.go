@@ -45,6 +45,15 @@ type nonMethodType struct{}
 //go:decor dumpTargetType
 type otherFileDefMethodType struct{}
 
+//go:decor dumpTargetType
+type genericType[T any] struct {
+	t T
+}
+
+func (g *genericType[T]) value() T {
+	return g.t
+}
+
 func dumpTargetType(ctx *decor.Context) {
 	g.PrintfLn("dumpTargetType say: Receiver: %v, TargetName: %+v", ctx.Receiver, ctx.TargetName)
 	ctx.TargetDo()

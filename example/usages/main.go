@@ -49,9 +49,9 @@ func main() {
 	g.Printf("useHitUseMultilineLintDecor() = %+v", useHitUseMultilineLintDecor())
 
 	section("types.go")
-	// 注释 `type T types` 类型声明，decorator 会自动装饰代理 `T` 类型下的所有方法：
+	// 注释 `type T types` 类型声明，decorator 会自动使用装饰器装饰代理 `T` 类型下的所有方法：
 	{
-		// 注释结构体的用法
+		// 结构体
 		s := &structType{"main say hello"}
 		g.PrintfLn("s.Name() = %+v", s.Name())
 		s.StrName("StrName() set")
@@ -59,26 +59,40 @@ func main() {
 		s.empty()
 	}
 	{
-		// 注释基础类型的用法
+		// 基础类型
 		v := varIntType(100)
 		g.PrintfLn("v.value() = %+v", v.value())
 		v.zeroSelf()
 		g.PrintfLn("v.value() = %+v", v.value())
 	}
 	{
-		// 注释基础类型的用法
+		// 基础类型
 		v := VarStringType("hello")
 		g.PrintfLn("v.value() = %+v", v.value())
 	}
 	{
-		// 注释结构体的用法，该类型没有任何方法
+		// 结构体，该类型没有任何方法
 		v := nonMethodType{}
 		g.PrintfLn("nonMethodType = %+v", v)
 	}
 	{
-		// 注释结构体的用法，该类型的方法定义在包内的其他文件里
+		// 结构体，该类型的方法定义在包内的其他文件里
 		o := &otherFileDefMethodType{}
 		g.PrintfLn("o.string() = %+v", o.string())
+	}
+	{
+		// 泛型结构体 T = int
+		genInt := &genericType[int]{}
+		g.PrintfLn("genInt.value() = %+v", genInt.value())
+		// 泛型结构体 T = string
+		genStr := &genericType[string]{}
+		g.PrintfLn("genStr.value() = %+v", genStr.value())
+		// 泛型结构体 T = bool
+		genBool := &genericType[bool]{}
+		g.PrintfLn("genBool.value() = %+v", genBool.value())
+		// 泛型结构体 T = struct
+		genStruct := &genericType[struct{}]{}
+		g.PrintfLn("genStruct.value() = %+v", genStruct.value())
 	}
 }
 
