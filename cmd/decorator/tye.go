@@ -168,14 +168,6 @@ func (d *decorArg) passNonzeroLint(value string) error {
 
 type decorArgsMap map[string]*decorArg
 
-type paramLint interface {
-	valid(in string) bool
-}
-
-type lintAllowType interface {
-	string | float64 | bool
-}
-
 type requiredLinter struct {
 	//	gt,
 	//	gte,
