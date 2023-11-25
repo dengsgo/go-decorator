@@ -49,7 +49,7 @@ func main() {
 	g.Printf("useHitUseMultilineLintDecor() = %+v", useHitUseMultilineLintDecor())
 
 	section("types.go")
-	// 注释 `type T types` 类型声明，decorator 会自动使用装饰器装饰代理 `T` 类型下的所有方法：
+	// 给 `type T types` 类型声明添加注释//go:decor F，decorator 会自动使用装饰器 F 装饰代理以 T 或者 *T 为接收者的所有方法：
 	{
 		// 结构体
 		s := &structType{"main say hello"}
@@ -94,6 +94,19 @@ func main() {
 		genStruct := &genericType[struct{}]{}
 		g.PrintfLn("genStruct.value() = %+v", genStruct.value())
 	}
+
+	section("types_multiple.go")
+	// `type T types` 和它的方法同时使用装饰器。
+	// 方法上的装饰器优先执行
+	{
+		m := multipleStructStandType{}
+		m.sayHello()
+	}
+	{
+		m := multipleStructWrapType{}
+		m.sayNiHao()
+	}
+
 }
 
 func section(s string) {

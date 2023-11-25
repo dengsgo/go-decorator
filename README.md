@@ -15,9 +15,9 @@
 ## Feature
 
 - Add the comment `//go:decor F` to use the decorator (`F` is the decorator function) to quickly complete the logic such as "boilerplate code injection, non-intrusive function behavior change, control logic flow";  
-- You can freely define functions as decorators and apply them to any top-level function or method.  
-- Supports the use of multiple (line) '//go: decor' decorator decorate the functions;  
-- Support annotation `type T types` type declaration, decorator will automatically proxy all methods under `T` type (coming soon);  
+- You can freely define functions as decorators and apply them to any top-level function or method;  
+- Support the use of multiple (line) '//go: decor' decorator decorate the functions;
+- Support comment `type T types` type declaration, decorator will automatically decorate proxy all methods with `T` or `*T` as the receiver;  
 - The decorator supports optional parameters, which brings more possibilities to development.  
 - Support compile-time lint verification to ensure the robustness of Go compiled code.   
 - Provide helpful error hints to detect problems at compile time and give the cause and line number of the error (e.g. undefined decorator or unreferenced package, etc.).  
@@ -120,7 +120,7 @@ func logging(ctx *decor.Context) {
 
 ```
 
-Decorator usage with optional parameters:
+Decorator usage with parameters:
 
 ```go
 package main
