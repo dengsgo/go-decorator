@@ -15,7 +15,7 @@
     - [Decorator constraints and validation](#decorator-constraints-and-validation)
       - [required](#required)
       - [nonzero](#nonzero)
-    - [方法集 Type 快捷注释](#方法集-type-快捷注释)
+    - [Method Set Type Quick Comments](#method-set-type-quick-comments)
   - [Context](#context)
     - [ctx.Kind](#ctxkind)
     - [ctx.TargetName](#ctxtargetname)
@@ -292,7 +292,7 @@ The three parameters `msg`, `count`, and `f` require the target function to pass
 
 > You can add '//go:decor-lint' rule constraints multiple times on the decorator, which means that the target function must all meet these constraints when calling the decorator in order to compile properly.
 
-### 方法集 Type 快捷注释
+### Method Set Type Quick Comments
 
 Add a comment to the' `type T types` type declaration `//go:decor F`, and the decorator will automatically use the decorator `F` to decorate all methods that have `T` or `*T` as receiver:  
 
