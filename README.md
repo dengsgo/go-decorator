@@ -166,7 +166,7 @@ import (
 	"github.com/dengsgo/go-decorator/decor"
 )
 
-// add comments//go: decor dumpTargetType,
+// add comments //go:decor dumpTargetType,
 // The structType method sets Name, StrName, and empty are automatically decorated by the decorator dumpTargetType proxy.
 // The receiver of a method can be either a value receiver or a pointer receiver, and is automatically decorated.
 
