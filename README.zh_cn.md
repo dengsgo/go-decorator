@@ -154,6 +154,35 @@ func optionalParametersFuncDemo()  {
 }
 ```
 
+给 `type T types` 类型声明添加注释//go:decor F，decorator 会自动使用装饰器 F 装饰代理以 T 或者 *T 为接收者的所有方法：
+
+```go
+package main
+
+import (
+	"github.com/dengsgo/go-decorator/decor"
+)
+
+// 添加注释//go:decor dumpTargetType，
+// structType 的方法集 Name、StrName、empty 会自动被装饰器 dumpTargetType 代理装饰。
+// 方法的接收者可以是值接收者，也可以是指针接收者，都会被自动装饰。
+
+//go:decor dumpTargetType
+type structType struct {
+	name string
+}
+
+func (s *structType) Name() string {
+	return s.name
+}
+
+func (s *structType) StrName(name string) {
+	s.name = name
+}
+
+func (s *structType) empty() {}
+```
+
 ## Example
 
 [example/usages](example/usages) Example 项目示范了如何正确编写代码使用 go-decorator 工具。 

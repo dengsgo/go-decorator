@@ -16,14 +16,14 @@
 
 - Add the comment `//go:decor F` to use the decorator (`F` is the decorator function) to quickly complete the logic such as "boilerplate code injection, non-intrusive function behavior change, control logic flow";  
 - You can freely define functions as decorators and apply them to any top-level function or method;  
-- Support the use of multiple (line) '//go: decor' decorator decorate the functions;
+- Support the use of multiple (line) `//go:decor` decorator decorate the functions;
 - Support comment `type T types` type declaration, decorator will automatically decorate proxy all methods with `T` or `*T` as the receiver;  
 - The decorator supports optional parameters, which brings more possibilities to development.  
 - Support compile-time lint verification to ensure the robustness of Go compiled code.   
 - Provide helpful error hints to detect problems at compile time and give the cause and line number of the error (e.g. undefined decorator or unreferenced package, etc.).  
 - Enhancing the target function only at compile time does not degrade the performance of the compiled program, nor does it have reflection operations.
 
-Decorator usage can be similar to other languages such as Python, TypeScript. (Ideal for caching, forensics, logging, and other scenarios, as a aid to free up duplicate coding).
+Decorator usage can be similar to other languages such as Python, TypeScript. (Ideal for caching, forensics, logging, and other scenarios, as an aid to free up duplicate coding).
 
 > `go-decorator` is a compile-time decorator injection technique. Using it does not affect your project's source files and does not generate additional `.go` files or other redundant files in your project. This injection method is very different from the `go:generate` generation method.
 
@@ -156,6 +156,36 @@ func optionalParametersFuncDemo()  {
 	// function code
 }
 ```
+
+Add a comment to the' `type T types` type declaration `//go:decor F`, and the decorator will automatically use the decorator `F` to decorate all methods that have `T` or `*T` as receiver:
+
+```go
+package main
+
+import (
+	"github.com/dengsgo/go-decorator/decor"
+)
+
+// add comments//go: decor dumpTargetType,
+// The structType method sets Name, StrName, and empty are automatically decorated by the decorator dumpTargetType proxy.
+// The receiver of a method can be either a value receiver or a pointer receiver, and is automatically decorated.
+
+//go:decor dumpTargetType
+type structType struct {
+	name string
+}
+
+func (s *structType) Name() string {
+	return s.name
+}
+
+func (s *structType) StrName(name string) {
+	s.name = name
+}
+
+func (s *structType) empty() {}
+```
+
 
 ## Example
 
