@@ -192,7 +192,7 @@ func hit(ctx *decor.Context, msg string, count int64, repeat bool, f float64, op
 
 `hit` 函数即为一个合法带有可选参数的装饰器，它允许目标函数调用时传入相应值， `hit` 函数就能获取到目标函数的参数值。
 
-以下的参数类型是被允许的：
+注意，额外参数的类型是有限制的，只有基础类型才会被允许使用，详细如下：
 
 | 类型  | 关键字|     
 |-----|-----|
@@ -265,6 +265,8 @@ func hit(ctx *decor.Context, msg string, count int64, repeat bool, f float64, op
 | `lt`  | `<`  |
 
 
+范围指令应用于字符串比较的是字符长度，应用于数值类型比较的是值大小。
+
 #### nonzero
 
 验证参数值不能为零值。例如：
@@ -279,6 +281,42 @@ func hit(ctx *decor.Context, msg string, count int64, repeat bool, f float64, op
 `msg, count, f` 三个参数要求目标函数在调用时传值不能为零值。
 
 > 可以在装饰器上多次添加 `//go:decor-lint` 规则约束，这意味着目标函数在调用装饰器时，必须全部满足这些约束才能正常编译。
+
+### 方法集 Type 快捷注释
+
+给 `type T types` 类型声明添加注释 `//go:decor F`，decorator 会自动使用装饰器 `F` 装饰代理以 `T` 或者 `*T` 为接收者的所有方法：
+
+```go
+package main
+
+import (
+	"github.com/dengsgo/go-decorator/decor"
+)
+
+// 添加注释//go:decor dumpTargetType，
+// structType 的方法集 Name、StrName、empty 会自动被装饰器 dumpTargetType 代理装饰。
+// 方法的接收者可以是值接收者，也可以是指针接收者，都会被自动装饰。
+
+//go:decor dumpTargetType
+type structType struct {
+	name string
+}
+
+func (s *structType) Name() string {
+	return s.name
+}
+
+func (s *structType) StrName(name string) {
+	s.name = name
+}
+
+func (s *structType) empty() {}
+```
+
+`type T types` 和它的方法同时使用装饰器。 这种情况方法的装饰器会先执行，然后再执行类型的装饰器。
+
+代码示例可以参考：[example/usages/types_multiple.go](example/usages/types_multiple.go).  
+提示：不推荐同时使用多个装饰器装饰目标函数！这会增加开发者阅读代码的难度。  
 
 
 ## Context

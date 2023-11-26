@@ -284,6 +284,44 @@ The three parameters `msg`, `count`, and `f` require the target function to pass
 
 > You can add '//go:decor-lint' rule constraints multiple times on the decorator, which means that the target function must all meet these constraints when calling the decorator in order to compile properly.
 
+### 方法集 Type 快捷注释
+
+Add a comment to the' `type T types` type declaration `//go:decor F`, and the decorator will automatically use the decorator `F` to decorate all methods that have `T` or `*T` as receiver:  
+
+```go
+package main
+
+import (
+	"github.com/dengsgo/go-decorator/decor"
+)
+
+// add comments //go:decor dumpTargetType,
+// The structType method sets Name, StrName, and empty are automatically decorated by the decorator dumpTargetType proxy.
+// The receiver of a method can be either a value receiver or a pointer receiver, and is automatically decorated.
+
+//go:decor dumpTargetType
+type structType struct {
+	name string
+}
+
+func (s *structType) Name() string {
+	return s.name
+}
+
+func (s *structType) StrName(name string) {
+	s.name = name
+}
+
+func (s *structType) empty() {}
+```
+
+`type T types` and its methods use both decorators. In this case, the decorator of the method is executed first, and then the decorator of the type is executed.
+
+Code examples can be referred to：[example/usages/types_multiple.go](example/usages/types_multiple.go).  
+
+Tip: It is not recommended to use multiple decorators to decorate the target function at the same time! This will increase the difficulty for developers to read the code.
+
+
 ## Context
 
 `ctx *decor.Context` is the entry parameter of the decorator function, which is the context of the target function (i.e., the function that uses this decorator, also known as the decorated function).

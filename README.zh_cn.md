@@ -154,7 +154,7 @@ func optionalParametersFuncDemo()  {
 }
 ```
 
-给 `type T types` 类型声明添加注释//go:decor F，decorator 会自动使用装饰器 F 装饰代理以 T 或者 *T 为接收者的所有方法：
+给 `type T types` 类型声明添加注释 `//go:decor F`，decorator 会自动使用装饰器 `F` 装饰代理以 `T` 或者 `*T` 为接收者的所有方法：
 
 ```go
 package main
