@@ -1,3 +1,11 @@
+## v0.20.0 beta
+
+- Feat: Support comment `type T types` type declaration, decorator will automatically decorate proxy all methods with `T` or `*T` as the receiver.  
+- Add: More detailed error message display.  
+- Add: Optimize the code called by the decorator, now the error message will prompt the correct line number  
+- Add: More test cases and usage examples  
+- Fix: Possible null pointers  
+
 ## v0.15.0 beta
 
 - Feat: `decor.Context` added fields `TargetName`、`Receiver`
