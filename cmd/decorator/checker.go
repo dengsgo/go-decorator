@@ -33,6 +33,22 @@ var (
 	errLintSyntaxError = errors.New("syntax error using go:decor-lint")
 )
 
+type linterCheckError struct {
+	msg string
+	pos token.Pos
+}
+
+func newLinterCheckError(msg string, pos token.Pos) *linterCheckError {
+	return &linterCheckError{
+		msg: msg,
+		pos: pos,
+	}
+}
+
+func (l *linterCheckError) Error() string {
+	return l.msg
+}
+
 func isDecoratorFunc(fd *ast.FuncDecl, pkgName string) bool {
 	if pkgName == "" ||
 		fd == nil ||
@@ -196,7 +212,7 @@ func parseDecorParameterStringToExprList(s string) ([]ast.Expr, error) {
 }
 
 func checkDecorAndGetParam(pkgPath, funName string, annotationMap map[string]string) ([]string, error) {
-	decl, file, err := pkgILoader.findFunc(pkgPath, funName)
+	fset, decl, file, err := pkgILoader.findFunc(pkgPath, funName)
 	if err != nil {
 		return nil, err
 	}
@@ -218,7 +234,8 @@ func checkDecorAndGetParam(pkgPath, funName string, annotationMap map[string]str
 		return []string{}, nil
 	}
 	if err := parseLinterFromDocGroup(decl.Doc, m); err != nil {
-		return nil, err
+		return nil, errors.New(fmt.Sprintf("%s\n\tLint: %s",
+			err.Error(), friendlyIDEPosition(fset, err.pos)))
 	}
 	params := make([]string, len(m))
 	for _, v := range m {
@@ -257,7 +274,7 @@ func checkDecorAndGetParam(pkgPath, funName string, annotationMap map[string]str
 	return params[1:], nil
 }
 
-func parseLinterFromDocGroup(doc *ast.CommentGroup, args decorArgsMap) error {
+func parseLinterFromDocGroup(doc *ast.CommentGroup, args decorArgsMap) *linterCheckError {
 	if doc == nil || doc.List == nil || len(doc.List) == 0 {
 		return nil
 	}
@@ -267,7 +284,7 @@ func parseLinterFromDocGroup(doc *ast.CommentGroup, args decorArgsMap) error {
 			break
 		}
 		if err := resolveLinterFromAnnotation(comment.Text[len(decorLintScanFlag):], args); err != nil {
-			return err
+			return newLinterCheckError(err.Error(), comment.Pos())
 		}
 	}
 	return nil
@@ -429,11 +446,6 @@ func collDeclFuncParamsAnfTypes(fd *ast.FuncDecl) (m decorArgsMap) {
 	return m
 }
 
-type pkgSet struct {
-	fset *token.FileSet
-	pkgs map[string]*ast.Package
-}
-
 var pkgILoader = newPkgLoader()
 
 type pkgLoader struct {
@@ -448,16 +460,16 @@ func newPkgLoader() *pkgLoader {
 	}
 }
 
-func (d *pkgLoader) findFunc(pkgPath, funName string) (target *ast.FuncDecl, file *ast.File, err error) {
+func (d *pkgLoader) findFunc(pkgPath, funName string) (fileSet *token.FileSet, target *ast.FuncDecl, file *ast.File, err error) {
 	return d.findTarget(pkgPath, funName)
 }
 
-func (d *pkgLoader) findTarget(pkgPath string, funName string) (target *ast.FuncDecl, afile *ast.File, err error) {
+func (d *pkgLoader) findTarget(pkgPath string, funName string) (fileSet *token.FileSet, target *ast.FuncDecl, afile *ast.File, err error) {
 	set, err := d.loadPkg(pkgPath)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
-	err = errors.New("target not found")
+	err = errors.New("decorator not found: " + pkgPath + "#" + funName)
 	if ext := filepath.Ext(funName); ext != "" {
 		funName = ext[1:]
 	}
@@ -477,6 +489,7 @@ func (d *pkgLoader) findTarget(pkgPath string, funName string) (target *ast.Func
 
 				afile = file
 				target = decl
+				fileSet = set.fset
 				err = nil
 				return true
 			})

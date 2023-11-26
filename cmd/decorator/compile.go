@@ -156,7 +156,7 @@ func compile(args []string) error {
 				}
 				params, err := checkDecorAndGetParam(decorPkgPath, decorName, decorParams)
 				if err != nil {
-					logs.Error(err, biSymbol, friendlyIDEPosition(fset, da.doc.Pos()))
+					logs.Error(err, biSymbol, "Decor:", friendlyIDEPosition(fset, da.doc.Pos()))
 				}
 				ra := builderReplaceArgs(fd, decorName, params, gi)
 				rs, err := replace(ra)

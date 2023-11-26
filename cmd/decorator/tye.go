@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"strconv"
 	"strings"
@@ -45,6 +46,11 @@ var (
 		lintCpLte: true,
 	}
 )
+
+type pkgSet struct {
+	fset *token.FileSet
+	pkgs map[string]*ast.Package
+}
 
 type mapV[K comparable, V any] struct {
 	items map[K]V
