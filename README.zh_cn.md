@@ -211,7 +211,7 @@ func main() {
 	g.PrintfLn("Sum(1, 2, 3, 4, 5, 6, 7, 8, 9) = %+v", Sum(1, 2, 3, 4, 5, 6, 7, 8, 9))
 
 	section("method.go")
-	// 方法使用装饰器
+	// 示例：方法使用装饰器
 	{
 		m := &methodTestPointerStruct{}
 		m.doSomething("main called")
@@ -220,7 +220,7 @@ func main() {
 		m := methodTestRawStruct{}
 		m.doSomething("main called")
 	}
-	
+
 	section("withdecorparams.go")
 	// 示例：使用带有参数的装饰器，如何传值
 	g.PrintfLn("useArgsDecor() = %+v", useArgsDecor())
@@ -229,6 +229,45 @@ func main() {
 	g.Printf("useHitUseNonzeroLint() = %+v", useHitUseNonzeroLint())
 	g.Printf("useHitBothUseLint() = %+v", useHitBothUseLint())
 	g.Printf("useHitUseMultilineLintDecor() = %+v", useHitUseMultilineLintDecor())
+
+	section("types.go")
+	// 示例：给 `type T types` 类型声明添加注释//go:decor F，decorator 会自动使用装饰器 F 装饰代理以 T 或者 *T 为接收者的所有方法：
+	{
+		// 结构体
+		s := &structType{"main say hello"}
+		g.PrintfLn("s.Name() = %+v", s.Name())
+		s.StrName("StrName() set")
+		g.PrintfLn("s.Name() = %+v", s.Name())
+		s.empty()
+	}
+	{
+		// 基础类型
+		v := varIntType(100)
+		g.PrintfLn("v.value() = %+v", v.value())
+		v.zeroSelf()
+		g.PrintfLn("v.value() = %+v", v.value())
+	}
+	{
+		// 泛型结构体 T = int
+		genInt := &genericType[int]{}
+		g.PrintfLn("genInt.value() = %+v", genInt.value())
+		// 泛型结构体 T = struct
+		genStruct := &genericType[struct{}]{}
+		g.PrintfLn("genStruct.value() = %+v", genStruct.value())
+	}
+
+	section("types_multiple.go")
+	// 示例：`type T types` 和它的方法同时使用装饰器。
+	// 方法上的装饰器优先执行
+	{
+		m := multipleStructStandType{}
+		m.sayHello()
+	}
+	{
+		m := multipleStructWrapType{}
+		m.sayNiHao()
+	}
+
 }
 
 ```

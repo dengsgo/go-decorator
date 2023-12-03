@@ -233,6 +233,45 @@ func main() {
 	g.Printf("useHitUseNonzeroLint() = %+v", useHitUseNonzeroLint())
 	g.Printf("useHitBothUseLint() = %+v", useHitBothUseLint())
 	g.Printf("useHitUseMultilineLintDecor() = %+v", useHitUseMultilineLintDecor())
+
+	section("types.go")
+	// Support comment `type T types` type declaration, decorator will automatically decorate proxy all methods with `T` or `*T` as the receiver;  
+	{
+		// structural
+		s := &structType{"main say hello"}
+		g.PrintfLn("s.Name() = %+v", s.Name())
+		s.StrName("StrName() set")
+		g.PrintfLn("s.Name() = %+v", s.Name())
+		s.empty()
+	}
+	{
+		// type base
+		v := varIntType(100)
+		g.PrintfLn("v.value() = %+v", v.value())
+		v.zeroSelf()
+		g.PrintfLn("v.value() = %+v", v.value())
+	}
+	{
+		// generic type T = int
+		genInt := &genericType[int]{}
+		g.PrintfLn("genInt.value() = %+v", genInt.value())
+		// generic type T = struct
+		genStruct := &genericType[struct{}]{}
+		g.PrintfLn("genStruct.value() = %+v", genStruct.value())
+	}
+
+	section("types_multiple.go")
+	// `type T types` 和它的方法同时使用装饰器。
+	// 方法上的装饰器优先执行
+	{
+		m := multipleStructStandType{}
+		m.sayHello()
+	}
+	{
+		m := multipleStructWrapType{}
+		m.sayNiHao()
+	}
+
 }
 
 ```
