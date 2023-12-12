@@ -48,7 +48,7 @@ Run `decorator` to display the current version.
 
 ```shell
 $ decorator
-decorator v0.20.0 beta , https://github.com/dengsgo/go-decorator
+decorator v0.21.0 beta , https://github.com/dengsgo/go-decorator
 ```
 
 Tip: Run the above installation command frequently to install the latest version for bug fixes, enhanced experience, and more new features.

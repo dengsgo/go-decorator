@@ -1,3 +1,7 @@
+## v0.21.0 beta
+
+- Fix: Possible null pointers during interface conversion
+
 ## v0.20.0 beta
 
 - Feat: Support comment `type T types` type declaration, decorator will automatically decorate proxy all methods with `T` or `*T` as the receiver.  

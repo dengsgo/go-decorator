@@ -48,7 +48,7 @@ $ go install github.com/dengsgo/go-decorator/cmd/decorator@latest
 
 ```shell
 $ decorator
-decorator v0.20.0 beta , https://github.com/dengsgo/go-decorator
+decorator v0.21.0 beta , https://github.com/dengsgo/go-decorator
 ```
 
 提示：经常运行上述安装命令来安装最新版本，以获得 BUG 修复、增强体验和更多的新特性。
