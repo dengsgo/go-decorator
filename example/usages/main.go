@@ -24,6 +24,10 @@ func main() {
 		g.Printf("datetime(%d)=%s\n", t, s)
 	}
 
+	section("special.go")
+	_, _ = nilInAndOut(nil, nil, "test")
+	_ = ellipsisIn(0, "hello", "world", "!")
+
 	section("genericfunc.go")
 	// 泛型函数使用装饰器
 	g.PrintfLn("Sum(1, 2, 3, 4, 5, 6, 7, 8, 9) = %+v", Sum(1, 2, 3, 4, 5, 6, 7, 8, 9))

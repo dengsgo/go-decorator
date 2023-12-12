@@ -144,7 +144,15 @@ func builderReplaceArgs(f *ast.FuncDecl, decorName string, decorParams []string,
 				ra.DecorListOut = append(ra.DecorListOut,
 					fmt.Sprintf("%s.TargetOut[%d]", ra.DecorVarName, count))
 				ra.DecorCallOut = append(ra.DecorCallOut,
-					fmt.Sprintf("%s.TargetOut[%d].(%s)", ra.DecorVarName, count, typeString(r.Type)))
+					//fmt.Sprintf("%s.TargetOut[%d].(%s)", ra.DecorVarName, count, typeString(r.Type)))
+					fmt.Sprintf(
+						"func() %s {o,_ := %s.TargetOut[%d].(%s); return o}()",
+						typeString(r.Type),
+						ra.DecorVarName,
+						count,
+						typeString(r.Type),
+					),
+				)
 				count++
 			}
 		}
@@ -161,7 +169,16 @@ func builderReplaceArgs(f *ast.FuncDecl, decorName string, decorParams []string,
 				ra.InArgNames = append(ra.InArgNames, p.Name)
 				ra.InArgTypes = append(ra.InArgTypes, typeString(r.Type))
 				ra.DecorCallIn = append(ra.DecorCallIn,
-					fmt.Sprintf("%s.TargetIn[%d].(%s)%s", ra.DecorVarName, count, typeString(r.Type), elString(r.Type)))
+					//fmt.Sprintf("%s.TargetIn[%d].(%s)%s", ra.DecorVarName, count, typeString(r.Type), elString(r.Type)))
+					fmt.Sprintf(
+						"func() %s {o,_ := %s.TargetIn[%d].(%s); return o}()%s",
+						typeString(r.Type),
+						ra.DecorVarName,
+						count,
+						typeString(r.Type),
+						elString(r.Type),
+					),
+				)
 				count++
 			}
 		}
