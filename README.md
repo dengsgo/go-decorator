@@ -3,7 +3,7 @@
 [![Actions](https://github.com/dengsgo/go-decorator/workflows/Go/badge.svg)](https://github.com/dengsgo/go-decorator/actions)  [![Go Report Card](https://goreportcard.com/badge/github.com/dengsgo/go-decorator)](https://goreportcard.com/report/github.com/dengsgo/go-decorator)  [![godoc.org](https://godoc.org/github.com/dengsgo/go-decorator/decor?status.svg)](https://godoc.org/github.com/dengsgo/go-decorator/decor)  [![Go doc](https://img.shields.io/badge/go.dev-reference-brightgreen?logo=go&logoColor=white&style=flat)](https://pkg.go.dev/github.com/dengsgo/go-decorator/decor)  
 
 
-[中文](README.zh_cn.md) | English 
+**[中文](README.zh_cn.md)** | **[使用手册](GUIDE.zh_cn.md)** | **English** | **[Guide](GUIDE.md)**  
 
 > Beta version, use with caution in production environments. Click ⭐Star to follow the project's progress. 
 
@@ -95,7 +95,7 @@ func main() {
 	myFunc() 
 }
 
-// Declare that the function will be decorated using the decorator logging by using the go: decor annotation.
+// Declare that the function will be decorated using the decorator logging by using the //go:decor annotation.
 //
 //go:decor logging
 func myFunc() {
@@ -103,7 +103,7 @@ func myFunc() {
 }
 
 // This is a regular function. 
-// But it implements the func (*decor.Context) type, so it is still a decorator method,
+// But it implements the func (*decor.Context[, ...any]) type, so it is still a decorator method,
 // You can use this decorator on other functions.
 // In the function, ctx is the decorator context, and the function name, input and output 
 // parameters, and execution of the target function can be obtained through ctx.
