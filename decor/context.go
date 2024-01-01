@@ -24,7 +24,7 @@ type TKind uint8
 
 const (
 	KFunc   TKind = iota // top-level function
-	KMethod              // struct method
+	KMethod              // method
 )
 
 // Context The context of the decorator.
