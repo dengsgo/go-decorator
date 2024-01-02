@@ -289,7 +289,7 @@ If you find any problems, you can provide feedback here. [GitHub Issues](https:/
 
 ## Contribute
 
-The project is still under development and due to frequent changes, external contributions are temporarily not accepted. Welcome to submit a Pull Request after stabilization.
+PRs for bug fixes and feature optimizations are welcome.
 
 ## TODO
 

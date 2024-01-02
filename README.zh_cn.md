@@ -287,7 +287,8 @@ func main() {
 
 ## Contribute
 
-项目仍在开发中，由于变动频繁，暂时不接受外部贡献。欢迎稳定后再提交 Pull Request .
+欢迎提交Bug修复和功能优化的PR。 
+
 
 ## TODO
 
