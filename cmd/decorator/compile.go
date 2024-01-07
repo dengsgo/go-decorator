@@ -53,6 +53,12 @@ func compile(args []string) error {
 		return nil
 	}
 
+	decorWrappedCodeFilePath := ""
+	if dpp, err := getPackageInfo(decoratorPackagePath); err == nil {
+		decorWrappedCodeFilePath = dpp.Dir + "/wrapped_code.go"
+		files = append(files, decorWrappedCodeFilePath)
+	}
+
 	logs.Debug("packageName", packageName, files, args)
 
 	var originPath string
@@ -167,7 +173,9 @@ func compile(args []string) error {
 				if err != nil {
 					logs.Error("getStmtList err", err)
 				}
-
+				if wcf, ok := pkg.Files[decorWrappedCodeFilePath]; ok {
+					assignWrappedCodePos(genStmts, wcf.Decls[0].(*ast.FuncDecl).Body.List)
+				}
 				if len(ra.OutArgNames) == 0 {
 					// non-return
 					genStmts[1].(*ast.AssignStmt).Rhs[0].(*ast.FuncLit).Body.List[0].(*ast.ExprStmt).X.(*ast.CallExpr).Fun.(*ast.FuncLit).Body.List = fd.Body.List
@@ -240,6 +248,67 @@ LOOP:
 			if funVisitor(decl) {
 				break LOOP
 			}
+		}
+	}
+}
+
+func assignWrappedCodePos(from, reset []ast.Stmt) {
+	{
+		partFrom := from[0].(*ast.AssignStmt)
+		partReset := reset[0].(*ast.AssignStmt)
+		partFrom.TokPos = partReset.Pos()
+		partFrom.Tok = partReset.Tok
+		assignStmtPos(partFrom.Lhs[0], partReset.Lhs[0], true)
+		assignStmtPos(partFrom.Rhs[0], partReset.Rhs[0], false)
+		{
+			l := partFrom.Rhs[0].(*ast.UnaryExpr).X.(*ast.CompositeLit)
+			r := partReset.Rhs[0].(*ast.CompositeLit)
+			l.Lbrace = r.Lbrace
+			l.Rbrace = r.Rbrace
+			assignStmtPos(l.Type, r.Type, true)
+			//l.Type.(*ast.SelectorExpr).X.(*ast.Ident).NamePos = r.Type.(*ast.Ident).NamePos
+			for i, kv := range l.Elts {
+				rv := r.Elts[i].(*ast.KeyValueExpr)
+				v := kv.(*ast.KeyValueExpr)
+				assignStmtPos(v, rv, true)
+			}
+		}
+	}
+	{
+		partFrom := from[1].(*ast.AssignStmt)
+		partReset := reset[1].(*ast.AssignStmt)
+		assignStmtPos(partFrom.Lhs[0], partReset.Lhs[0], true)
+		//partFrom.Lhs[0].(*ast.SelectorExpr).X.(*ast.Ident).NamePos = partReset.Lhs[0].(*ast.SelectorExpr).X.(*ast.Ident).NamePos
+		//partFrom.Lhs[0].(*ast.SelectorExpr).Sel.NamePos = partReset.Lhs[0].(*ast.SelectorExpr).Sel.NamePos
+		partFrom.Tok = partReset.Tok
+		//partFrom.Rhs[0].(*ast.FuncLit)
+		assignStmtPos(partFrom.Rhs[0], partReset.Rhs[0], true)
+		var flit *ast.CallExpr
+		r := partReset.Rhs[0].(*ast.FuncLit).Body.List[0].(*ast.ExprStmt).X.(*ast.CallExpr)
+		if astmt, ok := partFrom.Rhs[0].(*ast.FuncLit).Body.List[0].(*ast.AssignStmt); ok {
+			assignStmtPos(astmt.Lhs[0], r, true)
+			flit = partFrom.Rhs[0].(*ast.FuncLit).Body.List[0].(*ast.AssignStmt).Rhs[0].(*ast.CallExpr)
+		} else {
+			flit = partFrom.Rhs[0].(*ast.FuncLit).Body.List[0].(*ast.ExprStmt).X.(*ast.CallExpr)
+		}
+		flit.Lparen = r.Lparen
+		flit.Rparen = r.Rparen
+		//TODO
+		//if flit.Args != nil {
+		//	for _, arg := range flit.Args {
+		//		assignStmtPos(arg, r.Args[0], false)
+		//	}
+		//}
+	}
+	// has-return
+	if len(from) >= 4 {
+		l := from[3].(*ast.ReturnStmt)
+		r := reset[2].(*ast.ReturnStmt)
+		l.Return = r.Return
+		if l.Results != nil {
+			//for _, v := range l.Results {
+			//	assignStmtPos(v.)
+			//}
 		}
 	}
 }
