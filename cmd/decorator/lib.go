@@ -300,3 +300,95 @@ func parserGOFiles(fset *token.FileSet, files ...string) (*ast.Package, error) {
 	}
 	return pkg, nil
 }
+
+func assignStmtPos(f, t ast.Node, depth bool) {
+	if f == nil || t == nil {
+		return
+	}
+	switch v := f.(type) {
+	case *ast.Ident:
+		v.NamePos = t.Pos()
+	case *ast.BasicLit:
+		v.ValuePos = t.Pos()
+	case *ast.UnaryExpr:
+		v.OpPos = t.Pos()
+		if depth {
+			assignStmtPos(v.X, t, depth)
+		}
+	case *ast.IndexExpr:
+		v.Lbrack = t.Pos()
+		v.Rbrack = t.Pos()
+		assignStmtPos(v.X, t, depth)
+		assignStmtPos(v.Index, t, depth)
+	case *ast.AssignStmt:
+		v.TokPos = t.Pos()
+		if depth {
+			for _, lhs := range v.Lhs {
+				assignStmtPos(lhs, t, depth)
+			}
+			for _, rhs := range v.Rhs {
+				assignStmtPos(rhs, t, depth)
+			}
+		}
+	case *ast.CompositeLit:
+		v.Lbrace = t.Pos()
+		v.Rbrace = t.End()
+		if depth {
+			assignStmtPos(v.Type, t, depth)
+			if v.Elts != nil {
+				for _, els := range v.Elts {
+					assignStmtPos(els, t, depth)
+				}
+			}
+		}
+	case *ast.KeyValueExpr:
+		v.Colon = t.Pos()
+		if depth {
+			assignStmtPos(v.Key, t, depth)
+			assignStmtPos(v.Value, t, depth)
+		}
+	case *ast.ArrayType:
+		v.Lbrack = t.Pos()
+		if depth {
+			assignStmtPos(v.Len, t, depth)
+			assignStmtPos(v.Elt, t, depth)
+		}
+	case *ast.SelectorExpr:
+		assignStmtPos(v.Sel, t, depth)
+		assignStmtPos(v.X, t, depth)
+	case *ast.FuncLit:
+		assignStmtPos(v.Type, t, depth)
+	case *ast.FuncType:
+		v.Func = t.Pos()
+		assignStmtPos(v.Params, t, depth)
+		assignStmtPos(v.Results, t, depth)
+	case *ast.FieldList:
+		if v == nil {
+			return
+		}
+		v.Opening = t.Pos()
+		v.Closing = t.Pos()
+		if depth && v.List != nil {
+			for _, field := range v.List {
+				assignStmtPos(field, t, depth)
+			}
+		}
+	case *ast.Field:
+		if v == nil {
+			return
+		}
+		assignStmtPos(v.Type, t, depth)
+		assignStmtPos(v.Tag, t, depth)
+		if v.Names != nil {
+			for _, name := range v.Names {
+				assignStmtPos(name, t, depth)
+			}
+		}
+	case *ast.CallExpr:
+		assignStmtPos(v.Fun, t, depth)
+		v.Lparen = t.Pos()
+		v.Rparen = t.Pos()
+	default:
+		logs.Info("can`t support type from assignStmtPos")
+	}
+}
