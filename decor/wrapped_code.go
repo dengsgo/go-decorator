@@ -17,8 +17,8 @@ package decor
 func wrappedTargetCode( /* in1, in2, ... */ ) /* (out1, out2, ...) */ {
 	varDecorContext := Context{
 		Kind:       KFunc, // KFunc / KMethod
-		Receiver:   nil,   // wrapped method receiver
 		TargetName: "",    // wrapped function/method name
+		Receiver:   nil,   // wrapped method receiver
 		TargetIn:   []any{ /*in1, in2, ....*/ },
 		TargetOut:  []any{ /*out1, out2, ....*/ },
 	}
