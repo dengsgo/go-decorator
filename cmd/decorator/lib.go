@@ -306,10 +306,14 @@ func assignStmtPos(f, t ast.Node, depth bool) {
 		return
 	}
 	switch v := f.(type) {
+	case nil:
+		return
 	case *ast.Ident:
 		v.NamePos = t.Pos()
 	case *ast.BasicLit:
-		v.ValuePos = t.Pos()
+		if v != nil {
+			v.ValuePos = t.Pos()
+		}
 	case *ast.UnaryExpr:
 		v.OpPos = t.Pos()
 		if depth {
@@ -358,10 +362,26 @@ func assignStmtPos(f, t ast.Node, depth bool) {
 		assignStmtPos(v.X, t, depth)
 	case *ast.FuncLit:
 		assignStmtPos(v.Type, t, depth)
+		if depth {
+			assignStmtPos(v.Body, t, depth)
+		}
 	case *ast.FuncType:
 		v.Func = t.Pos()
 		assignStmtPos(v.Params, t, depth)
 		assignStmtPos(v.Results, t, depth)
+	case *ast.BlockStmt:
+		v.Lbrace = t.Pos()
+		v.Rbrace = t.End()
+		if depth && v.List != nil {
+			for _, st := range v.List {
+				assignStmtPos(st, t, depth)
+			}
+		}
+	case *ast.TypeAssertExpr:
+		v.Lparen = t.Pos()
+		v.Rparen = t.End()
+		assignStmtPos(v.Type, t, depth)
+		assignStmtPos(v.X, t, depth)
 	case *ast.FieldList:
 		if v == nil {
 			return
@@ -385,9 +405,16 @@ func assignStmtPos(f, t ast.Node, depth bool) {
 			}
 		}
 	case *ast.CallExpr:
-		assignStmtPos(v.Fun, t, depth)
 		v.Lparen = t.Pos()
 		v.Rparen = t.Pos()
+		if v.Args != nil {
+			for _, arg := range v.Args {
+				assignStmtPos(arg, t, depth)
+			}
+		}
+		if depth {
+			assignStmtPos(v.Fun, t, depth)
+		}
 	default:
 		logs.Info("can`t support type from assignStmtPos")
 	}

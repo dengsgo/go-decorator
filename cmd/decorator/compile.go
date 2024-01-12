@@ -77,6 +77,9 @@ func compile(args []string) error {
 
 	for file, f := range pkg.Files {
 		logs.Debug("file Parse", file)
+		if file == decorWrappedCodeFilePath {
+			continue // ignore
+		}
 		//f, err := parser.ParseFile(fset, file, nil, parser.ParseComments)
 		//if err != nil {
 		//	continue
@@ -174,7 +177,7 @@ func compile(args []string) error {
 					logs.Error("getStmtList err", err)
 				}
 				if wcf, ok := pkg.Files[decorWrappedCodeFilePath]; ok {
-					assignWrappedCodePos(genStmts, wcf.Decls[0].(*ast.FuncDecl).Body.List)
+					assignWrappedCodePos(genStmts, wcf.Decls[0].(*ast.FuncDecl).Body.List, wcf.Comments)
 				}
 				if len(ra.OutArgNames) == 0 {
 					// non-return
@@ -252,7 +255,7 @@ LOOP:
 	}
 }
 
-func assignWrappedCodePos(from, reset []ast.Stmt) {
+func assignWrappedCodePos(from, reset []ast.Stmt, cg []*ast.CommentGroup) {
 	{
 		partFrom := from[0].(*ast.AssignStmt)
 		partReset := reset[0].(*ast.AssignStmt)
@@ -291,26 +294,34 @@ func assignWrappedCodePos(from, reset []ast.Stmt) {
 		} else {
 			flit = partFrom.Rhs[0].(*ast.FuncLit).Body.List[0].(*ast.ExprStmt).X.(*ast.CallExpr)
 		}
-		flit.Lparen = r.Lparen
-		flit.Rparen = r.Rparen
+		//flit.Lparen = r.Lparen
 		//TODO
-		//if flit.Args != nil {
-		//	for _, arg := range flit.Args {
-		//		assignStmtPos(arg, r.Args[0], false)
-		//	}
-		//}
+		if flit.Args != nil {
+			inParams := getIndexComment(cg, 12)
+			for _, arg := range flit.Args {
+				assignStmtPos(arg, inParams, true)
+			}
+		}
 	}
 	// has-return
-	if len(from) >= 4 {
+	if len(from) > 3 {
 		l := from[3].(*ast.ReturnStmt)
 		r := reset[2].(*ast.ReturnStmt)
 		l.Return = r.Return
-		if l.Results != nil {
-			//for _, v := range l.Results {
-			//	assignStmtPos(v.)
-			//}
+		outParams := getIndexComment(cg, 14)
+		if l.Results != nil && outParams != nil {
+			for _, v := range l.Results {
+				assignStmtPos(v, outParams, true)
+			}
 		}
 	}
+}
+
+func getIndexComment(cg []*ast.CommentGroup, index int) *ast.Comment {
+	if len(cg) > index && cg[index] != nil && cg[index].List != nil && len(cg[index].List) > 0 {
+		return cg[index].List[0]
+	}
+	return nil
 }
 
 // Reset the line of the behavior annotation where the decorator call is located
