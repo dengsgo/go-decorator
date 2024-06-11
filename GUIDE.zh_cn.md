@@ -90,7 +90,7 @@ $ go get -u github.com/dengsgo/go-decorator
 
 ### 自定义装饰器
 
-装饰器是普通的 `go` 一级函数(Top-level Function)，它的类型是 `func(*decor.Context [, ...any])`. 只要函数满足这个类型，它即是合法的装饰器，可以在项目代码里来装饰其他函数。
+装饰器是普通的 `go` 一级函数(Top-level Function)，它的类型签名是 `func(*decor.Context [, ...any])`. 只要函数满足该签名，它即是合法的装饰器，可以在项目代码里来装饰其他函数。
 
 例如, 这里定义一个 logging 装饰器，它可以打印被调用函数的参数：
 
