@@ -19,7 +19,7 @@ jobs:
       matrix:
         target: ["1.18", "1.19", "1.20", "1.21", "1.22", "1.23"]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Go
       uses: actions/setup-go@v4
