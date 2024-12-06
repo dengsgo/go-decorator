@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	InTest      = false
+	InTest      = true
 	TestBuffers = bytes.NewBuffer([]byte{})
 )
 

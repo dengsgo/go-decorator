@@ -120,4 +120,5 @@ func section(s string) {
 func init() {
 	log.SetFlags(0)
 	time.Local = time.FixedZone("CST", 8*3600)
+	g.InTest = false
 }
