@@ -3,13 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/dengsgo/go-decorator/cmd/logs"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/dengsgo/go-decorator/cmd/logs"
 )
 
-const version = `v0.21.0 beta`
+const version = `v0.22.0 beta`
 const opensourceUrl = `https://github.com/dengsgo/go-decorator`
 
 type CmdFlag struct {

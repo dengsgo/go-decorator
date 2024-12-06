@@ -1,3 +1,7 @@
+## v0.22.0 beta
+
+- Fix: the issue of compilation errors caused by underline parameters. #10
+
 ## v0.21.0 beta
 
 - Fix: Possible null pointers during interface conversion
