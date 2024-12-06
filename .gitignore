@@ -1,3 +1,4 @@
 .idea
 .vscode
 cmd/decorator/decorator*
+test.go

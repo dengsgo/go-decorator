@@ -139,6 +139,10 @@ func builderReplaceArgs(f *ast.FuncDecl, decorName string, decorParams []string,
 				continue
 			}
 			for _, p := range r.Names {
+				if p.Name == "_" {
+					// fix issue #10. If the parameter name is “_”, we need to create a new name to replace it since the context will use this variable
+					p.Name = gi.nextStr()
+				}
 				ra.OutArgNames = append(ra.OutArgNames, p.Name)
 				ra.OutArgTypes = append(ra.OutArgTypes, typeString(r.Type))
 				ra.DecorListOut = append(ra.DecorListOut,
@@ -166,6 +170,10 @@ func builderReplaceArgs(f *ast.FuncDecl, decorName string, decorParams []string,
 				continue
 			}
 			for _, p := range r.Names {
+				if p.Name == "_" {
+					// fix issue #10. If the parameter name is “_”, we need to create a new name to replace it since the context will use this variable
+					p.Name = gi.nextStr()
+				}
 				ra.InArgNames = append(ra.InArgNames, p.Name)
 				ra.InArgTypes = append(ra.InArgTypes, typeString(r.Type))
 				ra.DecorCallIn = append(ra.DecorCallIn,
