@@ -3,7 +3,7 @@
 [![Actions](https://github.com/dengsgo/go-decorator/workflows/Go/badge.svg)](https://github.com/dengsgo/go-decorator/actions)  [![Go Report Card](https://goreportcard.com/badge/github.com/dengsgo/go-decorator)](https://goreportcard.com/report/github.com/dengsgo/go-decorator)  [![godoc.org](https://godoc.org/github.com/dengsgo/go-decorator/decor?status.svg)](https://godoc.org/github.com/dengsgo/go-decorator/decor)  [![Go doc](https://img.shields.io/badge/go.dev-reference-brightgreen?logo=go&logoColor=white&style=flat)](https://pkg.go.dev/github.com/dengsgo/go-decorator/decor)  [![Goproxy.cn](https://goproxy.cn/stats/github.com/dengsgo/go-decorator/badges/download-count.svg)](https://goproxy.cn)
 
 
-**中文** | **[使用手册](GUIDE.zh_cn.md)** | **[English](README.md)** | **[Guide](GUIDE.md)**  
+**中文** | **[使用手册](GUIDE.zh_cn.md)** | **[English](README.md)** | **[Guide](GUIDE.md)** | **[Q&A](Q&A.md)**  
 
 > 公开测试版本，谨慎用于生产环境. 欢迎 ⭐star 关注项目进展
 
@@ -12,8 +12,9 @@
 
 ## Feature
 
-- 添加注释 `//go:decor F` 即可使用装饰器（`F` 为装饰器函数），快速完成“样板代码注入、非侵入式改变函数行为、控制逻辑流程”等逻辑；  
-- 可以自由定义函数作为装饰器，应用于任意一级函数和方法上（top-level function or method）;
+- 添加注释 `//go:decor F` 即可使用装饰器（`F` 为装饰器函数）  
+- 非侵入式的观察、改变函数行为，快速完成“样板代码注入、控制逻辑流程”等逻辑；  
+- 自由定义函数作为装饰器，应用于任意一级函数和方法上（top-level function or method）;
 - 支持使用多个（行） `//go:decor` 装饰器装饰目标函数;
 - 支持注释 `type T types` 类型声明，decorator 会自动装饰代理以 `T` 或者 `*T` 为接收者的所有方法；  
 - 装饰器支持可选参数，给开发带来更多可能；
@@ -21,7 +22,7 @@
 - 提供友好的错误提示，可在编译时发现问题并给出错误原因和错误行号（例如未定义的装饰器或未引用的包等）;   
 - 仅在编译时增强目标函数，不会降低编译后程序的性能，亦没有反射操作;   
 
-装饰器的使用场景，可以类比其他语言，比如 Python、TypeScript。（非常适合在缓存、鉴权、日志等场景使用，作为辅助手段解放重复编码的困扰）。
+装饰器的使用场景，可以类比其他语言，比如 Python、TypeScript。（非常适合在缓存、鉴权、日志等场景使用，作为辅助手段解放重复编码的困扰）。详细可以参阅 [Q&A](Q&A.md) .
 
 > `go-decorator` 是一种编译时代码注入技术。使用它不会影响您项目的源文件，并且不会在项目中生成额外的 `.go` 文件和其他冗余文件。这种注入方法与 `go:generate` 生成方式截然不同。
 
@@ -100,7 +101,7 @@ func myFunc() {
 }
 
 // 这是一个普通的函数
-// 但是它具有 func(*decor.Context [, ...any]) 类型签名，因此它还是一个装饰器方法，
+// 它具有 func(*decor.Context [, ...any]) 类型签名，因此它还是一个装饰器方法，
 // 可以在其他函数上使用这个装饰器。
 // 在函数中，ctx 是装饰器上下文，可以通过 ctx 获取到目标函数的函数名、出入参
 // 以及执行目标函数。
@@ -289,6 +290,9 @@ func main() {
 
 欢迎提交Bug修复和功能优化的PR。 
 
+## Q&A
+
+[Q&A](Q&A.md) .
 
 ## TODO
 

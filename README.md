@@ -3,7 +3,7 @@
 [![Actions](https://github.com/dengsgo/go-decorator/workflows/Go/badge.svg)](https://github.com/dengsgo/go-decorator/actions)  [![Go Report Card](https://goreportcard.com/badge/github.com/dengsgo/go-decorator)](https://goreportcard.com/report/github.com/dengsgo/go-decorator)  [![godoc.org](https://godoc.org/github.com/dengsgo/go-decorator/decor?status.svg)](https://godoc.org/github.com/dengsgo/go-decorator/decor)  [![Go doc](https://img.shields.io/badge/go.dev-reference-brightgreen?logo=go&logoColor=white&style=flat)](https://pkg.go.dev/github.com/dengsgo/go-decorator/decor)  
 
 
-**[中文](README.zh_cn.md)** | **[使用手册](GUIDE.zh_cn.md)** | **English** | **[Guide](GUIDE.md)**  
+**[中文](README.zh_cn.md)** | **[使用手册](GUIDE.zh_cn.md)** | **English** | **[Guide](GUIDE.md)** | **[Q&A](Q&A.md)**  
 
 > Beta version, use with caution in production environments. Click ⭐Star to follow the project's progress. 
 
@@ -290,6 +290,10 @@ If you find any problems, you can provide feedback here. [GitHub Issues](https:/
 ## Contribute
 
 PRs for bug fixes and feature optimizations are welcome.
+
+## Q&A
+
+[Q&A](Q&A.md) .
 
 ## TODO
 
