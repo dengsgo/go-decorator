@@ -1,4 +1,15 @@
-# Q&A
+# Q&A  
+
+- [Q\&A](#qa)
+  - [我在什么场景下需要用到 go-decorator ?](#我在什么场景下需要用到-go-decorator-)
+  - [只有这个场景才能用到 go-decorator 吗？](#只有这个场景才能用到-go-decorator-吗)
+  - [go-decorator 是 Go 官方库吗？](#go-decorator-是-go-官方库吗)
+  - [什么时候发布正式版本？](#什么时候发布正式版本)
+  - [go-decorator 如何保证稳定性？](#go-decorator-如何保证稳定性)
+  - [迭代节奏是怎样的？](#迭代节奏是怎样的)
+  - [还会给 go-decorator 加入更多特性吗？](#还会给-go-decorator-加入更多特性吗)
+  - [go-decorator 对用户来说似乎是个黑魔法，可以详细说下实现原理吗？](#go-decorator-对用户来说似乎是个黑魔法可以详细说下实现原理吗)
+  - [可以邀请参与公司或组织内部分享布道吗？](#可以邀请参与公司或组织内部分享布道吗)
 
 ## 我在什么场景下需要用到 go-decorator ?
 
