@@ -32,36 +32,36 @@
 
 但是现在 `go-decorator` 为你提供了新的思路，使用它来处理此类问题就很方便。处理流程为：
 
-### 一、编写函数 LogFuncInfo，记录出入参和耗时 
+**一、编写函数 LogFuncInfo，记录出入参和耗时** 
 
 伪代码：
 
 ```go
-func LogFuncInfo(usedTime int, ctx *decor.Context) {
+func LogFuncInfo(elapsed int, ctx *decor.Context) {
     in = getInArgsMsg(ctx.TargetIn)
     out = getOutArgsMsg(ctx.TargetOut)
-    msg = format("usedTime:%s, funcName:%s, In: %s, Out: %s", usedTime, ctx.TargetName, in, out)
+    msg = format("elapsed:%s, funcName:%s, In: %s, Out: %s", elapsed, ctx.TargetName, in, out)
     Log.send(msg)
 }
 ```
 
-### 二、编写装饰器函数 RecordSlowFunc, 记录慢函数
+**二、编写装饰器函数 RecordSlowFunc, 记录慢函数**
 
 伪代码： 
 
 ```go 
 func RecordSlowFunc(ctx *decor.Context) {
-    startTime = time()
+    startTime = now()
     ctx.TargetDo() // 执行原函数(目标函数)
-    used = time() - startTime // 耗时
+    elapsed = now() - startTime // 耗时
     const slowTime = getSlowTimeConfig() // ms
-    if (used >= slowTime) {
-        LogFuncInfo(used, ctx) // 记录慢日志
+    if (elapsed >= slowTime) {
+        LogFuncInfo(elapsed, ctx) // 记录慢日志
     }
 }
 ```
 
-### 三、给任意函数加上注释，使用装饰器 RecordSlowFunc  
+**三、给任意函数加上注释，使用装饰器 RecordSlowFunc**  
 
 伪代码：
 
